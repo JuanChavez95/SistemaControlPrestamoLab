@@ -4,32 +4,16 @@
  */
 package Ventanas;
 
-
-
-/**
- *
- * @author DOC
- 
-public class Principal extends JFrame{
-    public Principal(){
-        setTitle("SISTEMA CONTROL Y PRÉSTAMO");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1375, 745);
-        setResizable(false);
-        getContentPane().setBackground(new Color(22, 129, 182));
-        setLayout(null);
-        
-        setVisible(true);
-    }
-}
-*/
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
 
 import Paneles.PanelDocentes;
+import Paneles.PanelAdministradores;
+import Paneles.PanelEditar;
+import Paneles.PanelEstudiantes;
+import Paneles.PanelLaboratorio;
 
 public class Principal extends JFrame {
     
@@ -63,22 +47,6 @@ public class Principal extends JFrame {
         defaultMessage.setFont(new Font("Arial", Font.PLAIN, 18));
         contentPanel.add(defaultMessage, BorderLayout.CENTER);
         
-        // Texto de activar Windows
-        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        footerPanel.setBackground(Color.WHITE);
-        JLabel activarLabel = new JLabel("Activar Windows");
-        activarLabel.setForeground(Color.LIGHT_GRAY);
-        JLabel configuracionLabel = new JLabel("Ve a Configuración para activar Windows.");
-        configuracionLabel.setForeground(Color.LIGHT_GRAY);
-        
-        JPanel textContainer = new JPanel(new GridLayout(2, 1));
-        textContainer.setBackground(Color.WHITE);
-        textContainer.add(activarLabel);
-        textContainer.add(configuracionLabel);
-        footerPanel.add(textContainer);
-        
-        contentPanel.add(footerPanel, BorderLayout.SOUTH);
-        
         setLocationRelativeTo(null);
     }
     
@@ -94,7 +62,7 @@ public class Principal extends JFrame {
         headerPanel.add(textoLabel, BorderLayout.WEST);
         
         // Información de usuario
-        usuarioLabel = new JLabel(" ▼ USUARIO");
+        usuarioLabel = new JLabel(" ▼ ADMINISTRADOR");
         usuarioLabel.setForeground(Color.WHITE);
         usuarioLabel.setFont(new Font("Arial", Font.BOLD, 14));
         usuarioLabel.setBorder(new EmptyBorder(0, 0, 0, 20));
@@ -118,7 +86,7 @@ public class Principal extends JFrame {
         panel.add(menuTitle);
         
         // Opciones del menú actualizadas según lo solicitado
-        panel.add(createMenuOption("LABORATORIOS", new String[]{"Horarios", "Editar Horario"}));
+        panel.add(createMenuOption("LABORATORIOS", new String[]{"Horarios", "Editar Horario", "Editar Laboratorio"}));
         panel.add(createMenuOption("USUARIOS", new String[]{"Docentes", "Estudiantes", "Administradores", "Editar usuarios"}));
         panel.add(createMenuOption("EQUIPOS", new String[]{"Máquinas", "Editar Equipos", "Detalle Equipos"}));
         panel.add(createMenuOption("PRÉSTAMOS", new String[]{"Visualizar Préstamos"}));
@@ -236,6 +204,8 @@ public class Principal extends JFrame {
                     contenidoEspecifico = crearPanelHorarios();
                 } else if (subopcion.equals("Editar Horario")) {
                     contenidoEspecifico = crearPanelEditarHorario();
+                } else if (subopcion.equals("Editar Laboratorio")) {
+                    contenidoEspecifico = crearPanelEditarLaboratorio();
                 }
                 break;
             case "USUARIOS":
@@ -267,22 +237,6 @@ public class Principal extends JFrame {
         
         nuevoContenido.add(contenidoEspecifico, BorderLayout.CENTER);
         
-        // Texto de activar Windows
-        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        footerPanel.setBackground(Color.BLACK);
-        JLabel activarLabel = new JLabel("Activar Windows");
-        activarLabel.setForeground(Color.LIGHT_GRAY);
-        JLabel configuracionLabel = new JLabel("Ve a Configuración para activar Windows.");
-        configuracionLabel.setForeground(Color.LIGHT_GRAY);
-        
-        JPanel textContainer = new JPanel(new GridLayout(2, 1));
-        textContainer.setBackground(Color.BLACK);
-        textContainer.add(activarLabel);
-        textContainer.add(configuracionLabel);
-        footerPanel.add(textContainer);
-        
-        nuevoContenido.add(footerPanel, BorderLayout.SOUTH);
-        
         contentPanel.add(nuevoContenido);
         contentPanel.revalidate();
         contentPanel.repaint();
@@ -303,6 +257,17 @@ public class Principal extends JFrame {
         return panel;
     }
     
+    private JPanel crearPanelEditarLaboratorio() {
+        /*
+        JPanel panel = new JPanel();
+        panel.setBackground(Color.WHITE);
+        panel.add(new JLabel("Panel de Edición de Laboratorio - Implementación pendiente"));
+        return panel;
+        */
+        PanelLaboratorio panelLaboratorio = new PanelLaboratorio();
+        return panelLaboratorio;
+    }
+    
     private JPanel crearPanelDocentes() {
         /*
         JPanel panel = new JPanel();
@@ -315,24 +280,36 @@ public class Principal extends JFrame {
     }
     
     private JPanel crearPanelEstudiantes() {
+        /*
         JPanel panel = new JPanel();
         panel.setBackground(Color.WHITE);
         panel.add(new JLabel("Panel de Estudiantes - Implementación pendiente"));
         return panel;
+        */
+        PanelEstudiantes panelEstudiantes = new PanelEstudiantes();
+        return panelEstudiantes;
     }
     
     private JPanel crearPanelAdministradores() {
+        /*
         JPanel panel = new JPanel();
         panel.setBackground(Color.WHITE);
         panel.add(new JLabel("Panel de Administradores - Implementación pendiente"));
         return panel;
+        */
+        PanelAdministradores panelAdministradores = new PanelAdministradores();
+        return panelAdministradores;
     }
     
     private JPanel crearPanelEditarUsuarios() {
+        /*
         JPanel panel = new JPanel();
         panel.setBackground(Color.WHITE);
         panel.add(new JLabel("Panel de Edición de Usuarios - Implementación pendiente"));
         return panel;
+        */
+        PanelEditar panelEditar = new PanelEditar();
+        return panelEditar;
     }
     
     private JPanel crearPanelMaquinas() {

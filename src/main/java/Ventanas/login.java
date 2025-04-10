@@ -138,7 +138,9 @@ public class login extends JFrame{
                     // Si pasa la validación
                     if (rol.equals("Administrador")) {
                          new Principal().setVisible(true);
-                    } else {
+                    } else if (rol.equals("Estudiante")){
+                        new Principal3().setVisible(true);
+                    }else {
                         new Principal2().setVisible(true);
                     }
                    // new Principal().setVisible(true);

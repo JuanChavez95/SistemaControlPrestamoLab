@@ -4,6 +4,7 @@
  */
 package Ventanas;
 
+
 /**
  *
  * @author DOC
@@ -17,13 +18,13 @@ import Paneles.PanelDocentes;
 import Paneles.PanelAdministradores;
 import Paneles.PanelEstudiantes;
 
-public class Principal2 extends JFrame {
+public class Principal3 extends JFrame {
     
     private JPanel menuPanel;
     private JPanel contentPanel;
     private JLabel usuarioLabel;
     
-    public Principal2() {
+    public Principal3() {
         setTitle("Sistema de Control y Préstamo de Laboratorios");
         setSize(1375, 745);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -64,7 +65,7 @@ public class Principal2 extends JFrame {
         headerPanel.add(textoLabel, BorderLayout.WEST);
         
         // Información de usuario
-        usuarioLabel = new JLabel(" ▼ DOCENTE");
+        usuarioLabel = new JLabel(" ▼ ESTUDIANTE");
         usuarioLabel.setForeground(Color.WHITE);
         usuarioLabel.setFont(new Font("Arial", Font.BOLD, 14));
         usuarioLabel.setBorder(new EmptyBorder(0, 0, 0, 20));
@@ -87,11 +88,11 @@ public class Principal2 extends JFrame {
         menuTitle.setBorder(new EmptyBorder(20, 15, 20, 0));
         panel.add(menuTitle);
         
-        // Opciones del menú actualizadas según lo solicitado
+        // Opciones del menú actualizadas sin la opción de PRÉSTAMOS
         panel.add(createMenuOption("LABORATORIOS", new String[]{"Horarios"}));
         panel.add(createMenuOption("USUARIOS", new String[]{"Docentes", "Estudiantes"}));
         panel.add(createMenuOption("EQUIPOS", new String[]{"Máquinas"}));
-        panel.add(createMenuOption("PRÉSTAMOS", new String[]{"Solicitar Préstamo", "Notificaciones"}));
+        // La sección de PRÉSTAMOS ha sido eliminada
         
         // Agregar espacio en blanco al final
         panel.add(Box.createVerticalGlue());
@@ -218,17 +219,10 @@ public class Principal2 extends JFrame {
                     contenidoEspecifico = crearPanelMaquinas();
                 }
                 break;
-            case "PRÉSTAMOS":
-                if (subopcion.equals("Solicitar Préstamo")) {
-                    contenidoEspecifico = crearPanelSolicitarPrestamo();
-                } else if (subopcion.equals("Notificaciones")) {
-                    contenidoEspecifico = crearPanelNotificaciones();
-                }
-                break;
+            // Se ha eliminado el case para PRÉSTAMOS
         }
         
         nuevoContenido.add(contenidoEspecifico, BorderLayout.CENTER);
-        
         contentPanel.add(nuevoContenido);
         contentPanel.revalidate();
         contentPanel.repaint();
@@ -259,17 +253,7 @@ public class Principal2 extends JFrame {
         return panel;
     }
     
-    private JPanel crearPanelSolicitarPrestamo() {
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.add(new JLabel("Panel de Solicitud de Préstamo - Implementación pendiente"));
-        return panel;
-    }
-    
-    private JPanel crearPanelNotificaciones() {
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.add(new JLabel("Panel de Notificaciones - Implementación pendiente"));
-        return panel;
-    }
+    // Se han eliminado los métodos:
+    // - crearPanelSolicitarPrestamo()
+    // - crearPanelNotificaciones()
 }

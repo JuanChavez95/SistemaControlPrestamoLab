@@ -8,6 +8,11 @@ package Servicios;
  *
  * @author DOC
  */
+
+public class LaboratorioService{
+    
+}
+/*
 import Clases.Laboratorio;
 import java.util.List;
 import java.util.Optional;
@@ -79,3 +84,4 @@ public class LaboratorioService {
         return actualizar(laboratorio);
     }
 }
+*/
