@@ -16,6 +16,10 @@ import java.awt.event.*;
 import Paneles.PanelDocentes;
 import Paneles.PanelAdministradores;
 import Paneles.PanelEstudiantes;
+import Paneles.PanelVisualizarEquipo;
+
+import Prestamos.PanelNotificacion;
+import Prestamos.PanelSolicitarPrestamo;
 
 public class Principal2 extends JFrame {
     
@@ -253,23 +257,17 @@ public class Principal2 extends JFrame {
     }
     
     private JPanel crearPanelMaquinas() {
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.add(new JLabel("Panel de Máquinas - Implementación pendiente"));
-        return panel;
+        PanelVisualizarEquipo panelVisualizarEquipo = new PanelVisualizarEquipo();
+        return panelVisualizarEquipo;
     }
     
     private JPanel crearPanelSolicitarPrestamo() {
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.add(new JLabel("Panel de Solicitud de Préstamo - Implementación pendiente"));
-        return panel;
+        PanelSolicitarPrestamo panelSolicitarPrestamo = new PanelSolicitarPrestamo();
+        return panelSolicitarPrestamo;
     }
     
     private JPanel crearPanelNotificaciones() {
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.add(new JLabel("Panel de Notificaciones - Implementación pendiente"));
-        return panel;
+        PanelNotificacion panelNotificacion = new PanelNotificacion();
+        return panelNotificacion;
     }
 }

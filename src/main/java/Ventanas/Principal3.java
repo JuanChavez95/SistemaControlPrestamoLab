@@ -17,6 +17,8 @@ import java.awt.event.*;
 import Paneles.PanelDocentes;
 import Paneles.PanelAdministradores;
 import Paneles.PanelEstudiantes;
+import Paneles.PanelHorario;
+import Paneles.PanelVisualizarEquipo;
 
 public class Principal3 extends JFrame {
     
@@ -230,10 +232,8 @@ public class Principal3 extends JFrame {
     
     // Métodos para crear paneles específicos - Implementaciones vacías
     private JPanel crearPanelHorarios() {
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.add(new JLabel("Panel de Horarios - Implementación pendiente"));
-        return panel;
+        PanelHorario panelHorario = new PanelHorario();
+        return panelHorario;
     }
     
     private JPanel crearPanelDocentes() {
@@ -247,10 +247,8 @@ public class Principal3 extends JFrame {
     }
     
     private JPanel crearPanelMaquinas() {
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.add(new JLabel("Panel de Máquinas - Implementación pendiente"));
-        return panel;
+        PanelVisualizarEquipo panelVisualizarEquipo = new PanelVisualizarEquipo();
+        return panelVisualizarEquipo;
     }
     
     // Se han eliminado los métodos:

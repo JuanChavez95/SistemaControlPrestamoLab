@@ -14,6 +14,13 @@ import Paneles.PanelAdministradores;
 import Paneles.PanelEditar;
 import Paneles.PanelEstudiantes;
 import Paneles.PanelLaboratorio;
+import Paneles.PanelEquipo;
+import Paneles.PanelHorario;
+import Paneles.PanelVisualizarHorario;
+import Paneles.PanelHistorialEquipo;
+import Paneles.PanelVisualizarEquipo;
+
+import Prestamos.PanelVisualizarPrestamos;
 
 public class Principal extends JFrame {
     
@@ -244,26 +251,16 @@ public class Principal extends JFrame {
     
     // Métodos para crear paneles específicos - Implementaciones vacías
     private JPanel crearPanelHorarios() {
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.add(new JLabel("Panel de Horarios - Implementación pendiente"));
-        return panel;
+        PanelVisualizarHorario panelVisualizarHorario = new PanelVisualizarHorario();
+        return panelVisualizarHorario;
     }
     
     private JPanel crearPanelEditarHorario() {
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.add(new JLabel("Panel de Edición de Horarios - Implementación pendiente"));
-        return panel;
+        PanelHorario panelHorario = new PanelHorario();
+        return panelHorario;
     }
     
     private JPanel crearPanelEditarLaboratorio() {
-        /*
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.add(new JLabel("Panel de Edición de Laboratorio - Implementación pendiente"));
-        return panel;
-        */
         PanelLaboratorio panelLaboratorio = new PanelLaboratorio();
         return panelLaboratorio;
     }
@@ -313,30 +310,22 @@ public class Principal extends JFrame {
     }
     
     private JPanel crearPanelMaquinas() {
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.add(new JLabel("Panel de Máquinas - Implementación pendiente"));
-        return panel;
+        PanelVisualizarEquipo panelVisualizarEquipo = new PanelVisualizarEquipo();
+        return panelVisualizarEquipo;
     }
     
     private JPanel crearPanelEditarEquipos() {
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.add(new JLabel("Panel de Edición de Equipos - Implementación pendiente"));
-        return panel;
+        PanelEquipo panelEquipo = new PanelEquipo();
+        return panelEquipo;
     }
     
     private JPanel crearPanelDetalleEquipos() {
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.add(new JLabel("Panel de Detalle de Equipos - Implementación pendiente"));
-        return panel;
+        PanelHistorialEquipo panelHistorialEquipo = new PanelHistorialEquipo();
+        return panelHistorialEquipo;
     }
     
     private JPanel crearPanelVisualizarPrestamos() {
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.add(new JLabel("Panel de Visualización de Préstamos - Implementación pendiente"));
-        return panel;
+        PanelVisualizarPrestamos panelVisualizarPrestamos = new PanelVisualizarPrestamos();
+        return panelVisualizarPrestamos;
     }
 }

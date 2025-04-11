@@ -4,72 +4,92 @@
  */
 package Clases;
 
-/**
- *
- * @author DOC
- */
-import java.time.DayOfWeek;
-import java.time.LocalTime;
-
 public class Horario {
-    private Long id;
-    private Laboratorio laboratorio;
-    private DayOfWeek dia;
-    private LocalTime horaInicio;
-    private LocalTime horaFin;
+    private int idHorario;
     private String materia;
-    private String paralelo;
-    private Usuario docente;
-    private boolean activo;
-    
-    // Constructor
-    public Horario(Long id, Laboratorio laboratorio, DayOfWeek dia, LocalTime horaInicio, 
-                  LocalTime horaFin, String materia, String paralelo, Usuario docente) {
-        this.id = id;
-        this.laboratorio = laboratorio;
-        this.dia = dia;
-        this.horaInicio = horaInicio;
-        this.horaFin = horaFin;
+    private int paralelo;
+    private String semestre;
+    private String carrera;
+    private String hora;
+    private String dia;
+    private int idLaboratorio;
+
+    public Horario() {}
+    //Constructor de la clase horario
+    public Horario(int idHorario, String materia, int paralelo, String semestre,
+                   String carrera, String hora, String dia, int idLaboratorio) {
+        this.idHorario = idHorario;
         this.materia = materia;
         this.paralelo = paralelo;
-        this.docente = docente;
-        this.activo = true;
+        this.semestre = semestre;
+        this.carrera = carrera;
+        this.hora = hora;
+        this.dia = dia;
+        this.idLaboratorio = idLaboratorio;
     }
-    
-    // Getters y setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    
-    public Laboratorio getLaboratorio() { return laboratorio; }
-    public void setLaboratorio(Laboratorio laboratorio) { this.laboratorio = laboratorio; }
-    
-    public DayOfWeek getDia() { return dia; }
-    public void setDia(DayOfWeek dia) { this.dia = dia; }
-    
-    public LocalTime getHoraInicio() { return horaInicio; }
-    public void setHoraInicio(LocalTime horaInicio) { this.horaInicio = horaInicio; }
-    
-    public LocalTime getHoraFin() { return horaFin; }
-    public void setHoraFin(LocalTime horaFin) { this.horaFin = horaFin; }
-    
-    public String getMateria() { return materia; }
-    public void setMateria(String materia) { this.materia = materia; }
-    
-    public String getParalelo() { return paralelo; }
-    public void setParalelo(String paralelo) { this.paralelo = paralelo; }
-    
-    public Usuario getDocente() { return docente; }
-    public void setDocente(Usuario docente) { this.docente = docente; }
-    
-    public boolean isActivo() { return activo; }
-    public void setActivo(boolean activo) { this.activo = activo; }
-    
-    // Método para verificar si hay colisión con otro horario
-    public boolean colisionaCon(Horario otro) {
-        if (!this.dia.equals(otro.dia)) {
-            return false;
-        }
-        
-        return (this.horaInicio.isBefore(otro.horaFin) && this.horaFin.isAfter(otro.horaInicio));
+
+    // Getters y Setters
+    public int getIdHorario() {
+        return idHorario;
+    }
+
+    public void setIdHorario(int idHorario) {
+        this.idHorario = idHorario;
+    }
+
+    public String getMateria() {
+        return materia;
+    }
+
+    public void setMateria(String materia) {
+        this.materia = materia;
+    }
+
+    public int getParalelo() {
+        return paralelo;
+    }
+
+    public void setParalelo(int paralelo) {
+        this.paralelo = paralelo;
+    }
+
+    public String getSemestre() {
+        return semestre;
+    }
+
+    public void setSemestre(String semestre) {
+        this.semestre = semestre;
+    }
+
+    public String getCarrera() {
+        return carrera;
+    }
+
+    public void setCarrera(String carrera) {
+        this.carrera = carrera;
+    }
+
+    public String getHora() {
+        return hora;
+    }
+
+    public void setHora(String hora) {
+        this.hora = hora;
+    }
+
+    public String getDia() {
+        return dia;
+    }
+
+    public void setDia(String dia) {
+        this.dia = dia;
+    }
+
+    public int getIdLaboratorio() {
+        return idLaboratorio;
+    }
+
+    public void setIdLaboratorio(int idLaboratorio) {
+        this.idLaboratorio = idLaboratorio;
     }
 }
