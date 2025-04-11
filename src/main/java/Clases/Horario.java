@@ -13,11 +13,22 @@ public class Horario {
     private String hora;
     private String dia;
     private int idLaboratorio;
+    private String estado;
 
-    public Horario() {}
-    //Constructor de la clase horario
-    public Horario(int idHorario, String materia, int paralelo, String semestre,
-                   String carrera, String hora, String dia, int idLaboratorio) {
+    // Constructor sin ID (para inserciones)
+    public Horario(String materia, int paralelo, String semestre, String carrera, String hora, String dia, int idLaboratorio, String estado) {
+        this.materia = materia;
+        this.paralelo = paralelo;
+        this.semestre = semestre;
+        this.carrera = carrera;
+        this.hora = hora;
+        this.dia = dia;
+        this.idLaboratorio = idLaboratorio;
+        this.estado = estado;
+    }
+
+    // Constructor con ID (para lectura y edición de valores en la interfaz)
+    public Horario(int idHorario, String materia, int paralelo, String semestre, String carrera, String hora, String dia, int idLaboratorio, String estado) {
         this.idHorario = idHorario;
         this.materia = materia;
         this.paralelo = paralelo;
@@ -26,15 +37,12 @@ public class Horario {
         this.hora = hora;
         this.dia = dia;
         this.idLaboratorio = idLaboratorio;
+        this.estado = estado;
     }
 
     // Getters y Setters
     public int getIdHorario() {
         return idHorario;
-    }
-
-    public void setIdHorario(int idHorario) {
-        this.idHorario = idHorario;
     }
 
     public String getMateria() {
@@ -91,5 +99,13 @@ public class Horario {
 
     public void setIdLaboratorio(int idLaboratorio) {
         this.idLaboratorio = idLaboratorio;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 }

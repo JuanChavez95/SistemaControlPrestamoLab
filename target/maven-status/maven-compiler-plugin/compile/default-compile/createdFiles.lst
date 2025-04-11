@@ -54,6 +54,7 @@ Clases\Prestamo.class
 Ventanas\Principal3$1.class
 Paneles\PanelAdministradores.class
 Paneles\PanelVisualizarEquipo.class
+Controles\ControladorPrestamo.class
 Clases\Permiso.class
 Ventanas\Principal$2.class
 Servicios\RolService.class

@@ -12,19 +12,19 @@ import java.util.List;
 
 public class ControladorHorario {
 
-    // Insertar un nuevo horario a la base de datos
-    public void insertar(Horario horario) throws SQLException {
-        String sql = "INSERT INTO horario (materia, paralelo, semestre, carrera, hora, dia, id_laboratorio) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    // Insertar un horario
+    public void insertar(Horario h) throws SQLException {
+        String sql = "INSERT INTO horario (materia, paralelo, semestre, carrera, hora, dia, id_laboratorio, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConexionBD.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, horario.getMateria());
-            stmt.setInt(2, horario.getParalelo());
-            stmt.setString(3, horario.getSemestre());
-            stmt.setString(4, horario.getCarrera());
-            stmt.setString(5, horario.getHora());
-            stmt.setString(6, horario.getDia());
-            stmt.setInt(7, horario.getIdLaboratorio());
+            stmt.setString(1, h.getMateria());
+            stmt.setInt(2, h.getParalelo());
+            stmt.setString(3, h.getSemestre());
+            stmt.setString(4, h.getCarrera());
+            stmt.setString(5, h.getHora());
+            stmt.setString(6, h.getDia());
+            stmt.setInt(7, h.getIdLaboratorio());
+            stmt.setString(8, h.getEstado());
             stmt.executeUpdate();
         }
     }
@@ -36,7 +36,6 @@ public class ControladorHorario {
         try (Connection conn = ConexionBD.conectar();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-
             while (rs.next()) {
                 lista.add(new Horario(
                     rs.getInt("id_horario"),
@@ -46,27 +45,28 @@ public class ControladorHorario {
                     rs.getString("carrera"),
                     rs.getString("hora"),
                     rs.getString("dia"),
-                    rs.getInt("id_laboratorio")
+                    rs.getInt("id_laboratorio"),
+                    rs.getString("estado")
                 ));
             }
         }
         return lista;
     }
 
-    // Actualizar un horario por ID
-    public void actualizar(Horario horario) throws SQLException {
-        String sql = "UPDATE horario SET materia = ?, paralelo = ?, semestre = ?, carrera = ?, hora = ?, dia = ?, id_laboratorio = ? WHERE id_horario = ?";
+    // Actualizar un horario
+    public void actualizar(Horario h) throws SQLException {
+        String sql = "UPDATE horario SET materia = ?, paralelo = ?, semestre = ?, carrera = ?, hora = ?, dia = ?, id_laboratorio = ?, estado = ? WHERE id_horario = ?";
         try (Connection conn = ConexionBD.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, horario.getMateria());
-            stmt.setInt(2, horario.getParalelo());
-            stmt.setString(3, horario.getSemestre());
-            stmt.setString(4, horario.getCarrera());
-            stmt.setString(5, horario.getHora());
-            stmt.setString(6, horario.getDia());
-            stmt.setInt(7, horario.getIdLaboratorio());
-            stmt.setInt(8, horario.getIdHorario());
+            stmt.setString(1, h.getMateria());
+            stmt.setInt(2, h.getParalelo());
+            stmt.setString(3, h.getSemestre());
+            stmt.setString(4, h.getCarrera());
+            stmt.setString(5, h.getHora());
+            stmt.setString(6, h.getDia());
+            stmt.setInt(7, h.getIdLaboratorio());
+            stmt.setString(8, h.getEstado());
+            stmt.setInt(9, h.getIdHorario());
             stmt.executeUpdate();
         }
     }
@@ -76,10 +76,8 @@ public class ControladorHorario {
         String sql = "DELETE FROM horario WHERE id_horario = ?";
         try (Connection conn = ConexionBD.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             stmt.setInt(1, idHorario);
             stmt.executeUpdate();
         }
     }
 }
-
