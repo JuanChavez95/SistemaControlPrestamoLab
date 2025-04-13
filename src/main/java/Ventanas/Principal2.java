@@ -4,270 +4,394 @@
  */
 package Ventanas;
 
-/**
- *
- * @author DOC
- */
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
 
+// Importaciones de todos los paneles necesarios
 import Paneles.PanelDocentes;
 import Paneles.PanelAdministradores;
+import Paneles.PanelEditar;
 import Paneles.PanelEstudiantes;
+import Paneles.PanelLaboratorio;
+import Paneles.PanelEquipo;
+import Paneles.PanelHorario;
+import Paneles.PanelVisualizarHorario;
+import Paneles.PanelHistorialEquipo;
 import Paneles.PanelVisualizarEquipo;
-
 import Prestamos.PanelNotificacion;
 import Prestamos.PanelSolicitarPrestamo;
+import Prestamos.PanelVisualizarPrestamos;
 
+/**
+ * Ventana principal del Sistema de Control y Préstamo de Laboratorios para administradores.
+ * Ofrece una interfaz moderna, elegante y fácil de usar para gestionar laboratorios, usuarios, equipos y préstamos.
+ * El administrador tiene control total: agregar, editar, eliminar y gestionar horarios, usuarios y más.
+ *
+ * @author DOC
+ */
 public class Principal2 extends JFrame {
-    
-    private JPanel menuPanel;
+
     private JPanel contentPanel;
     private JLabel usuarioLabel;
-    
+    private static final Color PRIMARY_COLOR = new Color(33, 97, 140); // Azul profundo para encabezados
+    private static final Color SECONDARY_COLOR = new Color(235, 245, 255); // Azul claro para fondos
+    private static final Color ACCENT_COLOR = new Color(52, 152, 219); // Azul vibrante para botones
+    private static final Color TEXT_COLOR = Color.WHITE; // Blanco para texto en botones
+    private static final Color SHADOW_COLOR = new Color(0, 0, 0, 80); // Sombra sutil
+    private static final Font HEADER_FONT = new Font("Segoe UI", Font.BOLD, 20);
+    private static final Font BUTTON_FONT = new Font("Segoe UI", Font.BOLD, 14);
+    private static final Font LABEL_FONT = new Font("Segoe UI", Font.PLAIN, 14);
+
     public Principal2() {
-        setTitle("Sistema de Control y Préstamo de Laboratorios");
-        setSize(1375, 745);
+        // Configuración de la ventana
+        setTitle("Sistema de Control y Préstamo de Laboratorios - Docentes");
+        setSize(1200, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setMinimumSize(new Dimension(1000, 600));
         setLayout(new BorderLayout());
-        setBackground(new Color(235, 255, 255));
-        
-        // Panel superior (header)
+
+        // Panel de fondo con degradado
+        JPanel backgroundPanel = createBackgroundPanel();
+        setContentPane(backgroundPanel);
+
+        // Panel de encabezado
         JPanel headerPanel = createHeaderPanel();
-        add(headerPanel, BorderLayout.NORTH);
-        
-        // Panel de menú lateral
-        menuPanel = createMenuPanel();
-        add(menuPanel, BorderLayout.WEST);
-        
-        // Panel de contenido principal
-        contentPanel = new JPanel();
-        contentPanel.setBackground(Color.WHITE);
-        contentPanel.setLayout(new BorderLayout());
-        add(contentPanel, BorderLayout.CENTER);
-        
-        // Mensaje por defecto en el panel de contenido
-        JLabel defaultMessage = new JLabel("¡BIENVENIDO AL SISTEMA DE CONTROL Y PRÉSTAMO DE LABORATORIOS!", SwingConstants.CENTER);
-        defaultMessage.setFont(new Font("Arial", Font.PLAIN, 18));
-        contentPanel.add(defaultMessage, BorderLayout.CENTER);
-        
+        backgroundPanel.add(headerPanel, BorderLayout.NORTH);
+
+        // Panel de menú principal
+        JPanel menuPanel = createMenuPanel();
+        backgroundPanel.add(menuPanel, BorderLayout.CENTER);
+
+        // Centrar la ventana
         setLocationRelativeTo(null);
+        setVisible(true);
     }
-    
-    private JPanel createHeaderPanel() {
-        JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(new Color(81, 0, 255));
-        headerPanel.setPreferredSize(new Dimension(getWidth(), 60));
-        
-        // Espacio para texto en lugar del logo
-        JLabel textoLabel = new JLabel("  UNIVERSIDAD SALESIANA DE BOLIVIA");
-        textoLabel.setForeground(Color.WHITE);
-        textoLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        headerPanel.add(textoLabel, BorderLayout.WEST);
-        
-        // Información de usuario
-        usuarioLabel = new JLabel(" ▼ DOCENTE");
-        usuarioLabel.setForeground(Color.WHITE);
-        usuarioLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        usuarioLabel.setBorder(new EmptyBorder(0, 0, 0, 20));
-        headerPanel.add(usuarioLabel, BorderLayout.EAST);
-        
-        return headerPanel;
-    }
-    
-    private JPanel createMenuPanel() {
-        JPanel panel = new JPanel();
-        panel.setBackground(new Color(127, 192, 231)); //MODIFICACIÓN
-        panel.setPreferredSize(new Dimension(250, getHeight()));
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        
-        // Título del menú
-        JLabel menuTitle = new JLabel("MENÚ PRINCIPAL");
-        menuTitle.setForeground(Color.BLACK);
-        menuTitle.setFont(new Font("Arial", Font.BOLD, 16));
-        menuTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
-        menuTitle.setBorder(new EmptyBorder(20, 15, 20, 0));
-        panel.add(menuTitle);
-        
-        // Opciones del menú actualizadas según lo solicitado
-        panel.add(createMenuOption("LABORATORIOS", new String[]{"Horarios"}));
-        panel.add(createMenuOption("USUARIOS", new String[]{"Docentes", "Estudiantes"}));
-        panel.add(createMenuOption("EQUIPOS", new String[]{"Máquinas"}));
-        panel.add(createMenuOption("PRÉSTAMOS", new String[]{"Solicitar Préstamo", "Notificaciones"}));
-        
-        // Agregar espacio en blanco al final
-        panel.add(Box.createVerticalGlue());
-        
+
+    /**
+     * Crea un panel de fondo con un degradado suave.
+     */
+    private JPanel createBackgroundPanel() {
+        JPanel panel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                GradientPaint gradient = new GradientPaint(0, 0, SECONDARY_COLOR, 0, getHeight(), new Color(180, 220, 255));
+                g2d.setPaint(gradient);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+                g2d.dispose();
+            }
+        };
+        panel.setLayout(new BorderLayout());
         return panel;
     }
-    
-    private JPanel createMenuOption(String title, String[] subOptions) {
-        JPanel optionPanel = new JPanel();
-        optionPanel.setLayout(new BoxLayout(optionPanel, BoxLayout.Y_AXIS));
-        optionPanel.setBackground(new Color(127, 192, 231)); 
-        optionPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
-        // Panel para el título y flecha
-        JPanel titlePanel = new JPanel(new BorderLayout());
-        titlePanel.setBackground(new Color(81, 0, 255)); 
-        titlePanel.setMaximumSize(new Dimension(250, 40));
-        
-        // Icono de círculo
-        JLabel circleLabel = new JLabel("●");
-        circleLabel.setForeground(Color.WHITE);
-        circleLabel.setBorder(new EmptyBorder(0, 15, 0, 10));
-        titlePanel.add(circleLabel, BorderLayout.WEST);
-        
-        // Título de la opción
-        JLabel titleLabel = new JLabel(title);
+
+    /**
+     * Crea el panel de encabezado con la marca de la universidad y controles de usuario.
+     */
+    private JPanel createHeaderPanel() {
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(PRIMARY_COLOR);
+        headerPanel.setPreferredSize(new Dimension(getWidth(), 60));
+        headerPanel.setBorder(new EmptyBorder(0, 20, 0, 20));
+
+        // Título de la universidad
+        JLabel titleLabel = new JLabel("Universidad Salesiana de Bolivia");
         titleLabel.setForeground(Color.WHITE);
-        titleLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-        titlePanel.add(titleLabel, BorderLayout.CENTER);
-        
-        // Flecha desplegable
-        JLabel arrowLabel = new JLabel("▼");
-        arrowLabel.setForeground(Color.WHITE);
-        arrowLabel.setBorder(new EmptyBorder(0, 0, 0, 15));
-        titlePanel.add(arrowLabel, BorderLayout.EAST);
-        
-        optionPanel.add(titlePanel);
-        
-        // Panel para subopciones (inicialmente oculto)
-        JPanel subOptionsPanel = new JPanel();
-        subOptionsPanel.setLayout(new BoxLayout(subOptionsPanel, BoxLayout.Y_AXIS));
-        subOptionsPanel.setBackground(new Color(127, 192, 231)); 
-        subOptionsPanel.setVisible(false);
-        
-        // Agregar subopciones
-        for (String subOption : subOptions) {
-            JLabel subOptionLabel = new JLabel("   • " + subOption);
-            subOptionLabel.setForeground(Color.BLACK);
-            subOptionLabel.setFont(new Font("Arial", Font.PLAIN, 13));
-            subOptionLabel.setBorder(new EmptyBorder(5, 30, 5, 0));
-            subOptionLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            
-            // Agregar funcionalidad al hacer clic en la subopción
-            subOptionLabel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    mostrarContenido(title, subOption);
-                }
-                
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    subOptionLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-                }
-            });
-            
-            subOptionsPanel.add(subOptionLabel);
-        }
-        
-        optionPanel.add(subOptionsPanel);
-        
-        // Agregar funcionalidad de despliegue
-        titlePanel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                subOptionsPanel.setVisible(!subOptionsPanel.isVisible());
-                arrowLabel.setText(subOptionsPanel.isVisible() ? "▼" : "►");
-                optionPanel.revalidate();
-                optionPanel.repaint();
-            }
-            
+        titleLabel.setFont(HEADER_FONT);
+        headerPanel.add(titleLabel, BorderLayout.WEST);
+
+        // Controles de usuario
+        JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
+        userPanel.setOpaque(false);
+
+        usuarioLabel = new JLabel("Docente ▼");
+        usuarioLabel.setForeground(Color.WHITE);
+        usuarioLabel.setFont(BUTTON_FONT);
+        usuarioLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        userPanel.add(usuarioLabel);
+
+        JButton logoutButton = new JButton("Cerrar Sesión");
+        logoutButton.setBackground(new Color(231, 76, 60));
+        logoutButton.setForeground(Color.WHITE);
+        logoutButton.setFont(BUTTON_FONT);
+        logoutButton.setFocusPainted(false);
+        logoutButton.setBorder(new RoundedBorder(12));
+        logoutButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        logoutButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                titlePanel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                logoutButton.setBackground(new Color(250, 100, 80));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                logoutButton.setBackground(new Color(231, 76, 60));
             }
         });
-        
-        return optionPanel;
+        logoutButton.addActionListener(e -> dispose());
+        userPanel.add(logoutButton);
+
+        headerPanel.add(userPanel, BorderLayout.EAST);
+        return headerPanel;
     }
-    
-    private void mostrarContenido(String categoria, String subopcion) {
+
+    /**
+     * Crea el panel de menú principal con botones y área de contenido.
+     */
+    private JPanel createMenuPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setOpaque(false);
+        panel.setBorder(new EmptyBorder(20, 20, 20, 20));
+
+        // Panel de botones de menú
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
+        buttonPanel.setOpaque(false);
+
+        // Panel de contenido
+        contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setBackground(Color.WHITE);
+        contentPanel.setBorder(new RoundedBorder(10));
+
+        // Mensaje de bienvenida
+        JLabel welcomeLabel = new JLabel("Bienvenido al Sistema de Control y Préstamo de Laboratorios", SwingConstants.CENTER);
+        welcomeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        welcomeLabel.setForeground(new Color(44, 62, 80));
+        contentPanel.add(welcomeLabel, BorderLayout.CENTER);
+
+        // Añadir botones de menú con las opciones actualizadas según lo solicitado
+        buttonPanel.add(createMenuButton("Laboratorios", new String[]{"Horarios"}));
+        buttonPanel.add(createMenuButton("Usuarios", new String[]{"Docentes", "Estudiantes"}));
+        buttonPanel.add(createMenuButton("Equipos", new String[]{"Máquinas"}));
+        buttonPanel.add(createMenuButton("Préstamos", new String[]{"Solicitar Préstamo", "Notificaciones"}));
+
+        panel.add(buttonPanel, BorderLayout.NORTH);
+        panel.add(contentPanel, BorderLayout.CENTER);
+        return panel;
+    }
+
+    /**
+     * Crea un botón de menú estilizado con un menú desplegable.
+     */
+    private JButton createMenuButton(String title, String[] subOptions) {
+        JButton button = new JButton(title) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                // Sombra
+                g2d.setColor(SHADOW_COLOR);
+                g2d.fillRoundRect(3, 3, getWidth() - 4, getHeight() - 4, 20, 20);
+                // Fondo del botón
+                GradientPaint gradient = new GradientPaint(0, 0, ACCENT_COLOR, 0, getHeight(), new Color(41, 128, 185));
+                g2d.setPaint(gradient);
+                g2d.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 20, 20);
+                g2d.dispose();
+
+                // Asegurar que el texto se dibuje correctamente
+                g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                g2d.setColor(TEXT_COLOR);
+                g2d.setFont(getFont());
+                FontMetrics fm = g2d.getFontMetrics();
+                int textWidth = fm.stringWidth(getText());
+                int textHeight = fm.getAscent();
+                int x = (getWidth() - textWidth) / 2;
+                int y = (getHeight() + textHeight) / 2 - 2;
+                g2d.drawString(getText(), x, y);
+                g2d.dispose();
+            }
+
+            @Override
+            protected void paintBorder(Graphics g) {
+                // No dibujar borde adicional para mantener el estilo limpio
+            }
+        };
+        button.setForeground(TEXT_COLOR);
+        button.setFont(BUTTON_FONT);
+        button.setContentAreaFilled(false);
+        button.setFocusPainted(false);
+        button.setBorder(new RoundedBorder(20));
+        button.setPreferredSize(new Dimension(200, 45));
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(new Color(52, 170, 220));
+                button.repaint();
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(ACCENT_COLOR);
+                button.repaint();
+            }
+        });
+
+        // Menú desplegable
+        JPopupMenu popupMenu = new JPopupMenu();
+        popupMenu.setBackground(SECONDARY_COLOR);
+        popupMenu.setBorder(new RoundedBorder(10));
+
+        for (String subOption : subOptions) {
+            JMenuItem menuItem = new JMenuItem(subOption);
+            menuItem.setFont(LABEL_FONT);
+            menuItem.setBackground(SECONDARY_COLOR);
+            menuItem.setForeground(new Color(44, 62, 80));
+            menuItem.setBorder(new EmptyBorder(8, 15, 8, 15));
+            menuItem.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    menuItem.setBackground(new Color(200, 230, 255));
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    menuItem.setBackground(SECONDARY_COLOR);
+                }
+            });
+            menuItem.addActionListener(e -> mostrarContenido(title, subOption));
+            popupMenu.add(menuItem);
+        }
+
+        button.addActionListener(e -> popupMenu.show(button, 0, button.getHeight()));
+        return button;
+    }
+
+    /**
+     * Muestra el contenido seleccionado en el panel principal.
+     * Adaptado del código original para mantener compatibilidad con los paneles existentes.
+     */
+    private void mostrarContenido(String categoria, String subOpcion) {
         // Limpiar el panel de contenido
         contentPanel.removeAll();
-        
-        // Crear nuevo panel con el contenido específico
-        JPanel nuevoContenido = new JPanel();
-        nuevoContenido.setBackground(Color.WHITE);
-        nuevoContenido.setLayout(new BorderLayout());
-        
+
+        JPanel contentWrapper = new JPanel(new BorderLayout());
+        contentWrapper.setOpaque(false);
+        contentWrapper.setBorder(new EmptyBorder(15, 15, 15, 15));
+
         // Título del contenido
-        JLabel tituloContenido = new JLabel(categoria + " > " + subopcion);
-        tituloContenido.setFont(new Font("Arial", Font.BOLD, 18));
-        tituloContenido.setBorder(new EmptyBorder(20, 20, 20, 20));
-        nuevoContenido.add(tituloContenido, BorderLayout.NORTH);
-        
-        // Contenido específico según la categoría y subopción
+        JLabel titleLabel = new JLabel(categoria.toUpperCase() + " > " + subOpcion);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        titleLabel.setForeground(new Color(44, 62, 80));
+        titleLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        contentWrapper.add(titleLabel, BorderLayout.NORTH);
+
+        // Panel de contenido específico
         JPanel contenidoEspecifico = new JPanel();
-        contenidoEspecifico.setBackground(Color.WHITE);
-        
+        contenidoEspecifico.setOpaque(false);
+
+        // Mapeo de las opciones de menú con los métodos correspondientes
         switch (categoria) {
-            case "LABORATORIOS":
-                if (subopcion.equals("Horarios")) {
+            case "Laboratorios":
+                if (subOpcion.equals("Horarios")) {
                     contenidoEspecifico = crearPanelHorarios();
                 }
                 break;
-            case "USUARIOS":
-                if (subopcion.equals("Docentes")) {
+            case "Usuarios":
+                if (subOpcion.equals("Docentes")) {
                     contenidoEspecifico = crearPanelDocentes();
-                } else if (subopcion.equals("Estudiantes")) {
+                } else if (subOpcion.equals("Estudiantes")) {
                     contenidoEspecifico = crearPanelEstudiantes();
                 }
                 break;
-            case "EQUIPOS":
-                if (subopcion.equals("Máquinas")) {
+            case "Equipos":
+                if (subOpcion.equals("Máquinas")) {
                     contenidoEspecifico = crearPanelMaquinas();
                 }
                 break;
-            case "PRÉSTAMOS":
-                if (subopcion.equals("Solicitar Préstamo")) {
+            case "Préstamos":
+                if (subOpcion.equals("Solicitar Préstamo")) {
                     contenidoEspecifico = crearPanelSolicitarPrestamo();
-                } else if (subopcion.equals("Notificaciones")) {
+                } else if (subOpcion.equals("Notificaciones")) {
                     contenidoEspecifico = crearPanelNotificaciones();
                 }
                 break;
         }
-        
-        nuevoContenido.add(contenidoEspecifico, BorderLayout.CENTER);
-        
-        contentPanel.add(nuevoContenido);
+
+        contentWrapper.add(contenidoEspecifico, BorderLayout.CENTER);
+        contentPanel.add(contentWrapper, BorderLayout.CENTER);
         contentPanel.revalidate();
         contentPanel.repaint();
     }
-    
-    // Métodos para crear paneles específicos - Implementaciones vacías
+
+    /**
+     * Crea el panel para mostrar los horarios de los laboratorios.
+     */
     private JPanel crearPanelHorarios() {
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.add(new JLabel("Panel de Horarios - Implementación pendiente"));
-        return panel;
+        return new PanelVisualizarHorario();
     }
-    
+
+    /**
+     * Crea el panel para gestionar docentes.
+     */
     private JPanel crearPanelDocentes() {
-        PanelDocentes panelDocentes = new PanelDocentes();
-        return panelDocentes;
+        return new PanelDocentes();
     }
-    
+
+    /**
+     * Crea el panel para gestionar estudiantes.
+     */
     private JPanel crearPanelEstudiantes() {
-        PanelEstudiantes panelEstudiantes = new PanelEstudiantes();
-        return panelEstudiantes;
+        return new PanelEstudiantes();
     }
-    
+
+    /**
+     * Crea el panel para visualizar máquinas/equipos.
+     */
     private JPanel crearPanelMaquinas() {
-        PanelVisualizarEquipo panelVisualizarEquipo = new PanelVisualizarEquipo();
-        return panelVisualizarEquipo;
+        return new PanelVisualizarEquipo();
     }
-    
+
+    /**
+     * Crea el panel para solicitar préstamos.
+     * Este método se añadió para la nueva opción del menú.
+     */
     private JPanel crearPanelSolicitarPrestamo() {
         PanelSolicitarPrestamo panelSolicitarPrestamo = new PanelSolicitarPrestamo();
         return panelSolicitarPrestamo;
     }
-    
+
+    /**
+     * Crea el panel para notificaciones.
+     * Este método se añadió para la nueva opción del menú.
+     */
     private JPanel crearPanelNotificaciones() {
         PanelNotificacion panelNotificacion = new PanelNotificacion();
         return panelNotificacion;
+    }
+
+    /**
+     * Borde personalizado con esquinas redondeadas.
+     */
+    private static class RoundedBorder implements Border {
+        private final int radius;
+
+        public RoundedBorder(int radius) {
+            this.radius = radius;
+        }
+
+        @Override
+        public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+            Graphics2D g2d = (Graphics2D) g.create();
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2d.setColor(new Color(150, 150, 150));
+            g2d.drawRoundRect(x, y, width - 1, height - 1, radius, radius);
+            g2d.dispose();
+        }
+
+        @Override
+        public Insets getBorderInsets(Component c) {
+            return new Insets(radius / 2, radius / 2, radius / 2, radius / 2);
+        }
+
+        @Override
+        public boolean isBorderOpaque() {
+            return false;
+        }
     }
 }

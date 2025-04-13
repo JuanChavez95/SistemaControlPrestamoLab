@@ -5,231 +5,489 @@
 package Ventanas;
 
 import exceptions.CredencialesInvalidas;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-
+import java.awt.*;
+import java.awt.event.*;
+import java.sql.SQLException;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import Clases.Usuario;
 import Controles.ControlUsuario;
-import java.sql.SQLException;
 
 /**
- *
+ * Ventana para registrar un nuevo usuario en el sistema
  * @author DOC
  */
-public class NuevoUsuario extends JFrame{
-    public NuevoUsuario(){
-        setTitle("NUEVO USUARIO");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1375, 745);
-        setResizable(false);
-        getContentPane().setBackground(new Color(235, 255, 255));
-        setLayout(null);
-        
-        //Titulo general del sistema
-        JLabel titulo2 = new JLabel("INGRESAR NUEVO USUARIO");
-        titulo2.setBounds(50, 50, 360, 26);
-        titulo2.setForeground(Color.BLUE);
-        titulo2.setFont(new Font("Arial", Font.BOLD, 25));
-        titulo2.setBackground(new Color(235, 255, 255));
-        titulo2.setOpaque(true);
-        add(titulo2);
+public class NuevoUsuario extends JFrame {
+    private JTextField cajaNombre, cajaAPP, cajaAPM, cajaCorreo, cajaContra, cajaRU, cajaCI;
+    private JComboBox<String> cajarol;
+
+    public NuevoUsuario() {
+        inicializarComponentes();
+        setLocationRelativeTo(null); // Centra la ventana en la pantalla
         setVisible(true);
-        
-        //Frame principal
-        JPanel frame1 = new JPanel();
-        frame1.setBackground(new Color(81, 0, 255));
-        frame1.setBounds(70, 100, 1200, 580);
-        frame1.setLayout(null);
-        add(frame1);
-        
-        //Frames decorativos
-        JPanel frame2 = new JPanel();
-        frame2.setBackground(new Color(122, 95, 126));
-        frame2.setBounds(50, 100, 20, 580);
-        frame2.setLayout(null);
-        add(frame2);
-        
-        JPanel frame3 = new JPanel();
-        frame3.setBackground(new Color(122, 95, 126));
-        frame3.setBounds(1270, 100, 20, 580);
-        frame3.setLayout(null);
-        add(frame3);
-        
-        //PANEL DE INGRESO DE TEXTO
-        
-        JLabel nombre = new JLabel("Nombre: ");
-        nombre.setBounds(40, 80, 75, 30);
-        nombre.setForeground(Color.WHITE);
-        nombre.setFont(new Font("Arial", Font.BOLD, 16));
-        nombre.setBackground(new Color(127, 192, 231));
-        nombre.setHorizontalAlignment(SwingConstants.CENTER);
-        nombre.setOpaque(true);
-        frame1.add(nombre);
+    }
 
-        JTextField cajaNombre = new JTextField();
-        cajaNombre.setBounds(270, 80, 280, 25);
-        frame1.add(cajaNombre);
-        
-        JLabel app = new JLabel("Apellido Paterno: ");
-        app.setBounds(40, 170, 140, 30);
-        app.setForeground(Color.WHITE);
-        app.setFont(new Font("Arial", Font.BOLD, 16));
-        app.setBackground(new Color(127, 192, 231));
-        app.setHorizontalAlignment(SwingConstants.CENTER);
-        app.setOpaque(true);
-        frame1.add(app);
+    private void inicializarComponentes() {
+        setTitle("Sistema de Control de Préstamos - Nuevo Usuario");
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setMinimumSize(new Dimension(600, 600)); // Reducimos la altura de la ventana
+        setResizable(true); // Permitimos redimensionar la ventana
 
-        JTextField cajaAPP = new JTextField();
-        cajaAPP.setBounds(270, 170, 280, 25);
-        frame1.add(cajaAPP);
-        
-        JLabel apm = new JLabel("Apellido Materno: ");
-        apm.setBounds(40, 260, 140, 30);
-        apm.setForeground(Color.WHITE);
-        apm.setFont(new Font("Arial", Font.BOLD, 16));
-        apm.setBackground(new Color(127, 192, 231));
-        apm.setHorizontalAlignment(SwingConstants.CENTER);
-        apm.setOpaque(true);
-        frame1.add(apm);
-
-        JTextField cajaAPM = new JTextField();
-        cajaAPM.setBounds(270, 260, 280, 25);
-        frame1.add(cajaAPM);
-        
-        JLabel correo = new JLabel("Correo Email: ");
-        correo.setBounds(40, 350, 150, 30);
-        correo.setForeground(Color.WHITE);
-        correo.setFont(new Font("Arial", Font.BOLD, 16));
-        correo.setBackground(new Color(127, 192, 231));
-        correo.setHorizontalAlignment(SwingConstants.CENTER);
-        correo.setOpaque(true);
-        frame1.add(correo);
-
-        JTextField cajacorreo = new JTextField();
-        cajacorreo.setBounds(270, 350, 280, 25);
-        frame1.add(cajacorreo);
-        
-        JLabel contra = new JLabel("Contraseña: ");
-        contra.setBounds(680, 80, 105, 30);
-        contra.setForeground(Color.WHITE);
-        contra.setFont(new Font("Arial", Font.BOLD, 16));
-        contra.setBackground(new Color(127, 192, 231));
-        contra.setOpaque(true);
-        frame1.add(contra);
-
-        JTextField cajaContra = new JTextField();
-        cajaContra.setBounds(875, 80, 280, 25);
-        frame1.add(cajaContra);
-        
-        JLabel ru = new JLabel("R.U: ");
-        ru.setBounds(680, 170, 50, 30);
-        ru.setForeground(Color.WHITE);
-        ru.setFont(new Font("Arial", Font.BOLD, 16));
-        ru.setBackground(new Color(127, 192, 231));
-        ru.setHorizontalAlignment(SwingConstants.CENTER);
-        ru.setOpaque(true);
-        frame1.add(ru);
-
-        JTextField cajaRU = new JTextField();
-        cajaRU.setBounds(875, 170, 280, 25);
-        frame1.add(cajaRU);
-        
-        JLabel rol = new JLabel("Rol: ");
-        rol.setBounds(680, 260, 50, 30);
-        rol.setForeground(Color.WHITE);
-        rol.setFont(new Font("Arial", Font.BOLD, 16));
-        rol.setBackground(new Color(127, 192, 231));
-        rol.setHorizontalAlignment(SwingConstants.CENTER);
-        rol.setOpaque(true);
-        frame1.add(rol);
-
-        JComboBox<String> cajarol = new JComboBox<>(new String[]{"Docente", "Estudiante"});
-        cajarol.setBounds(875, 260, 280, 25);
-        frame1.add(cajarol);
-        
-        JLabel ci = new JLabel("C.I: ");
-        ci.setBounds(680, 350, 50, 30);
-        ci.setForeground(Color.WHITE);
-        ci.setFont(new Font("Arial", Font.BOLD, 16));
-        ci.setBackground(new Color(127, 192, 231));
-        ci.setHorizontalAlignment(SwingConstants.CENTER);
-        ci.setOpaque(true);
-        frame1.add(ci);
-
-        JTextField cajaCI = new JTextField();
-        cajaCI.setBounds(875, 350, 280, 25);
-        frame1.add(cajaCI);
-        
-        //Botón para GUARDAR nuevo usuario
-        JButton botonNuevo = new JButton("GUARDAR");
-        botonNuevo.setBounds(560, 505, 130, 26);
-        botonNuevo.setBackground(new Color(82, 169, 41));
-        botonNuevo.setForeground(Color.WHITE);
-        botonNuevo.setFont(new Font("Arial", Font.BOLD, 15));
-        frame1.add(botonNuevo);
-        
-        
-        // Botón para guardar al nuevo usuario
-        botonNuevo.addActionListener(new ActionListener() {
+        // Fondo con degradado
+        JPanel fondoPanel = new JPanel() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    // Recoger los datos de los campos de texto de las cajas
-                    String nombre = cajaNombre.getText();
-                    String APP = cajaAPP.getText();
-                    String APM = cajaAPM.getText();
-                    String password = cajaContra.getText();
-                    int ru = Integer.parseInt(cajaRU.getText());
-                    int ci = Integer.parseInt(cajaCI.getText());
-                    String correo = cajacorreo.getText();
-                    String role = (String) cajarol.getSelectedItem();
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                GradientPaint gradient = new GradientPaint(0, 0, new Color(30, 60, 120), 0, getHeight(), new Color(60, 120, 180));
+                g2d.setPaint(gradient);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+        fondoPanel.setLayout(new GridBagLayout());
+        setContentPane(fondoPanel);
 
-                    // Verificar que no haya campos vacíos
-                    if (nombre.isEmpty() || APP.isEmpty() || APM.isEmpty() || password.isEmpty() ||
-                        correo.isEmpty() || cajaRU.getText().isEmpty() || cajaCI.getText().isEmpty()) {
-                        throw new CredencialesInvalidas("Campos vacíos");
-                    }
+        // Panel principal del formulario
+        JPanel formPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setColor(getBackground());
+                g2d.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 40, 40);
+            }
+        };
+        formPanel.setBackground(Color.WHITE);
+        formPanel.setOpaque(false);
+        formPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        formPanel.setLayout(null);
+        formPanel.setPreferredSize(new Dimension(500, 500)); // Reducimos la altura del panel
 
-                    // Crear una nueva instancia de Usuario
-                    Usuario nuevoUsuario = new Usuario(ru, nombre, APP, APM, password, ci, role, correo);
-                    ControlUsuario controlUsuario = new ControlUsuario();
-                    controlUsuario.insertar(nuevoUsuario);
+        // Añadir el panel al fondoPanel usando GridBagConstraints
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.NONE;
+        fondoPanel.add(formPanel, gbc);
 
-                    // Mostrar un mensaje de éxito
-                    JOptionPane.showMessageDialog(null, "Usuario guardado exitosamente");
-                    //Cerrar esta interfaz
-                    dispose();
-                    
+        // Título
+        JLabel titulo = new JLabel("Registrar Nuevo Usuario", SwingConstants.CENTER);
+        titulo.setBounds(0, 10, 500, 30); // Reducimos el tamaño y ajustamos la posición
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 20)); // Reducimos el tamaño de la fuente
+        titulo.setForeground(new Color(30, 60, 120));
+        formPanel.add(titulo);
 
-                } catch (NumberFormatException nfe) {
-                    // Manejo de error si no se puede convertir el RU o CI a número
-                    JOptionPane.showMessageDialog(null, "RU o CI deben ser números válidos");
-                } catch (CredencialesInvalidas ex) {
-                    // Manejo de error si algún campo está vacío
-                    JOptionPane.showMessageDialog(null, ex.getMessage());
-                } catch (SQLException sqle) {
-                    String msg = sqle.getMessage();
-                    if (msg.contains("Duplicate entry")) {
-                        JOptionPane.showMessageDialog(null, "El RU, CI o correo ya está registrado.");
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Error al guardar el usuario.:\n" + msg);
-                    }
-                } catch (Exception ex) {
-                    // Capturar cualquier otro error no manejado
-                    JOptionPane.showMessageDialog(null, "Error del sistema");
+        // Subtítulo
+        JLabel subtitulo = new JLabel("Complete los datos para crear un nuevo usuario", SwingConstants.CENTER);
+        subtitulo.setBounds(0, 40, 500, 20); // Reducimos el tamaño y ajustamos la posición
+        subtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 12)); // Reducimos el tamaño de la fuente
+        subtitulo.setForeground(Color.GRAY);
+        formPanel.add(subtitulo);
+
+        // Campos del formulario
+        int padding = 30;
+        int labelWidth = 150;
+        int fieldWidth = 300;
+        int fieldHeight = 30; // Reducimos la altura de los campos
+        int yStart = 70; // Reducimos el yStart para ganar espacio
+        int yGap = 40; // Reducimos el espaciado entre campos
+
+        // Nombre
+        JLabel nombreLabel = new JLabel("Nombre:");
+        nombreLabel.setBounds(padding, yStart, labelWidth, 20); // Reducimos la altura
+        nombreLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12)); // Reducimos la fuente
+        nombreLabel.setForeground(Color.DARK_GRAY);
+        formPanel.add(nombreLabel);
+
+        cajaNombre = new JTextField();
+        cajaNombre.setBounds(padding + labelWidth, yStart, fieldWidth, fieldHeight);
+        cajaNombre.setFont(new Font("Segoe UI", Font.PLAIN, 12)); // Reducimos la fuente
+        cajaNombre.setForeground(Color.BLACK);
+        cajaNombre.setBackground(new Color(245, 245, 245));
+        cajaNombre.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(200, 200, 200), 1, true),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+        cajaNombre.setText("Ingrese el nombre");
+        cajaNombre.setForeground(Color.GRAY);
+        cajaNombre.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (cajaNombre.getText().equals("Ingrese el nombre")) {
+                    cajaNombre.setText("");
+                    cajaNombre.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (cajaNombre.getText().isEmpty()) {
+                    cajaNombre.setText("Ingrese el nombre");
+                    cajaNombre.setForeground(Color.GRAY);
                 }
             }
         });
+        formPanel.add(cajaNombre);
 
+        // Apellido Paterno
+        JLabel appLabel = new JLabel("Apellido Paterno:");
+        appLabel.setBounds(padding, yStart + yGap, labelWidth, 20);
+        appLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        appLabel.setForeground(Color.DARK_GRAY);
+        formPanel.add(appLabel);
+
+        cajaAPP = new JTextField();
+        cajaAPP.setBounds(padding + labelWidth, yStart + yGap, fieldWidth, fieldHeight);
+        cajaAPP.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        cajaAPP.setForeground(Color.BLACK);
+        cajaAPP.setBackground(new Color(245, 245, 245));
+        cajaAPP.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(200, 200, 200), 1, true),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+        cajaAPP.setText("Ingrese el apellido paterno");
+        cajaAPP.setForeground(Color.GRAY);
+        cajaAPP.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (cajaAPP.getText().equals("Ingrese el apellido paterno")) {
+                    cajaAPP.setText("");
+                    cajaAPP.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (cajaAPP.getText().isEmpty()) {
+                    cajaAPP.setText("Ingrese el apellido paterno");
+                    cajaAPP.setForeground(Color.GRAY);
+                }
+            }
+        });
+        formPanel.add(cajaAPP);
+
+        // Apellido Materno
+        JLabel apmLabel = new JLabel("Apellido Materno:");
+        apmLabel.setBounds(padding, yStart + 2 * yGap, labelWidth, 20);
+        apmLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        apmLabel.setForeground(Color.DARK_GRAY);
+        formPanel.add(apmLabel);
+
+        cajaAPM = new JTextField();
+        cajaAPM.setBounds(padding + labelWidth, yStart + 2 * yGap, fieldWidth, fieldHeight);
+        cajaAPM.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        cajaAPM.setForeground(Color.BLACK);
+        cajaAPM.setBackground(new Color(245, 245, 245));
+        cajaAPM.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(200, 200, 200), 1, true),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+        cajaAPM.setText("Ingrese el apellido materno");
+        cajaAPM.setForeground(Color.GRAY);
+        cajaAPM.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (cajaAPM.getText().equals("Ingrese el apellido materno")) {
+                    cajaAPM.setText("");
+                    cajaAPM.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (cajaAPM.getText().isEmpty()) {
+                    cajaAPM.setText("Ingrese el apellido materno");
+                    cajaAPM.setForeground(Color.GRAY);
+                }
+            }
+        });
+        formPanel.add(cajaAPM);
+
+        // Correo
+        JLabel correoLabel = new JLabel("Correo Electrónico:");
+        correoLabel.setBounds(padding, yStart + 3 * yGap, labelWidth, 20);
+        correoLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        correoLabel.setForeground(Color.DARK_GRAY);
+        formPanel.add(correoLabel);
+
+        cajaCorreo = new JTextField();
+        cajaCorreo.setBounds(padding + labelWidth, yStart + 3 * yGap, fieldWidth, fieldHeight);
+        cajaCorreo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        cajaCorreo.setForeground(Color.BLACK);
+        cajaCorreo.setBackground(new Color(245, 245, 245));
+        cajaCorreo.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(200, 200, 200), 1, true),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+        cajaCorreo.setText("ejemplo@correo.com");
+        cajaCorreo.setForeground(Color.GRAY);
+        cajaCorreo.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (cajaCorreo.getText().equals("ejemplo@correo.com")) {
+                    cajaCorreo.setText("");
+                    cajaCorreo.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (cajaCorreo.getText().isEmpty()) {
+                    cajaCorreo.setText("ejemplo@correo.com");
+                    cajaCorreo.setForeground(Color.GRAY);
+                }
+            }
+        });
+        formPanel.add(cajaCorreo);
+
+        // Contraseña
+        JLabel contraLabel = new JLabel("Contraseña:");
+        contraLabel.setBounds(padding, yStart + 4 * yGap, labelWidth, 20);
+        contraLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        contraLabel.setForeground(Color.DARK_GRAY);
+        formPanel.add(contraLabel);
+
+        cajaContra = new JTextField();
+        cajaContra.setBounds(padding + labelWidth, yStart + 4 * yGap, fieldWidth, fieldHeight);
+        cajaContra.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        cajaContra.setForeground(Color.BLACK);
+        cajaContra.setBackground(new Color(245, 245, 245));
+        cajaContra.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(200, 200, 200), 1, true),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+        cajaContra.setText("Ingrese su contraseña");
+        cajaContra.setForeground(Color.GRAY);
+        cajaContra.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (cajaContra.getText().equals("Ingrese su contraseña")) {
+                    cajaContra.setText("");
+                    cajaContra.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (cajaContra.getText().isEmpty()) {
+                    cajaContra.setText("Ingrese su contraseña");
+                    cajaContra.setForeground(Color.GRAY);
+                }
+            }
+        });
+        formPanel.add(cajaContra);
+
+        // RU
+        JLabel ruLabel = new JLabel("R.U.:");
+        ruLabel.setBounds(padding, yStart + 5 * yGap, labelWidth, 20);
+        ruLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        ruLabel.setForeground(Color.DARK_GRAY);
+        formPanel.add(ruLabel);
+
+        cajaRU = new JTextField();
+        cajaRU.setBounds(padding + labelWidth, yStart + 5 * yGap, fieldWidth, fieldHeight);
+        cajaRU.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        cajaRU.setForeground(Color.BLACK);
+        cajaRU.setBackground(new Color(245, 245, 245));
+        cajaRU.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(200, 200, 200), 1, true),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+        cajaRU.setText("Ingrese el R.U.");
+        cajaRU.setForeground(Color.GRAY);
+        cajaRU.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (cajaRU.getText().equals("Ingrese el R.U.")) {
+                    cajaRU.setText("");
+                    cajaRU.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (cajaRU.getText().isEmpty()) {
+                    cajaRU.setText("Ingrese el R.U.");
+                    cajaRU.setForeground(Color.GRAY);
+                }
+            }
+        });
+        formPanel.add(cajaRU);
+
+        // Rol
+        JLabel rolLabel = new JLabel("Rol:");
+        rolLabel.setBounds(padding, yStart + 6 * yGap, labelWidth, 20);
+        rolLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        rolLabel.setForeground(Color.DARK_GRAY);
+        formPanel.add(rolLabel);
+
+        cajarol = new JComboBox<>(new String[]{"Docente", "Estudiante"});
+        cajarol.setBounds(padding + labelWidth, yStart + 6 * yGap, fieldWidth, fieldHeight);
+        cajarol.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        cajarol.setBackground(new Color(245, 245, 245));
+        cajarol.setForeground(Color.BLACK);
+        formPanel.add(cajarol);
+
+        // CI
+        JLabel ciLabel = new JLabel("C.I.:");
+        ciLabel.setBounds(padding, yStart + 7 * yGap, labelWidth, 20);
+        ciLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        ciLabel.setForeground(Color.DARK_GRAY);
+        formPanel.add(ciLabel);
+
+        cajaCI = new JTextField();
+        cajaCI.setBounds(padding + labelWidth, yStart + 7 * yGap, fieldWidth, fieldHeight);
+        cajaCI.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        cajaCI.setForeground(Color.BLACK);
+        cajaCI.setBackground(new Color(245, 245, 245));
+        cajaCI.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(200, 200, 200), 1, true),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+        cajaCI.setText("Ingrese el C.I.");
+        cajaCI.setForeground(Color.GRAY);
+        cajaCI.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (cajaCI.getText().equals("Ingrese el C.I.")) {
+                    cajaCI.setText("");
+                    cajaCI.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (cajaCI.getText().isEmpty()) {
+                    cajaCI.setText("Ingrese el C.I.");
+                    cajaCI.setForeground(Color.GRAY);
+                }
+            }
+        });
+        formPanel.add(cajaCI);
+
+        // Botones
+        int buttonWidth = 120; // Reducimos el ancho de los botones
+        int buttonHeight = 30; // Reducimos la altura de los botones
+        int buttonY = yStart + 8 * yGap + 10; // Ajustamos la posición para que esté dentro del panel
+
+        // Botón "Guardar"
+        JButton botonGuardar = new JButton("Guardar");
+        botonGuardar.setBounds(padding, buttonY, buttonWidth, buttonHeight);
+        botonGuardar.setBackground(new Color(30, 120, 60));
+        botonGuardar.setForeground(Color.WHITE);
+        botonGuardar.setFont(new Font("Segoe UI", Font.BOLD, 14)); // Reducimos la fuente
+        botonGuardar.setFocusPainted(false);
+        botonGuardar.setBorderPainted(false);
+        botonGuardar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        botonGuardar.setBorder(new LineBorder(new Color(30, 120, 60), 1, true));
+        // Efecto hover
+        botonGuardar.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                botonGuardar.setBackground(new Color(50, 140, 80));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                botonGuardar.setBackground(new Color(30, 120, 60));
+            }
+        });
+        // Acción del botón "Guardar"
+        botonGuardar.addActionListener(e -> guardarUsuario());
+        formPanel.add(botonGuardar);
+
+        // Botón "Cancelar"
+        JButton botonCancelar = new JButton("Cancelar");
+        botonCancelar.setBounds(padding + labelWidth + fieldWidth - buttonWidth, buttonY, buttonWidth, buttonHeight);
+        botonCancelar.setBackground(new Color(180, 70, 70));
+        botonCancelar.setForeground(Color.WHITE);
+        botonCancelar.setFont(new Font("Segoe UI", Font.BOLD, 14)); // Reducimos la fuente
+        botonCancelar.setFocusPainted(false);
+        botonCancelar.setBorderPainted(false);
+        botonCancelar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        botonCancelar.setBorder(new LineBorder(new Color(180, 70, 70), 1, true));
+        botonCancelar.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                botonCancelar.setBackground(new Color(200, 90, 90));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                botonCancelar.setBackground(new Color(180, 70, 70));
+            }
+        });
+        botonCancelar.addActionListener(e -> dispose());
+        formPanel.add(botonCancelar);
+    }
+
+    private void guardarUsuario() {
+        try {
+            // Recoger los datos de los campos
+            String nombre = cajaNombre.getText().trim();
+            String APP = cajaAPP.getText().trim();
+            String APM = cajaAPM.getText().trim();
+            String correo = cajaCorreo.getText().trim();
+            String password = cajaContra.getText().trim();
+            String ruText = cajaRU.getText().trim();
+            String ciText = cajaCI.getText().trim();
+            String role = (String) cajarol.getSelectedItem();
+
+            // Validar campos vacíos y placeholders (usando la lógica del CÓDIGO 2)
+            if (nombre.isEmpty() || nombre.equals("Ingrese el nombre") ||
+                APP.isEmpty() || APP.equals("Ingrese el apellido paterno") ||
+                APM.isEmpty() || APM.equals("Ingrese el apellido materno") ||
+                correo.isEmpty() || correo.equals("ejemplo@correo.com") ||
+                password.isEmpty() || password.equals("Ingrese su contraseña") ||
+                ruText.isEmpty() || ruText.equals("Ingrese el R.U.") ||
+                ciText.isEmpty() || ciText.equals("Ingrese el C.I.")) {
+                throw new CredencialesInvalidas("Por favor, complete todos los campos");
+            }
+
+            // Convertir RU y CI a números
+            int ru = Integer.parseInt(ruText);
+            int ci = Integer.parseInt(ciText);
+
+            // Crear una nueva instancia de Usuario
+            Usuario nuevoUsuario = new Usuario(ru, nombre, APP, APM, password, ci, role, correo);
+            ControlUsuario controlUsuario = new ControlUsuario();
+            controlUsuario.insertar(nuevoUsuario);
+
+            // Mostrar mensaje de éxito (estilo del CÓDIGO 2)
+            JOptionPane.showMessageDialog(this, "Usuario guardado exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            dispose();
+
+        } catch (NumberFormatException nfe) {
+            mostrarMensajeError("RU o CI deben ser números válidos");
+        } catch (CredencialesInvalidas ex) {
+            mostrarMensajeError(ex.getMessage());
+        } catch (SQLException sqle) {
+            String msg = sqle.getMessage();
+            if (msg.contains("Duplicate entry")) {
+                mostrarMensajeError("El RU, CI o correo ya está registrado");
+            } else {
+                mostrarMensajeError("Error al guardar el usuario:\n" + msg);
+            }
+        } catch (Exception ex) {
+            mostrarMensajeError("Error del sistema");
+        }
+    }
+
+    private void mostrarMensajeError(String mensaje) {
+        JOptionPane optionPane = new JOptionPane(
+            mensaje,
+            JOptionPane.ERROR_MESSAGE,
+            JOptionPane.DEFAULT_OPTION,
+            null,
+            new Object[] {"Aceptar"},
+            "Aceptar"
+        );
+        JDialog dialog = optionPane.createDialog(this, "Error");
+        dialog.setVisible(true);
     }
 }
