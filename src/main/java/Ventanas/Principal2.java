@@ -24,6 +24,11 @@ import Paneles.PanelVisualizarEquipo;
 import Prestamos.PanelNotificacion;
 import Prestamos.PanelSolicitarPrestamo;
 import Prestamos.PanelVisualizarPrestamos;
+// Aquí deberías importar los nuevos paneles
+import PanelesMateriales.PanelInsumos;
+import PanelesMateriales.PanelHerramientas;
+import PanelesMateriales.PanelEditarInsumos;
+import PanelSanciones.PanelSancionesVigentes;
 
 /**
  * Ventana principal del Sistema de Control y Préstamo de Laboratorios para administradores.
@@ -168,6 +173,9 @@ public class Principal2 extends JFrame {
         buttonPanel.add(createMenuButton("Usuarios", new String[]{"Docentes", "Estudiantes"}));
         buttonPanel.add(createMenuButton("Equipos", new String[]{"Máquinas"}));
         buttonPanel.add(createMenuButton("Préstamos", new String[]{"Solicitar Préstamo", "Notificaciones"}));
+        // Añadiendo los nuevos módulos
+        buttonPanel.add(createMenuButton("Materiales", new String[]{"Insumos", "Herramientas", "Editar Insumos"}));
+        buttonPanel.add(createMenuButton("Sanciones", new String[]{"Sanciones Vigentes"}));
 
         panel.add(buttonPanel, BorderLayout.NORTH);
         panel.add(contentPanel, BorderLayout.CENTER);
@@ -311,6 +319,20 @@ public class Principal2 extends JFrame {
                     contenidoEspecifico = crearPanelNotificaciones();
                 }
                 break;
+            case "Materiales":
+                if (subOpcion.equals("Insumos")) {
+                    contenidoEspecifico = crearPanelInsumos();
+                } else if (subOpcion.equals("Herramientas")) {
+                    contenidoEspecifico = crearPanelHerramientas();
+                } else if (subOpcion.equals("Editar Insumos")) {
+                    contenidoEspecifico = crearPanelEditarInsumos();
+                }
+                break;
+            case "Sanciones":
+                if (subOpcion.equals("Sanciones Vigentes")) {
+                    contenidoEspecifico = crearPanelSancionesVigentes();
+                }
+                break;
         }
 
         contentWrapper.add(contenidoEspecifico, BorderLayout.CENTER);
@@ -363,6 +385,42 @@ public class Principal2 extends JFrame {
     private JPanel crearPanelNotificaciones() {
         PanelNotificacion panelNotificacion = new PanelNotificacion();
         return panelNotificacion;
+    }
+
+    /**
+     * Crea el panel para gestionar insumos.
+     * Este método se añadió para la nueva opción del menú.
+     */
+    private JPanel crearPanelInsumos() {
+        PanelInsumos panelInsumos = new PanelInsumos();
+        return panelInsumos;
+    }
+
+    /**
+     * Crea el panel para gestionar herramientas.
+     * Este método se añadió para la nueva opción del menú.
+     */
+    private JPanel crearPanelHerramientas() {
+        PanelHerramientas panelHerramientas = new PanelHerramientas();
+        return panelHerramientas;
+    }
+
+    /**
+     * Crea el panel para editar insumos.
+     * Este método se añadió para la nueva opción del menú.
+     */
+    private JPanel crearPanelEditarInsumos() {
+        PanelEditarInsumos panelEditarInsumos = new PanelEditarInsumos();
+        return panelEditarInsumos;
+    }
+
+    /**
+     * Crea el panel para ver sanciones vigentes.
+     * Este método se añadió para la nueva opción del menú.
+     */
+    private JPanel crearPanelSancionesVigentes() {
+        PanelSancionesVigentes panelSancionesVigentes = new PanelSancionesVigentes();
+        return panelSancionesVigentes;
     }
 
     /**

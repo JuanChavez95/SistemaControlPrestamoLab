@@ -21,7 +21,13 @@ import Paneles.PanelHorario;
 import Paneles.PanelVisualizarHorario;
 import Paneles.PanelHistorialEquipo;
 import Paneles.PanelVisualizarEquipo;
+import Prestamos.PanelNotificacion;
+import Prestamos.PanelSolicitarPrestamo;
 import Prestamos.PanelVisualizarPrestamos;
+// Aquí deberías importar los nuevos paneles
+import PanelesMateriales.PanelInsumos;
+import PanelesMateriales.PanelHerramientas;
+import PanelSanciones.PanelSancionesVigentes;
 
 /**
  * Ventana principal del Sistema de Control y Préstamo de Laboratorios para administradores.
@@ -45,7 +51,7 @@ public class Principal3 extends JFrame {
 
     public Principal3() {
         // Configuración de la ventana
-        setTitle("Sistema de Control y Préstamo de Laboratorios - Administrador");
+        setTitle("Sistema de Control y Préstamo de Laboratorios - Estudiantes");
         setSize(1200, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setMinimumSize(new Dimension(1000, 600));
@@ -162,9 +168,13 @@ public class Principal3 extends JFrame {
         contentPanel.add(welcomeLabel, BorderLayout.CENTER);
 
         // Añadir botones de menú con las opciones actualizadas según lo solicitado
-        buttonPanel.add(createMenuButton("Laboratorios", new String[]{"Horario"}));
+        buttonPanel.add(createMenuButton("Laboratorios", new String[]{"Horarios"}));
         buttonPanel.add(createMenuButton("Usuarios", new String[]{"Docentes", "Estudiantes"}));
         buttonPanel.add(createMenuButton("Equipos", new String[]{"Máquinas"}));
+        buttonPanel.add(createMenuButton("Préstamos", new String[]{"Solicitar Préstamo", "Notificaciones"}));
+        // Añadiendo los nuevos módulos
+        buttonPanel.add(createMenuButton("Materiales", new String[]{"Insumos", "Herramientas"}));
+        buttonPanel.add(createMenuButton("Sanciones", new String[]{"Sanciones Vigentes"}));
 
         panel.add(buttonPanel, BorderLayout.NORTH);
         panel.add(contentPanel, BorderLayout.CENTER);
@@ -285,8 +295,8 @@ public class Principal3 extends JFrame {
         // Mapeo de las opciones de menú con los métodos correspondientes
         switch (categoria) {
             case "Laboratorios":
-                if (subOpcion.equals("Horario")) {
-                    contenidoEspecifico = crearPanelHorario();
+                if (subOpcion.equals("Horarios")) {
+                    contenidoEspecifico = crearPanelHorarios();
                 }
                 break;
             case "Usuarios":
@@ -301,6 +311,25 @@ public class Principal3 extends JFrame {
                     contenidoEspecifico = crearPanelMaquinas();
                 }
                 break;
+            case "Préstamos":
+                if (subOpcion.equals("Solicitar Préstamo")) {
+                    contenidoEspecifico = crearPanelSolicitarPrestamo();
+                } else if (subOpcion.equals("Notificaciones")) {
+                    contenidoEspecifico = crearPanelNotificaciones();
+                }
+                break;
+            case "Materiales":
+                if (subOpcion.equals("Insumos")) {
+                    contenidoEspecifico = crearPanelInsumos();
+                } else if (subOpcion.equals("Herramientas")) {
+                    contenidoEspecifico = crearPanelHerramientas();
+                }
+                break;
+            case "Sanciones":
+                if (subOpcion.equals("Sanciones Vigentes")) {
+                    contenidoEspecifico = crearPanelSancionesVigentes();
+                }
+                break;
         }
 
         contentWrapper.add(contenidoEspecifico, BorderLayout.CENTER);
@@ -310,9 +339,9 @@ public class Principal3 extends JFrame {
     }
 
     /**
-     * Crea el panel para mostrar el horario de los laboratorios.
+     * Crea el panel para mostrar los horarios de los laboratorios.
      */
-    private JPanel crearPanelHorario() {
+    private JPanel crearPanelHorarios() {
         return new PanelVisualizarHorario();
     }
 
@@ -335,6 +364,52 @@ public class Principal3 extends JFrame {
      */
     private JPanel crearPanelMaquinas() {
         return new PanelVisualizarEquipo();
+    }
+
+    /**
+     * Crea el panel para solicitar préstamos.
+     * Este método se añadió para la nueva opción del menú.
+     */
+    private JPanel crearPanelSolicitarPrestamo() {
+        PanelSolicitarPrestamo panelSolicitarPrestamo = new PanelSolicitarPrestamo();
+        return panelSolicitarPrestamo;
+    }
+
+    /**
+     * Crea el panel para notificaciones.
+     * Este método se añadió para la nueva opción del menú.
+     */
+    private JPanel crearPanelNotificaciones() {
+        PanelNotificacion panelNotificacion = new PanelNotificacion();
+        return panelNotificacion;
+    }
+
+    /**
+     * Crea el panel para gestionar insumos.
+     * Este método se añadió para la nueva opción del menú.
+     */
+    private JPanel crearPanelInsumos() {
+        PanelInsumos panelInsumos = new PanelInsumos();
+        return panelInsumos;
+    }
+
+    /**
+     * Crea el panel para gestionar herramientas.
+     * Este método se añadió para la nueva opción del menú.
+     */
+    private JPanel crearPanelHerramientas() {
+        PanelHerramientas panelHerramientas = new PanelHerramientas();
+        return panelHerramientas;
+    }
+
+  
+    /**
+     * Crea el panel para ver sanciones vigentes.
+     * Este método se añadió para la nueva opción del menú.
+     */
+    private JPanel crearPanelSancionesVigentes() {
+        PanelSancionesVigentes panelSancionesVigentes = new PanelSancionesVigentes();
+        return panelSancionesVigentes;
     }
 
     /**

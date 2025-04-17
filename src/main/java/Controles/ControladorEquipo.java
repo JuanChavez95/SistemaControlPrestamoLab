@@ -18,7 +18,7 @@ public class ControladorEquipo {
 
     // Insertar nuevo equipo a la tabla
     public void insertar(Equipos equipo) throws SQLException {
-        String sql = "INSERT INTO equipos (id_equipos, procesador, ram, dispositivo, monitor, teclado, mouse, id_laboratorio) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO equipos (id_equipos, procesador, ram, dispositivo, monitor, teclado, mouse, estado, id_laboratorio) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConexionBD.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, equipo.getIdEquipos());
@@ -28,7 +28,8 @@ public class ControladorEquipo {
             stmt.setString(5, equipo.getMonitor());
             stmt.setString(6, equipo.getTeclado());
             stmt.setString(7, equipo.getMouse());
-            stmt.setInt(8, equipo.getIdLaboratorio());
+            stmt.setString(8, equipo.getEstado());
+            stmt.setInt(9, equipo.getIdLaboratorio());
             stmt.executeUpdate();
         }
     }
@@ -49,6 +50,7 @@ public class ControladorEquipo {
                     rs.getString("monitor"),
                     rs.getString("teclado"),
                     rs.getString("mouse"),
+                    rs.getString("estado"),
                     rs.getInt("id_laboratorio")
                 ));
             }
@@ -58,7 +60,7 @@ public class ControladorEquipo {
 
     // Actualizar un equipo por su ID
     public void actualizar(Equipos equipo) throws SQLException {
-        String sql = "UPDATE equipos SET procesador = ?, ram = ?, dispositivo = ?, monitor = ?, teclado = ?, mouse = ?, id_laboratorio = ? WHERE id_equipos = ?";
+        String sql = "UPDATE equipos SET procesador = ?, ram = ?, dispositivo = ?, monitor = ?, teclado = ?, mouse = ?, estado = ?, id_laboratorio = ? WHERE id_equipos = ?";
         try (Connection conn = ConexionBD.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, equipo.getProcesador());
@@ -67,8 +69,9 @@ public class ControladorEquipo {
             stmt.setString(4, equipo.getMonitor());
             stmt.setString(5, equipo.getTeclado());
             stmt.setString(6, equipo.getMouse());
-            stmt.setInt(7, equipo.getIdLaboratorio());
-            stmt.setString(8, equipo.getIdEquipos());
+            stmt.setString(7, equipo.getEstado());
+            stmt.setInt(8, equipo.getIdLaboratorio());
+            stmt.setString(9, equipo.getIdEquipos());
             stmt.executeUpdate();
         }
     }
@@ -83,4 +86,3 @@ public class ControladorEquipo {
         }
     }
 }
-

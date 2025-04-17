@@ -45,7 +45,7 @@ public class PanelEstudiantes extends JPanel {
     }
 
     private void cargarDatosDesdeBD() {
-        String url = "jdbc:mysql://localhost:3306/prestamos_controles_lab";
+        String url = "jdbc:mysql://localhost:3306/prestamos_controles_laboratorio";
         String usuario = "root";
         String contraseña = "grand batle124"; 
 

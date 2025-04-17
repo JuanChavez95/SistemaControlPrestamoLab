@@ -4,6 +4,7 @@ Servicios\UsuarioService.class
 Ventanas\Principal3.class
 Ventanas\NuevoUsuario$7.class
 Ventanas\login$6.class
+Clases\HistorialGeneral.class
 Ventanas\Principal3$4.class
 Paneles\PanelLaboratorio.class
 Ventanas\Principal$1.class
@@ -18,11 +19,16 @@ Ventanas\NuevoUsuario$1.class
 Paneles\PanelHistorialEquipo.class
 Controles\ControladorEquipo.class
 Paneles\PanelEquipo.class
+PanelesMateriales\PanelEditarHerramientas$1.class
+PanelesMateriales\PanelEditarHerramientas.class
+PanelesMateriales\PanelHerramientas.class
 Prestamos\PanelVisualizarPrestamos.class
+Clases\Equipamiento.class
 Ventanas\login$8.class
 Paneles\PanelVisualizarHorario.class
 Paneles\PanelEditar$2.class
 DataBase\ConexionBD.class
+PanelesMateriales\PanelEditarInsumos.class
 exceptions\CredencialesInvalidas.class
 Ventanas\login$1.class
 Ventanas\NuevoUsuario$11.class
@@ -56,9 +62,11 @@ Paneles\PanelDocentes.class
 Ventanas\Principal3$RoundedBorder.class
 Paneles\PanelEditar$4.class
 Ventanas\NuevoAdministrador.class
+Controles\ControladorEquipamiento.class
 Clases\Administrador.class
 Ventanas\Principal2$5.class
 Ventanas\Principal2$2.class
+PanelesMateriales\PanelDetalleHerramientas.class
 Ventanas\NuevoAdministrador$3.class
 Paneles\PanelEditar$1.class
 Clases\HistorialEquipos.class
@@ -83,8 +91,12 @@ Clases\Equipo$EstadoEquipo.class
 Ventanas\Principal3$5.class
 Ventanas\Principal$3.class
 interfaces\GenericDAO.class
+PanelSanciones\PanelSancionesVigentes.class
+Controles\ControladorHistorialGeneral.class
 interfaces\UsuarioDAO.class
 Ventanas\Principal.class
+PanelSanciones\PanelSancionar.class
+PanelSanciones\PanelListaSanciones.class
 Ventanas\NuevoUsuario$2.class
 Ventanas\NuevoAdministrador$5.class
 Clases\Horario.class
@@ -97,5 +109,6 @@ Paneles\PanelVisualizarEquipo.class
 Ventanas\Principal$2.class
 Servicios\RolService.class
 Ventanas\NuevoAdministrador$4.class
+PanelesMateriales\PanelInsumos.class
 Clases\Equipo.class
 Ventanas\login$5.class

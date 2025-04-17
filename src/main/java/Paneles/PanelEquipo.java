@@ -25,7 +25,7 @@ import java.util.Map;
 public class PanelEquipo extends JPanel {
 
     private JTextField cajaProcesador, cajaMonitor, cajaTeclado, cajaMouse, cajaId;
-    private JComboBox<String> comboRam, comboDispositivo, comboLaboratorio;
+    private JComboBox<String> comboRam, comboDispositivo, comboLaboratorio, comboEstado;
     private JTable tablaEquipos;
     private DefaultTableModel modelo;
     private JButton btnAgregar, btnActualizar, btnEliminar, btnLimpiar;
@@ -47,7 +47,7 @@ public class PanelEquipo extends JPanel {
         setBackground(new Color(81, 0, 255));
 
         // Panel del formulario
-        JPanel panelForm = new JPanel(new GridLayout(8, 2, 10, 10));
+        JPanel panelForm = new JPanel(new GridLayout(9, 2, 10, 10)); // Aumentado a 9 filas para incluir estado
         panelForm.setBorder(BorderFactory.createTitledBorder("GESTOR DE EQUIPOS"));
         panelForm.setBackground(new Color(81, 0, 255));
 
@@ -58,9 +58,10 @@ public class PanelEquipo extends JPanel {
         JLabel lblMonitor = new JLabel("Monitor:");
         JLabel lblTeclado = new JLabel("Teclado:");
         JLabel lblMouse = new JLabel("Mouse:");
+        JLabel lblEstado = new JLabel("Estado:"); // Nueva etiqueta para estado
         JLabel lblLab = new JLabel("Laboratorio:");
 
-        for (JLabel label : new JLabel[]{lblId, lblProcesador, lblRam, lblDispositivo, lblMonitor, lblTeclado, lblMouse, lblLab}) {
+        for (JLabel label : new JLabel[]{lblId, lblProcesador, lblRam, lblDispositivo, lblMonitor, lblTeclado, lblMouse, lblEstado, lblLab}) {
             label.setForeground(Color.WHITE);
         }
 
@@ -112,6 +113,9 @@ public class PanelEquipo extends JPanel {
         cajaTeclado = new JTextField();
         cajaMouse = new JTextField();
         
+        // Nuevo ComboBox para el estado
+        comboEstado = new JComboBox<>(new String[]{"Disponible", "No Disponible", "De baja"});
+        
         // Creación del ComboBox para laboratorios
         comboLaboratorio = new JComboBox<>();
         cargarLaboratorios();
@@ -123,6 +127,7 @@ public class PanelEquipo extends JPanel {
         panelForm.add(lblMonitor); panelForm.add(cajaMonitor);
         panelForm.add(lblTeclado); panelForm.add(cajaTeclado);
         panelForm.add(lblMouse); panelForm.add(cajaMouse);
+        panelForm.add(lblEstado); panelForm.add(comboEstado); // Añadir el ComboBox de estado
         panelForm.add(lblLab); panelForm.add(comboLaboratorio);
 
         // Botones
@@ -150,9 +155,9 @@ public class PanelEquipo extends JPanel {
         panelSuperior.add(panelForm, BorderLayout.NORTH);
         panelSuperior.add(panelBotones, BorderLayout.SOUTH);
 
-        // Tabla
+        // Tabla (actualizada para incluir el estado)
         modelo = new DefaultTableModel(new String[]{
-                "ID", "Procesador", "RAM", "Disco", "Monitor", "Teclado", "Mouse", "ID Lab"
+                "ID", "Procesador", "RAM", "Disco", "Monitor", "Teclado", "Mouse", "Estado", "ID Lab"
         }, 0);
         tablaEquipos = new JTable(modelo);
         tablaEquipos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -178,6 +183,7 @@ public class PanelEquipo extends JPanel {
                         cajaMonitor.getText(),
                         cajaTeclado.getText(),
                         cajaMouse.getText(),
+                        comboEstado.getSelectedItem().toString(), // Añadir el estado
                         idLab
                 );
                 controlador.insertar(equipo);
@@ -206,6 +212,7 @@ public class PanelEquipo extends JPanel {
                         cajaMonitor.getText(),
                         cajaTeclado.getText(),
                         cajaMouse.getText(),
+                        comboEstado.getSelectedItem().toString(), // Añadir el estado
                         idLab
                 );
                 controlador.actualizar(equipo);
@@ -243,9 +250,10 @@ public class PanelEquipo extends JPanel {
                 cajaMonitor.setText(modelo.getValueAt(fila, 4).toString());
                 cajaTeclado.setText(modelo.getValueAt(fila, 5).toString());
                 cajaMouse.setText(modelo.getValueAt(fila, 6).toString());
+                comboEstado.setSelectedItem(modelo.getValueAt(fila, 7).toString()); // Seleccionar el estado
                 
                 // Seleccionar el laboratorio correspondiente
-                int idLabSeleccionado = Integer.parseInt(modelo.getValueAt(fila, 7).toString());
+                int idLabSeleccionado = Integer.parseInt(modelo.getValueAt(fila, 8).toString());
                 seleccionarLaboratorio(idLabSeleccionado);
             }
         });
@@ -303,6 +311,7 @@ public class PanelEquipo extends JPanel {
                         eq.getMonitor(),
                         eq.getTeclado(),
                         eq.getMouse(),
+                        eq.getEstado(), // Añadir el estado
                         eq.getIdLaboratorio()
                 });
             }
@@ -320,6 +329,7 @@ public class PanelEquipo extends JPanel {
         cajaMonitor.setText("");
         cajaTeclado.setText("");
         cajaMouse.setText("");
+        comboEstado.setSelectedIndex(0); // Resetear el estado
         comboLaboratorio.setSelectedIndex(0);
         tablaEquipos.clearSelection();
     }

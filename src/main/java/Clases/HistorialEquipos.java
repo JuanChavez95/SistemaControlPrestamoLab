@@ -4,65 +4,32 @@
  */
 package Clases;
 
-import java.sql.Date;
-
 public class HistorialEquipos {
-
-    private int idHistorialEquipos;
+    // Atributos Privados
+    private int idHistorial;
     private String idEquipos;
-    private Date fecha;
-    private String categoria;
-    private String descripcion;
 
+    // Constructor vacío
     public HistorialEquipos() {}
 
-    public HistorialEquipos(int idHistorialEquipos, String idEquipos, Date fecha, String categoria, String descripcion) {
-        this.idHistorialEquipos = idHistorialEquipos;
+    // Constructor completo
+    public HistorialEquipos(int idHistorial, String idEquipos) {
+        this.idHistorial = idHistorial;
         this.idEquipos = idEquipos;
-        this.fecha = fecha;
-        this.categoria = categoria;
-        this.descripcion = descripcion;
     }
 
     // Getters y Setters
-
-    public int getIdHistorialEquipos() {
-        return idHistorialEquipos;
+    public int getIdHistorial() {
+        return idHistorial;
     }
-
-    public void setIdHistorialEquipos(int idHistorialEquipos) {
-        this.idHistorialEquipos = idHistorialEquipos;
+    public void setIdHistorial(int idHistorial) {
+        this.idHistorial = idHistorial;
     }
 
     public String getIdEquipos() {
         return idEquipos;
     }
-
     public void setIdEquipos(String idEquipos) {
         this.idEquipos = idEquipos;
-    }
-
-    public Date getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(Date fecha) {
-        this.fecha = fecha;
-    }
-
-    public String getCategoria() {
-        return categoria;
-    }
-
-    public void setCategoria(String categoria) {
-        this.categoria = categoria;
-    }
-
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
     }
 }

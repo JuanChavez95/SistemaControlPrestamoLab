@@ -13,12 +13,13 @@ public class Equipos {
     private String monitor;
     private String teclado;
     private String mouse;
+    private String estado; // Nuevo atributo para el estado
     private int idLaboratorio;
 
     public Equipos() {}
 
     public Equipos(String idEquipos, String procesador, String ram, String dispositivo,
-                   String monitor, String teclado, String mouse, int idLaboratorio) {
+                   String monitor, String teclado, String mouse, String estado, int idLaboratorio) {
         this.idEquipos = idEquipos;
         this.procesador = procesador;
         this.ram = ram;
@@ -26,6 +27,7 @@ public class Equipos {
         this.monitor = monitor;
         this.teclado = teclado;
         this.mouse = mouse;
+        this.estado = estado;
         this.idLaboratorio = idLaboratorio;
     }
 
@@ -78,6 +80,13 @@ public class Equipos {
     public void setMouse(String mouse) {
         this.mouse = mouse; 
     }
+    
+    public String getEstado() {
+        return estado;
+    }
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
 
     public int getIdLaboratorio() {
         return idLaboratorio; 
@@ -86,4 +95,3 @@ public class Equipos {
         this.idLaboratorio = idLaboratorio; 
     }
 }
-

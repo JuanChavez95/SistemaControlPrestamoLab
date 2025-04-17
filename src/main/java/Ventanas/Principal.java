@@ -18,6 +18,21 @@ import Paneles.PanelVisualizarHorario;
 import Paneles.PanelHistorialEquipo;
 import Paneles.PanelVisualizarEquipo;
 import Prestamos.PanelVisualizarPrestamos;
+// Importaciones para los nuevos paneles (asumiendo que se crearán en el futuro)
+import PanelesMateriales.PanelEditarHerramientas;
+import PanelesMateriales.PanelEditarInsumos;
+import PanelesMateriales.PanelDetalleHerramientas;
+import PanelesMateriales.PanelHerramientas;
+import PanelesMateriales.PanelInsumos;
+import PanelSanciones.PanelListaSanciones;
+import PanelSanciones.PanelSancionar;
+import PanelesMateriales.PanelDetalleHerramientas;
+import PanelesMateriales.PanelEditarHerramientas;
+import PanelesMateriales.PanelEditarInsumos;
+import PanelesMateriales.PanelHerramientas;
+import PanelesMateriales.PanelInsumos;
+import PanelSanciones.PanelListaSanciones;
+import PanelSanciones.PanelSancionar;
 
 /**
  * Ventana principal del Sistema de Control y Préstamo de Laboratorios para administradores.
@@ -162,6 +177,10 @@ public class Principal extends JFrame {
         buttonPanel.add(createMenuButton("Usuarios", new String[]{"Docentes", "Estudiantes", "Administradores", "Editar Usuarios"}));
         buttonPanel.add(createMenuButton("Equipos", new String[]{"Máquinas", "Editar Equipos", "Detalle Equipos"}));
         buttonPanel.add(createMenuButton("Préstamos", new String[]{"Visualizar Préstamos"}));
+        
+        // Nuevos botones para las categorías solicitadas
+        buttonPanel.add(createMenuButton("Materiales", new String[]{"Herramientas", "Insumos", "Editar Herramientas", "Editar Insumos", "Detalle Herramientas"}));
+        buttonPanel.add(createMenuButton("Sanciones", new String[]{"Lista de Sanciones", "Sancionar"}));
 
         panel.add(buttonPanel, BorderLayout.NORTH);
         panel.add(contentPanel, BorderLayout.CENTER);
@@ -315,6 +334,27 @@ public class Principal extends JFrame {
                     contenidoEspecifico = crearPanelVisualizarPrestamos();
                 }
                 break;
+            // Nuevos casos para Materiales y Sanciones
+            case "Materiales":
+                if (subOpcion.equals("Herramientas")) {
+                    contenidoEspecifico = crearPanelHerramientas();
+                } else if (subOpcion.equals("Insumos")) {
+                    contenidoEspecifico = crearPanelInsumos();
+                } else if (subOpcion.equals("Editar Herramientas")) {
+                    contenidoEspecifico = crearPanelEditarHerramientas();
+                } else if (subOpcion.equals("Editar Insumos")) {
+                    contenidoEspecifico = crearPanelEditarInsumos();
+                } else if (subOpcion.equals("Detalle Herramientas")) {
+                    contenidoEspecifico = crearPanelDetalleHerramientas();
+                }
+                break;
+            case "Sanciones":
+                if (subOpcion.equals("Lista de Sanciones")) {
+                    contenidoEspecifico = crearPanelListaSanciones();
+                } else if (subOpcion.equals("Sancionar")) {
+                    contenidoEspecifico = crearPanelSancionar();
+                }
+                break;
         }
 
         contentWrapper.add(contenidoEspecifico, BorderLayout.CENTER);
@@ -409,6 +449,59 @@ public class Principal extends JFrame {
      */
     private JPanel crearPanelVisualizarPrestamos() {
         return new PanelVisualizarPrestamos();
+    }
+
+    // Nuevos métodos para los paneles de Materiales
+
+    /**
+     * Crea el panel para visualizar herramientas.
+     */
+    private JPanel crearPanelHerramientas() {
+        return new PanelHerramientas();
+    }
+
+    /**
+     * Crea el panel para visualizar insumos.
+     */
+    private JPanel crearPanelInsumos() {
+        return new PanelInsumos();
+    }
+
+    /**
+     * Crea el panel para editar herramientas.
+     */
+    private JPanel crearPanelEditarHerramientas() {
+        return new PanelEditarHerramientas();
+    }
+
+    /**
+     * Crea el panel para editar insumos.
+     */
+    private JPanel crearPanelEditarInsumos() {
+        return new PanelEditarInsumos();
+    }
+
+    /**
+     * Crea el panel para ver detalles de herramientas.
+     */
+    private JPanel crearPanelDetalleHerramientas() {
+        return new PanelDetalleHerramientas();
+    }
+
+    // Nuevos métodos para los paneles de Sanciones
+
+    /**
+     * Crea el panel para listar sanciones.
+     */
+    private JPanel crearPanelListaSanciones() {
+        return new PanelListaSanciones();
+    }
+
+    /**
+     * Crea el panel para aplicar sanciones.
+     */
+    private JPanel crearPanelSancionar() {
+        return new PanelSancionar();
     }
 
     /**
