@@ -10,6 +10,7 @@ Paneles\PanelLaboratorio.class
 Ventanas\Principal$1.class
 Ventanas\Principal2$1.class
 Ventanas\NuevoAdministrador$2.class
+Paneles\PanelHistorialEquipo$3.class
 Paneles\PanelEstudiantes.class
 Prestamos\PanelNotificacion.class
 Paneles\PanelHorario.class
@@ -69,6 +70,8 @@ Ventanas\Principal2$2.class
 PanelesMateriales\PanelDetalleHerramientas.class
 Ventanas\NuevoAdministrador$3.class
 Paneles\PanelEditar$1.class
+Paneles\PanelVisualizarEquipo$RoundedBorder.class
+Paneles\PanelHistorialEquipo$1.class
 Clases\HistorialEquipos.class
 Ventanas\login.class
 com\mycompany\sistemacontrolprestamolab\SistemaControlPrestamoLab.class
@@ -89,9 +92,11 @@ Controles\ControlAdministrador.class
 Ventanas\Principal2.class
 Clases\Equipo$EstadoEquipo.class
 Ventanas\Principal3$5.class
+Paneles\PanelHistorialEquipo$2.class
 Ventanas\Principal$3.class
 interfaces\GenericDAO.class
 PanelSanciones\PanelSancionesVigentes.class
+Paneles\PanelVisualizarEquipo$RoundedButton.class
 Controles\ControladorHistorialGeneral.class
 interfaces\UsuarioDAO.class
 Ventanas\Principal.class

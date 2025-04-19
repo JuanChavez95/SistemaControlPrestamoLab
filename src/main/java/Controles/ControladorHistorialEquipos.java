@@ -20,8 +20,8 @@ import java.util.Date;
  */
 public class ControladorHistorialEquipos {
     
-    private ControladorHistorialGeneral controlHistorialGeneral;
-    private ControladorEquipo controlEquipo;
+    public ControladorHistorialGeneral controlHistorialGeneral;
+    public ControladorEquipo controlEquipo;
     
     public ControladorHistorialEquipos() {
         controlHistorialGeneral = new ControladorHistorialGeneral();

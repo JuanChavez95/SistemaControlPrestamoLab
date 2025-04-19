@@ -58,6 +58,31 @@ public class ControladorEquipo {
         return lista;
     }
 
+    // Buscar un equipo por su ID
+    public Equipos buscarPorId(String idEquipos) throws SQLException {
+        String sql = "SELECT * FROM equipos WHERE id_equipos = ?";
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, idEquipos);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new Equipos(
+                        rs.getString("id_equipos"),
+                        rs.getString("procesador"),
+                        rs.getString("ram"),
+                        rs.getString("dispositivo"),
+                        rs.getString("monitor"),
+                        rs.getString("teclado"),
+                        rs.getString("mouse"),
+                        rs.getString("estado"),
+                        rs.getInt("id_laboratorio")
+                    );
+                }
+            }
+        }
+        return null;
+    }
+
     // Actualizar un equipo por su ID
     public void actualizar(Equipos equipo) throws SQLException {
         String sql = "UPDATE equipos SET procesador = ?, ram = ?, dispositivo = ?, monitor = ?, teclado = ?, mouse = ?, estado = ?, id_laboratorio = ? WHERE id_equipos = ?";
