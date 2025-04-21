@@ -4,100 +4,57 @@
  */
 package Controles;
 
-/**
- *
- * @author DOC
- */
-public class ControladorPrestamo {
-    /*
-    CLASE PRÉSTAMO:
-    package Clases;
-
-import java.sql.Date;
-
-public class Prestamo {
-    private int idPrestamo;
-    private int ruUsuario;
-    private Integer ruAdministrador; // Puede ser null
-    private Integer idHorario;       // Puede ser null
-    private Date fechaPrestamo;
-    private String horaPrestamo;
-    private String observaciones;
-
-    // Constructor sin ID (para inserciones)
-    public Prestamo(int ruUsuario, Integer ruAdministrador, Integer idHorario, Date fechaPrestamo, String horaPrestamo, String observaciones) {
-        this.ruUsuario = ruUsuario;
-        this.ruAdministrador = ruAdministrador;
-        this.idHorario = idHorario;
-        this.fechaPrestamo = fechaPrestamo;
-        this.horaPrestamo = horaPrestamo;
-        this.observaciones = observaciones;
-    }
-
-    // Constructor con ID (para lectura y edición)
-    public Prestamo(int idPrestamo, int ruUsuario, Integer ruAdministrador, Integer idHorario, Date fechaPrestamo, String horaPrestamo, String observaciones) {
-        this.idPrestamo = idPrestamo;
-        this.ruUsuario = ruUsuario;
-        this.ruAdministrador = ruAdministrador;
-        this.idHorario = idHorario;
-        this.fechaPrestamo = fechaPrestamo;
-        this.horaPrestamo = horaPrestamo;
-        this.observaciones = observaciones;
-    }
-
-    // Getters y Setters
-    public int getIdPrestamo() { return idPrestamo; }
-    public int getRuUsuario() { return ruUsuario; }
-    public void setRuUsuario(int ruUsuario) { this.ruUsuario = ruUsuario; }
-
-    public Integer getRuAdministrador() { return ruAdministrador; }
-    public void setRuAdministrador(Integer ruAdministrador) { this.ruAdministrador = ruAdministrador; }
-
-    public Integer getIdHorario() { return idHorario; }
-    public void setIdHorario(Integer idHorario) { this.idHorario = idHorario; }
-
-    public Date getFechaPrestamo() { return fechaPrestamo; }
-    public void setFechaPrestamo(Date fechaPrestamo) { this.fechaPrestamo = fechaPrestamo; }
-
-    public String getHoraPrestamo() { return horaPrestamo; }
-    public void setHoraPrestamo(String horaPrestamo) { this.horaPrestamo = horaPrestamo; }
-
-    public String getObservaciones() { return observaciones; }
-    public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
-}
-
-    CONTROLADOR PRÉSTAMO:
-    package Controles;
-
 import Clases.Prestamo;
 import DataBase.ConexionBD;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Controlador para operaciones CRUD sobre la tabla prestamo.
+ * Autor: Equipo Soldados Caídos
+ */
 public class ControladorPrestamo {
 
-    // Insertar un préstamo (administrador y horario pueden ser null)
-    public void insertar(Prestamo p) throws SQLException {
-        String sql = "INSERT INTO prestamo (ru_usuario, ru_administrador, id_horario, fecha_prestamo, hora_prestamo, observaciones) VALUES (?, ?, ?, ?, ?, ?)";
+    // Insertar un préstamo (sin ID)
+    public int insertar(Prestamo prestamo) throws SQLException {
+        String sql = "INSERT INTO prestamo (ru_usuario, ru_administrador, id_horario, fecha_prestamo, " +
+                    "hora_prestamo, estado_prestamo, observaciones) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConexionBD.conectar();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, p.getRuUsuario());
-            if (p.getRuAdministrador() != null) {
-                stmt.setInt(2, p.getRuAdministrador());
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setInt(1, prestamo.getRuUsuario());
+            
+            // Manejo de valores que pueden ser NULL
+            if (prestamo.getRuAdministrador() != null) {
+                stmt.setInt(2, prestamo.getRuAdministrador());
             } else {
-                stmt.setNull(2, Types.INTEGER);
+                stmt.setNull(2, java.sql.Types.INTEGER);
             }
-            if (p.getIdHorario() != null) {
-                stmt.setInt(3, p.getIdHorario());
+            
+            if (prestamo.getIdHorario() != null) {
+                stmt.setInt(3, prestamo.getIdHorario());
             } else {
-                stmt.setNull(3, Types.INTEGER);
+                stmt.setNull(3, java.sql.Types.INTEGER);
             }
-            stmt.setDate(4, p.getFechaPrestamo());
-            stmt.setString(5, p.getHoraPrestamo());
-            stmt.setString(6, p.getObservaciones());
+            
+            stmt.setDate(4, prestamo.getFechaPrestamo());
+            stmt.setString(5, prestamo.getHoraPrestamo());
+            stmt.setString(6, prestamo.getEstadoPrestamo());
+            stmt.setString(7, prestamo.getObservaciones());
+            
             stmt.executeUpdate();
+            
+            // Obtener el ID generado
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
         }
+        return -1;
     }
 
     // Listar todos los préstamos
@@ -111,10 +68,11 @@ public class ControladorPrestamo {
                 lista.add(new Prestamo(
                     rs.getInt("id_prestamo"),
                     rs.getInt("ru_usuario"),
-                    (Integer) rs.getObject("ru_administrador"),
-                    (Integer) rs.getObject("id_horario"),
+                    rs.getObject("ru_administrador") != null ? rs.getInt("ru_administrador") : null,
+                    rs.getObject("id_horario") != null ? rs.getInt("id_horario") : null,
                     rs.getDate("fecha_prestamo"),
                     rs.getString("hora_prestamo"),
+                    rs.getString("estado_prestamo"),
                     rs.getString("observaciones")
                 ));
             }
@@ -122,26 +80,34 @@ public class ControladorPrestamo {
         return lista;
     }
 
-    // Actualizar un préstamo
-    public void actualizar(Prestamo p) throws SQLException {
-        String sql = "UPDATE prestamo SET ru_usuario = ?, ru_administrador = ?, id_horario = ?, fecha_prestamo = ?, hora_prestamo = ?, observaciones = ? WHERE id_prestamo = ?";
+    // Actualizar un préstamo por ID
+    public void actualizar(Prestamo prestamo) throws SQLException {
+        String sql = "UPDATE prestamo SET ru_usuario = ?, ru_administrador = ?, id_horario = ?, " +
+                    "fecha_prestamo = ?, hora_prestamo = ?, estado_prestamo = ?, observaciones = ? " +
+                    "WHERE id_prestamo = ?";
         try (Connection conn = ConexionBD.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, p.getRuUsuario());
-            if (p.getRuAdministrador() != null) {
-                stmt.setInt(2, p.getRuAdministrador());
+            stmt.setInt(1, prestamo.getRuUsuario());
+            
+            // Manejo de valores que pueden ser NULL
+            if (prestamo.getRuAdministrador() != null) {
+                stmt.setInt(2, prestamo.getRuAdministrador());
             } else {
-                stmt.setNull(2, Types.INTEGER);
+                stmt.setNull(2, java.sql.Types.INTEGER);
             }
-            if (p.getIdHorario() != null) {
-                stmt.setInt(3, p.getIdHorario());
+            
+            if (prestamo.getIdHorario() != null) {
+                stmt.setInt(3, prestamo.getIdHorario());
             } else {
-                stmt.setNull(3, Types.INTEGER);
+                stmt.setNull(3, java.sql.Types.INTEGER);
             }
-            stmt.setDate(4, p.getFechaPrestamo());
-            stmt.setString(5, p.getHoraPrestamo());
-            stmt.setString(6, p.getObservaciones());
-            stmt.setInt(7, p.getIdPrestamo());
+            
+            stmt.setDate(4, prestamo.getFechaPrestamo());
+            stmt.setString(5, prestamo.getHoraPrestamo());
+            stmt.setString(6, prestamo.getEstadoPrestamo());
+            stmt.setString(7, prestamo.getObservaciones());
+            stmt.setInt(8, prestamo.getIdPrestamo());
+            
             stmt.executeUpdate();
         }
     }
@@ -155,7 +121,76 @@ public class ControladorPrestamo {
             stmt.executeUpdate();
         }
     }
-}
-
-    */
+    
+    // Buscar un préstamo por ID
+    public Prestamo buscarPorId(int idPrestamo) throws SQLException {
+        String sql = "SELECT * FROM prestamo WHERE id_prestamo = ?";
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idPrestamo);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new Prestamo(
+                        rs.getInt("id_prestamo"),
+                        rs.getInt("ru_usuario"),
+                        rs.getObject("ru_administrador") != null ? rs.getInt("ru_administrador") : null,
+                        rs.getObject("id_horario") != null ? rs.getInt("id_horario") : null,
+                        rs.getDate("fecha_prestamo"),
+                        rs.getString("hora_prestamo"),
+                        rs.getString("estado_prestamo"),
+                        rs.getString("observaciones")
+                    );
+                }
+            }
+        }
+        return null;
+    }
+    
+    // Listar préstamos por usuario
+    public List<Prestamo> listarPorUsuario(int ruUsuario) throws SQLException {
+        List<Prestamo> lista = new ArrayList<>();
+        String sql = "SELECT * FROM prestamo WHERE ru_usuario = ?";
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, ruUsuario);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(new Prestamo(
+                        rs.getInt("id_prestamo"),
+                        rs.getInt("ru_usuario"),
+                        rs.getObject("ru_administrador") != null ? rs.getInt("ru_administrador") : null,
+                        rs.getObject("id_horario") != null ? rs.getInt("id_horario") : null,
+                        rs.getDate("fecha_prestamo"),
+                        rs.getString("hora_prestamo"),
+                        rs.getString("estado_prestamo"),
+                        rs.getString("observaciones")
+                    ));
+                }
+            }
+        }
+        return lista;
+    }
+    
+    // Listar préstamos activos
+    public List<Prestamo> listarActivos() throws SQLException {
+        List<Prestamo> lista = new ArrayList<>();
+        String sql = "SELECT * FROM prestamo WHERE estado_prestamo = 'En curso'";
+        try (Connection conn = ConexionBD.conectar();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                lista.add(new Prestamo(
+                    rs.getInt("id_prestamo"),
+                    rs.getInt("ru_usuario"),
+                    rs.getObject("ru_administrador") != null ? rs.getInt("ru_administrador") : null,
+                    rs.getObject("id_horario") != null ? rs.getInt("id_horario") : null,
+                    rs.getDate("fecha_prestamo"),
+                    rs.getString("hora_prestamo"),
+                    rs.getString("estado_prestamo"),
+                    rs.getString("observaciones")
+                ));
+            }
+        }
+        return lista;
+    }
 }
