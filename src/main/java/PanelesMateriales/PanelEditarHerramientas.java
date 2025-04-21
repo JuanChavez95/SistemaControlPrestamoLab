@@ -25,7 +25,7 @@ import java.util.Map;
 public class PanelEditarHerramientas extends JPanel {
 
     private JTextField cajaNombre, cajaMarca, cajaModelo, cajaNumeroSerie;
-    private JComboBox<String> comboEstado, comboLaboratorio;
+    private JComboBox<String> comboEstado, comboLaboratorio, comboDisponibilidad;
     private JTable tablaEquipamientos;
     private DefaultTableModel modelo;
     private JButton btnAgregar, btnActualizar, btnEliminar, btnLimpiar;
@@ -37,7 +37,7 @@ public class PanelEditarHerramientas extends JPanel {
     private Map<String, Integer> mapLaboratorios;
     
     // Para la opción "Ninguno" en el laboratorio
-    private final int SIN_LABORATORIO = 0;
+    private final Integer SIN_LABORATORIO = null;
 
     private Integer idSeleccionado = null;
 
@@ -50,8 +50,8 @@ public class PanelEditarHerramientas extends JPanel {
         setBackground(new Color(81, 0, 255));
 
         // Panel del formulario
-        JPanel panelForm = new JPanel(new GridLayout(7, 2, 10, 10));
-        panelForm.setBorder(BorderFactory.createTitledBorder("GESTOR DE HERRAMIENTAS"));
+        JPanel panelForm = new JPanel(new GridLayout(8, 2, 10, 10));
+        panelForm.setBorder(BorderFactory.createTitledBorder("GESTOR DE EQUIPAMIENTO"));
         panelForm.setBackground(new Color(81, 0, 255));
 
         JLabel lblNombre = new JLabel("Nombre del Equipo:");
@@ -60,8 +60,9 @@ public class PanelEditarHerramientas extends JPanel {
         JLabel lblNumeroSerie = new JLabel("Número de Serie:");
         JLabel lblEstado = new JLabel("Estado:");
         JLabel lblLab = new JLabel("Laboratorio:");
+        JLabel lblDisponibilidad = new JLabel("Disponibilidad:");
 
-        for (JLabel label : new JLabel[]{lblNombre, lblMarca, lblModelo, lblNumeroSerie, lblEstado, lblLab}) {
+        for (JLabel label : new JLabel[]{lblNombre, lblMarca, lblModelo, lblNumeroSerie, lblEstado, lblLab, lblDisponibilidad}) {
             label.setForeground(Color.WHITE);
         }
 
@@ -72,6 +73,9 @@ public class PanelEditarHerramientas extends JPanel {
         
         // ComboBox para el estado
         comboEstado = new JComboBox<>(new String[]{"Nuevo", "Uso Medio", "De Baja", "No disponible"});
+        
+        // ComboBox para disponibilidad
+        comboDisponibilidad = new JComboBox<>(new String[]{"Disponible", "En Uso", "En Mantenimiento", "No Disponible"});
         
         // Creación del ComboBox para laboratorios
         comboLaboratorio = new JComboBox<>();
@@ -84,6 +88,7 @@ public class PanelEditarHerramientas extends JPanel {
         panelForm.add(lblModelo); panelForm.add(cajaModelo);
         panelForm.add(lblNumeroSerie); panelForm.add(cajaNumeroSerie);
         panelForm.add(lblEstado); panelForm.add(comboEstado);
+        panelForm.add(lblDisponibilidad); panelForm.add(comboDisponibilidad);
         panelForm.add(lblLab); panelForm.add(comboLaboratorio);
 
         // Botones
@@ -113,7 +118,7 @@ public class PanelEditarHerramientas extends JPanel {
 
         // Tabla
         modelo = new DefaultTableModel(new String[]{
-                "ID", "Nombre", "Marca", "Modelo", "Número Serie", "Estado", "ID Lab"
+                "ID", "Nombre", "Marca", "Modelo", "Número Serie", "Estado", "Disponibilidad", "ID Lab"
         }, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -134,7 +139,7 @@ public class PanelEditarHerramientas extends JPanel {
                 validarCampos();
                 
                 String labSeleccionado = comboLaboratorio.getSelectedItem().toString();
-                int idLab = mapLaboratorios.get(labSeleccionado);
+                Integer idLab = mapLaboratorios.get(labSeleccionado);
                 
                 Equipamiento equipo = new Equipamiento(
                         cajaNombre.getText(),
@@ -142,7 +147,8 @@ public class PanelEditarHerramientas extends JPanel {
                         cajaModelo.getText(),
                         cajaNumeroSerie.getText(),
                         comboEstado.getSelectedItem().toString(),
-                        idLab
+                        idLab,
+                        comboDisponibilidad.getSelectedItem().toString()
                 );
                 controlador.insertar(equipo);
                 cargarDatos();
@@ -160,10 +166,8 @@ public class PanelEditarHerramientas extends JPanel {
                 // Validar campos antes de continuar
                 validarCampos();
                 
-                //String labSeleccionado = comboLaboratorio.getSelectedItem().toString();
-                //int idLab = mapLaboratorios.get(labSeleccionado);
                 String labSeleccionado = comboLaboratorio.getSelectedItem().toString();
-                int idLab = labSeleccionado.equals("Ninguno") ? 0 : mapLaboratorios.get(labSeleccionado);
+                Integer idLab = mapLaboratorios.get(labSeleccionado);
                 
                 Equipamiento equipo = new Equipamiento(
                         idSeleccionado,
@@ -172,7 +176,8 @@ public class PanelEditarHerramientas extends JPanel {
                         cajaModelo.getText(),
                         cajaNumeroSerie.getText(),
                         comboEstado.getSelectedItem().toString(),
-                        idLab
+                        idLab,
+                        comboDisponibilidad.getSelectedItem().toString()
                 );
                 controlador.actualizar(equipo);
                 cargarDatos();
@@ -210,10 +215,16 @@ public class PanelEditarHerramientas extends JPanel {
                     cajaModelo.setText(modelo.getValueAt(fila, 3).toString());
                     cajaNumeroSerie.setText(modelo.getValueAt(fila, 4).toString());
                     comboEstado.setSelectedItem(modelo.getValueAt(fila, 5).toString());
+                    comboDisponibilidad.setSelectedItem(modelo.getValueAt(fila, 6).toString());
                     
                     // Seleccionar el laboratorio correspondiente
-                    int idLabSeleccionado = Integer.parseInt(modelo.getValueAt(fila, 6).toString());
-                    seleccionarLaboratorio(idLabSeleccionado);
+                    Object idLabObj = modelo.getValueAt(fila, 7);
+                    if (idLabObj != null) {
+                        Integer idLabSeleccionado = Integer.parseInt(idLabObj.toString());
+                        seleccionarLaboratorio(idLabSeleccionado);
+                    } else {
+                        comboLaboratorio.setSelectedItem("Ninguno");
+                    }
                 }
             }
         });
@@ -237,14 +248,14 @@ public class PanelEditarHerramientas extends JPanel {
     }
     
     // Método para seleccionar un laboratorio específico en el ComboBox
-    private void seleccionarLaboratorio(int idLab) {
-        if (idLab == 0) {
+    private void seleccionarLaboratorio(Integer idLab) {
+        if (idLab == null) {
             comboLaboratorio.setSelectedItem("Ninguno");
             return;
         }
         
         for (Map.Entry<String, Integer> entry : mapLaboratorios.entrySet()) {
-            if (entry.getValue() == idLab) {
+            if (entry.getValue() != null && entry.getValue().equals(idLab)) {
                 comboLaboratorio.setSelectedItem(entry.getKey());
                 return;
             }
@@ -276,6 +287,7 @@ public class PanelEditarHerramientas extends JPanel {
                         eq.getModelo(),
                         eq.getNumeroSerie(),
                         eq.getEstado(),
+                        eq.getDisponibilidad(),
                         eq.getIdLaboratorio()
                 });
             }
@@ -291,6 +303,7 @@ public class PanelEditarHerramientas extends JPanel {
         cajaModelo.setText("");
         cajaNumeroSerie.setText("");
         comboEstado.setSelectedIndex(0);
+        comboDisponibilidad.setSelectedIndex(0);
         comboLaboratorio.setSelectedIndex(0);
         tablaEquipamientos.clearSelection();
     }

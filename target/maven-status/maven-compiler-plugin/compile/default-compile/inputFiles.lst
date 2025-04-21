@@ -25,6 +25,7 @@ C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Servicio
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Paneles\PanelHorario.java
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Paneles\PanelEditar.java
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControladorHorario.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\HistorialEquipamiento.java
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\EquipoPrestamo.java
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\Horario.java
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\PanelesMateriales\PanelHerramientas.java
@@ -39,6 +40,7 @@ C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\R
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\exceptions\CredencialesInvalidas.java
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Prestamos\PanelSolicitarPrestamo.java
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\Permiso.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControladorInsumo.java
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Prestamos\PanelVisualizarPrestamos.java
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\Usuario.java
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\PanelSanciones\PanelSancionar.java
@@ -46,9 +48,11 @@ C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\PanelSan
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Servicios\UsuarioService.java
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\Prestamo.java
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\Equipamiento.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\Insumo.java
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControlAdministrador.java
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\PanelesMateriales\PanelEditarHerramientas.java
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Ventanas\login.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControladorHistorialEquipamiento.java
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Prestamos\PanelNotificacion.java
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Servicios\HorarioService.java
 C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControladorEquipamiento.java

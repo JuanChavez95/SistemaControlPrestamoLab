@@ -4,33 +4,34 @@
  */
 package Clases;
 
-/**
- * Clase que representa un equipamiento de laboratorio.
+/*
  * Autor: Equipo Soldados Caídos
  */
 public class Equipamiento {
-    private int idEquipamiento; // Para lectura y edición
+    private int idEquipamiento; //Para lectura y edición
     private String nombreEquipamiento;
     private String marca;
     private String modelo;
     private String numeroSerie;
     private String estado;
-    private int idLaboratorio; // Referencia al laboratorio donde se encuentra
+    private Integer idLaboratorio; // Puede ser null
+    private String disponibilidad;
 
     // Constructor sin ID (para inserción de datos)
     public Equipamiento(String nombreEquipamiento, String marca, String modelo, String numeroSerie, 
-                       String estado, int idLaboratorio) {
+                        String estado, Integer idLaboratorio, String disponibilidad) {
         this.nombreEquipamiento = nombreEquipamiento;
         this.marca = marca;
         this.modelo = modelo;
         this.numeroSerie = numeroSerie;
         this.estado = estado;
         this.idLaboratorio = idLaboratorio;
+        this.disponibilidad = disponibilidad;
     }
 
-    // Constructor con ID (para la lectura y actualización de datos)
-    public Equipamiento(int idEquipamiento, String nombreEquipamiento, String marca, String modelo, 
-                       String numeroSerie, String estado, int idLaboratorio) {
+    // Constructor con ID (para lectura y actualización)
+    public Equipamiento(int idEquipamiento, String nombreEquipamiento, String marca, String modelo,
+                        String numeroSerie, String estado, Integer idLaboratorio, String disponibilidad) {
         this.idEquipamiento = idEquipamiento;
         this.nombreEquipamiento = nombreEquipamiento;
         this.marca = marca;
@@ -38,6 +39,7 @@ public class Equipamiento {
         this.numeroSerie = numeroSerie;
         this.estado = estado;
         this.idLaboratorio = idLaboratorio;
+        this.disponibilidad = disponibilidad;
     }
 
     // Getters y setters
@@ -85,11 +87,19 @@ public class Equipamiento {
         this.estado = estado;
     }
 
-    public int getIdLaboratorio() {
+    public Integer getIdLaboratorio() {
         return idLaboratorio;
     }
 
-    public void setIdLaboratorio(int idLaboratorio) {
+    public void setIdLaboratorio(Integer idLaboratorio) {
         this.idLaboratorio = idLaboratorio;
+    }
+
+    public String getDisponibilidad() {
+        return disponibilidad;
+    }
+
+    public void setDisponibilidad(String disponibilidad) {
+        this.disponibilidad = disponibilidad;
     }
 }

@@ -123,7 +123,7 @@ public class PanelHistorialEquipo extends JPanel {
 
         JLabel lblCategoria = new JLabel("Categoría:");
         lblCategoria.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        cbCategoria = new JComboBox<>(new String[]{"Mantenimiento", "Reparación", "Actualización", "Reemplazo", "Inspección", "Restaurada"});
+        cbCategoria = new JComboBox<>(new String[]{"Mantenimiento", "Reparación", "Actualización", "Reemplazo", "Inspección"});
         cbCategoria.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         gbc.gridx = 0; gbc.gridy = 4;
         formPanel.add(lblCategoria, gbc);
