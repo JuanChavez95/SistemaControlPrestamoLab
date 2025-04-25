@@ -33,6 +33,8 @@ import PanelesMateriales.PanelHerramientas;
 import PanelesMateriales.PanelInsumos;
 import PanelSanciones.PanelListaSanciones;
 import PanelSanciones.PanelSancionar;
+import Reportes.PanelReporteEquipos;
+import Reportes.PanelReportePrestamo;
 
 /**
  * Ventana principal del Sistema de Control y Préstamo de Laboratorios para administradores.
@@ -175,8 +177,8 @@ public class Principal extends JFrame {
         // Añadir botones de menú con las mismas categorías y submenús que en el código original
         buttonPanel.add(createMenuButton("Laboratorios", new String[]{"Horarios", "Editar Horario", "Editar Laboratorio"}));
         buttonPanel.add(createMenuButton("Usuarios", new String[]{"Docentes", "Estudiantes", "Administradores", "Editar Usuarios"}));
-        buttonPanel.add(createMenuButton("Equipos", new String[]{"Máquinas", "Editar Equipos", "Detalle Equipos"}));
-        buttonPanel.add(createMenuButton("Préstamos", new String[]{"Visualizar Préstamos"}));
+        buttonPanel.add(createMenuButton("Equipos", new String[]{"Máquinas", "Editar Equipos", "Detalle Equipos", "Generar Reportes Equipos"}));
+        buttonPanel.add(createMenuButton("Préstamos", new String[]{"Visualizar Préstamos", "Generar Reportes"}));
         
         // Nuevos botones para las categorías solicitadas
         buttonPanel.add(createMenuButton("Materiales", new String[]{"Herramientas", "Insumos", "Editar Herramientas", "Editar Insumos", "Detalle Herramientas"}));
@@ -321,19 +323,23 @@ public class Principal extends JFrame {
                 }
                 break;
             case "Equipos":
-                if (subOpcion.equals("Máquinas")) {
-                    contenidoEspecifico = crearPanelMaquinas();
-                } else if (subOpcion.equals("Editar Equipos")) {
-                    contenidoEspecifico = crearPanelEditarEquipos();
-                } else if (subOpcion.equals("Detalle Equipos")) {
-                    contenidoEspecifico = crearPanelDetalleEquipos();
-                }
+            if (subOpcion.equals("Máquinas")) {
+                contenidoEspecifico = crearPanelMaquinas();
+            } else if (subOpcion.equals("Editar Equipos")) {
+                contenidoEspecifico = crearPanelEditarEquipos();
+            } else if (subOpcion.equals("Detalle Equipos")) {
+                contenidoEspecifico = crearPanelDetalleEquipos();
+            } else if (subOpcion.equals("Generar Reportes Equipos")) {
+                contenidoEspecifico = crearPanelReportesEquipos();
+            }
                 break;
             case "Préstamos":
-                if (subOpcion.equals("Visualizar Préstamos")) {
-                    contenidoEspecifico = crearPanelVisualizarPrestamos();
-                }
-                break;
+            if (subOpcion.equals("Visualizar Préstamos")) {
+                contenidoEspecifico = crearPanelVisualizarPrestamos();
+            } else if (subOpcion.equals("Generar Reportes")) {
+                contenidoEspecifico = crearPanelGenerarReportePrestamos();
+            }
+            break;
             // Nuevos casos para Materiales y Sanciones
             case "Materiales":
                 if (subOpcion.equals("Herramientas")) {
@@ -442,6 +448,10 @@ public class Principal extends JFrame {
     private JPanel crearPanelDetalleEquipos() {
         return new PanelHistorialEquipo();
     }
+    
+    private JPanel crearPanelReportesEquipos() {
+        return new PanelReporteEquipos();
+    }
 
     /**
      * Crea el panel para visualizar préstamos.
@@ -449,6 +459,11 @@ public class Principal extends JFrame {
      */
     private JPanel crearPanelVisualizarPrestamos() {
         return new PanelVisualizarPrestamos();
+    }
+    
+    //Panel para los reportes:
+    private JPanel crearPanelGenerarReportePrestamos() {
+        return new PanelReportePrestamo(); 
     }
 
     // Nuevos métodos para los paneles de Materiales
