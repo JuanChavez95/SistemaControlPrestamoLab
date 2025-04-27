@@ -32,6 +32,7 @@ PanelesMateriales\PanelDetalleHerramientas$2.class
 PanelesMateriales\PanelEditarHerramientas.class
 PanelesMateriales\PanelHerramientas.class
 Prestamos\PanelVisualizarPrestamos.class
+Reportes\PanelReportePrestamo$ReporteInsumo.class
 Clases\Sancion.class
 Clases\Equipamiento.class
 Ventanas\login$8.class
@@ -48,6 +49,7 @@ Servicios\EquipoService.class
 Ventanas\Principal$4.class
 Ventanas\Principal3$2.class
 Controles\ControladorSancionInsumo.class
+Reportes\PanelReportePrestamo$DetalleInsumo.class
 Ventanas\Principal2$4.class
 Reportes\PanelReportePrestamo.class
 Servicios\LaboratorioService.class
@@ -83,6 +85,7 @@ Clases\DetallePrestamoInsumo.class
 Controles\ControladorEquipamiento.class
 Clases\Administrador.class
 Controles\ControladorInsumo.class
+Reportes\PanelReportePrestamo$PrestamoCompleto.class
 Ventanas\Principal2$5.class
 Controles\ControladorDetallePrestamoInsumo.class
 Clases\SancionInsumo.class
@@ -103,6 +106,7 @@ Ventanas\NuevoUsuario$5.class
 Ventanas\NuevoUsuario$8.class
 Ventanas\login$7.class
 Clases\EquipoPrestamo.class
+Reportes\PanelReportePrestamo$DetalleEquipamiento.class
 Servicios\HorarioService.class
 Reportes\PanelReportePrestamo$ReporteEquipamiento.class
 Servicios\PrestamoService.class
