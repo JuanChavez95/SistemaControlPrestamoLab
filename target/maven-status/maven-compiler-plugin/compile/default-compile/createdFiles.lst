@@ -44,6 +44,7 @@ Clases\Equipamiento.class
 Ventanas\login$8.class
 Paneles\PanelVisualizarHorario.class
 PanelesMateriales\PanelEditarInsumos$1.class
+PanelSanciones\PanelListaSanciones$3.class
 Paneles\PanelEditar$2.class
 DataBase\ConexionBD.class
 Prestamos\PanelSolicitarPrestamo$2.class
@@ -56,6 +57,7 @@ Servicios\EquipoService.class
 Ventanas\Principal$4.class
 Ventanas\Principal3$2.class
 Controles\ControladorSancionInsumo.class
+PanelSanciones\PanelListaSanciones$2.class
 Reportes\PanelReportePrestamo$DetalleInsumo.class
 Ventanas\Principal2$4.class
 Reportes\PanelReportePrestamo.class
@@ -89,6 +91,7 @@ Clases\Insumo.class
 Paneles\PanelDocentes.class
 Ventanas\Principal3$RoundedBorder.class
 Paneles\PanelEditar$4.class
+PanelSanciones\PanelListaSanciones$1.class
 Ventanas\NuevoAdministrador.class
 Clases\DetallePrestamoInsumo.class
 Controles\ControladorEquipamiento.class
@@ -119,7 +122,9 @@ Ventanas\login$7.class
 Clases\EquipoPrestamo.class
 Reportes\PanelReportePrestamo$DetalleEquipamiento.class
 Servicios\HorarioService.class
+PanelSanciones\PanelListaSanciones$4.class
 Reportes\PanelReportePrestamo$ReporteEquipamiento.class
+PanelSanciones\PanelSancionesVigentes$2.class
 Servicios\PrestamoService.class
 Controles\ControladorHorario.class
 Ventanas\Principal3$3.class
@@ -146,6 +151,7 @@ PanelSanciones\PanelSancionar.class
 PanelSanciones\PanelListaSanciones.class
 Ventanas\NuevoUsuario$2.class
 Ventanas\NuevoAdministrador$5.class
+PanelSanciones\PanelSancionesVigentes$1.class
 Clases\Horario.class
 Paneles\PanelAdministradores$1.class
 Dao\UsuarioDAOImpl.class
