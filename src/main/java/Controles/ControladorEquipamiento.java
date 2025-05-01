@@ -163,4 +163,5 @@ public class ControladorEquipamiento {
             stmt.executeUpdate();
         }
     }
+    
 }

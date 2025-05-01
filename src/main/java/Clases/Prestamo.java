@@ -35,17 +35,16 @@ public class Prestamo {
 
     // Constructor con ID (para la lectura y actualización de datos)
     public Prestamo(int idPrestamo, int ruUsuario, Integer ruAdministrador, Integer idHorario, 
-                   Date fechaPrestamo, String horaPrestamo, String estadoPrestamo, 
-                   String observaciones) {
-        this.idPrestamo = idPrestamo;
-        this.ruUsuario = ruUsuario;
-        this.ruAdministrador = ruAdministrador;
-        this.idHorario = idHorario;
-        this.fechaPrestamo = fechaPrestamo;
-        this.horaPrestamo = horaPrestamo;
-        this.estadoPrestamo = estadoPrestamo;
-        this.observaciones = observaciones;
-    }
+                java.sql.Date fechaPrestamo, String horaPrestamo, String estadoPrestamo, String observaciones) {
+    this.idPrestamo = idPrestamo;
+    this.ruUsuario = ruUsuario;
+    this.ruAdministrador = ruAdministrador;
+    this.idHorario = idHorario;
+    this.fechaPrestamo = fechaPrestamo;
+    this.horaPrestamo = horaPrestamo;
+    this.estadoPrestamo = estadoPrestamo;
+    this.observaciones = observaciones;
+}
 
     // Getters y setters
     public int getIdPrestamo() {

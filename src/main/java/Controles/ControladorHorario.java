@@ -53,6 +53,32 @@ public class ControladorHorario {
         return lista;
     }
 
+    // Listar horarios por laboratorio
+    public List<Horario> listarPorLaboratorio(int idLaboratorio) throws SQLException {
+        List<Horario> lista = new ArrayList<>();
+        String sql = "SELECT * FROM horario WHERE id_laboratorio = ?";
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idLaboratorio);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(new Horario(
+                        rs.getInt("id_horario"),
+                        rs.getString("materia"),
+                        rs.getInt("paralelo"),
+                        rs.getString("semestre"),
+                        rs.getString("carrera"),
+                        rs.getString("hora"),
+                        rs.getString("dia"),
+                        rs.getInt("id_laboratorio"),
+                        rs.getString("estado")
+                    ));
+                }
+            }
+        }
+        return lista;
+    }
+
     // Actualizar un horario
     public void actualizar(Horario h) throws SQLException {
         String sql = "UPDATE horario SET materia = ?, paralelo = ?, semestre = ?, carrera = ?, hora = ?, dia = ?, id_laboratorio = ?, estado = ? WHERE id_horario = ?";
@@ -79,5 +105,29 @@ public class ControladorHorario {
             stmt.setInt(1, idHorario);
             stmt.executeUpdate();
         }
+    }
+    
+    public Horario buscarPorId(int idHorario) throws SQLException {
+    String sql = "SELECT * FROM horario WHERE id_horario = ?";
+    try (Connection conn = ConexionBD.conectar();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, idHorario);
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return new Horario(
+                    rs.getInt("id_horario"),
+                    rs.getString("materia"),
+                    rs.getInt("paralelo"),
+                    rs.getString("semestre"),
+                    rs.getString("carrera"),
+                    rs.getString("hora"),
+                    rs.getString("dia"),
+                    rs.getInt("id_laboratorio"),
+                    rs.getString("estado")
+                );
+            }
+        }
+    }
+    return null;
     }
 }

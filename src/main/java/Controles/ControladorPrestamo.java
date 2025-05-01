@@ -12,13 +12,40 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Controlador para operaciones CRUD sobre la tabla prestamo.
  * Autor: Equipo Soldados Caídos
  */
 public class ControladorPrestamo {
+    private static final Logger LOGGER = Logger.getLogger(ControladorPrestamo.class.getName());
+    private final ControladorInsumo controladorInsumo = new ControladorInsumo();
+    private final ControladorEquipamiento controladorEquipamiento = new ControladorEquipamiento();
+
+    // Verificar si un usuario existe
+    public boolean existeUsuario(int ru) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM usuario WHERE ru = ?";
+        System.out.println("Verificando existencia de usuario con RU: " + ru);
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, ru);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                int count = rs.getInt(1);
+                System.out.println("Resultado de existeUsuario para RU " + ru + ": " + (count > 0));
+                return count > 0;
+            }
+            System.out.println("No se encontraron resultados para RU: " + ru);
+            return false;
+        } catch (SQLException ex) {
+            System.err.println("Error en existeUsuario para RU " + ru + ": " + ex.getMessage());
+            throw ex;
+        }
+    }
 
     // Insertar un préstamo (sin ID)
     public int insertar(Prestamo prestamo) throws SQLException {
@@ -192,5 +219,220 @@ public class ControladorPrestamo {
             }
         }
         return lista;
+    }
+
+    // Obtener equipamientos de un préstamo
+    public List<Integer> obtenerEquipamientosPrestamo(int idPrestamo) throws SQLException {
+        List<Integer> equipamientoIds = new ArrayList<>();
+        String sql = "SELECT id_equipamiento FROM detalle_prestamo_equipamiento WHERE id_prestamo = ?";
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idPrestamo);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    equipamientoIds.add(rs.getInt("id_equipamiento"));
+                }
+            }
+        }
+        return equipamientoIds;
+    }
+
+    // Obtener insumos y cantidades de un préstamo
+    public Map<Integer, Integer> obtenerInsumosPrestamoConCantidades(int idPrestamo) throws SQLException {
+        Map<Integer, Integer> insumoCantidades = new HashMap<>();
+        String sql = "SELECT id_insumo, cantidad_inicial FROM detalle_prestamo_insumo WHERE id_prestamo = ?";
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idPrestamo);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    insumoCantidades.put(rs.getInt("id_insumo"), rs.getInt("cantidad_inicial"));
+                }
+            }
+        }
+        return insumoCantidades;
+    }
+
+    // Insertar detalle de equipamiento en un préstamo
+    public void insertarDetalleEquipamiento(int idPrestamo, int idEquipamiento) throws SQLException {
+        String sql = "INSERT INTO detalle_prestamo_equipamiento (id_prestamo, id_equipamiento) VALUES (?, ?)";
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idPrestamo);
+            stmt.setInt(2, idEquipamiento);
+            stmt.executeUpdate();
+        }
+    }
+
+    // Insertar detalle de insumo en un préstamo  
+    public void insertarDetalleInsumo(int idPrestamo, int idInsumo, int cantidad) throws SQLException {
+        String sql = "INSERT INTO detalle_prestamo_insumo (id_prestamo, id_insumo, cantidad_inicial) VALUES (?, ?, ?)";
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idPrestamo);
+            stmt.setInt(2, idInsumo);
+            stmt.setInt(3, cantidad);
+            stmt.executeUpdate();
+        }
+    }
+
+    // Obtener el nombre de un usuario por RU
+    public String obtenerNombreUsuario(int ruUsuario) throws SQLException {
+        String sql = "SELECT nombre FROM usuario WHERE ru = ?";
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, ruUsuario);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("nombre");
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.severe("Error al obtener nombre de usuario con RU " + ruUsuario + ": " + e.getMessage());
+            throw e;
+        }
+        return null;
+    }
+
+    // Aceptar un préstamo
+    public void aceptarPrestamo(int idPrestamo, Integer idHorario, int ruAdministrador, String observaciones) throws SQLException {
+        // Actualizar el estado del préstamo
+        String sql = "UPDATE prestamo SET estado_prestamo = ?, ru_administrador = ?, observaciones = ? WHERE id_prestamo = ?";
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, "Aceptado");
+            stmt.setInt(2, ruAdministrador);
+            stmt.setString(3, observaciones);
+            stmt.setInt(4, idPrestamo);
+            int filas = stmt.executeUpdate();
+            if (filas == 0) {
+                throw new SQLException("No se encontró el préstamo con ID " + idPrestamo);
+            }
+        } catch (SQLException e) {
+            LOGGER.severe("Error al aceptar préstamo ID " + idPrestamo + ": " + e.getMessage());
+            throw e;
+        }
+
+        // Actualizar disponibilidad de equipamientos
+        List<Integer> equipamientoIds = obtenerEquipamientosPrestamo(idPrestamo);
+        for (Integer idEquipamiento : equipamientoIds) {
+            controladorEquipamiento.actualizarDisponibilidad(idEquipamiento, "Prestado");
+        }
+
+        // Reducir la cantidad de insumos
+        Map<Integer, Integer> insumoCantidades = obtenerInsumosPrestamoConCantidades(idPrestamo);
+        for (Map.Entry<Integer, Integer> entry : insumoCantidades.entrySet()) {
+            int idInsumo = entry.getKey();
+            int cantidadPrestada = entry.getValue();
+            Clases.Insumo insumo = controladorInsumo.buscarPorId(idInsumo);
+            if (insumo != null) {
+                int nuevaCantidad = insumo.getCantidad() - cantidadPrestada;
+                controladorInsumo.actualizarCantidad(idInsumo, nuevaCantidad);
+                controladorInsumo.actualizarDisponibilidad(idInsumo, nuevaCantidad > 0 ? "Disponible" : "No Disponible");
+            }
+        }
+    }
+
+    // Rechazar un préstamo
+    public void rechazarPrestamo(int idPrestamo) throws SQLException {
+        String sql = "UPDATE prestamo SET estado_prestamo = ? WHERE id_prestamo = ?";
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, "Rechazado");
+            stmt.setInt(2, idPrestamo);
+            int filas = stmt.executeUpdate();
+            if (filas == 0) {
+                throw new SQLException("No se encontró el préstamo con ID " + idPrestamo);
+            }
+        } catch (SQLException e) {
+            LOGGER.severe("Error al rechazar préstamo ID " + idPrestamo + ": " + e.getMessage());
+            throw e;
+        }
+
+        // Restaurar disponibilidad de equipamientos
+        List<Integer> equipamientoIds = obtenerEquipamientosPrestamo(idPrestamo);
+        for (Integer idEquipamiento : equipamientoIds) {
+            controladorEquipamiento.actualizarDisponibilidad(idEquipamiento, "Disponible");
+        }
+    }
+
+    // Terminar un préstamo
+   public void terminarPrestamo(int idPrestamo, List<Integer> insumoIds, List<Integer> cantidadesDevueltas) throws SQLException {
+    String sql = "UPDATE prestamo SET estado_prestamo = ? WHERE id_prestamo = ?";
+    try (Connection conn = ConexionBD.conectar();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setString(1, "Terminado");
+        stmt.setInt(2, idPrestamo);
+        int filas = stmt.executeUpdate();
+        if (filas == 0) {
+            throw new SQLException("No se encontró el préstamo con ID " + idPrestamo);
+        }
+    } catch (SQLException e) {
+        LOGGER.severe("Error al terminar préstamo ID " + idPrestamo + ": " + e.getMessage());
+        throw e;
+    }
+
+    // Registrar cantidades devueltas y actualizar cantidades de insumos
+    for (int i = 0; i < insumoIds.size(); i++) {
+        int idInsumo = insumoIds.get(i);
+        int cantidadDevuelta = cantidadesDevueltas.get(i);
+
+        // Actualizar la cantidad devuelta en detalle_prestamo_insumo
+        String sqlDetalle = "UPDATE detalle_prestamo_insumo SET cantidad_final = ? WHERE id_prestamo = ? AND id_insumo = ?";
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sqlDetalle)) {
+            stmt.setInt(1, cantidadDevuelta);
+            stmt.setInt(2, idPrestamo);
+            stmt.setInt(3, idInsumo);
+            stmt.executeUpdate();
+        }
+
+        // Obtener la cantidad inicial prestada para este insumo
+        String sqlCantidadInicial = "SELECT cantidad_inicial FROM detalle_prestamo_insumo WHERE id_prestamo = ? AND id_insumo = ?";
+        int cantidadInicial = 0;
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sqlCantidadInicial)) {
+            stmt.setInt(1, idPrestamo);
+            stmt.setInt(2, idInsumo);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    cantidadInicial = rs.getInt("cantidad_inicial");
+                }
+            }
+        }
+
+        // Actualizar la cantidad en la tabla insumos
+        Clases.Insumo insumo = controladorInsumo.buscarPorId(idInsumo);
+        if (insumo != null) {
+            // La nueva cantidad debe ser la actual más lo que se devuelve
+            int nuevaCantidad = insumo.getCantidad() + cantidadDevuelta;
+            controladorInsumo.actualizarCantidad(idInsumo, nuevaCantidad);
+            controladorInsumo.actualizarDisponibilidad(idInsumo, nuevaCantidad > 0 ? "Disponible" : "No Disponible");
+            System.out.println("Insumo ID " + idInsumo + ": Cantidad actual " + insumo.getCantidad() + 
+                              " + Devuelto " + cantidadDevuelta + " = Nueva cantidad " + nuevaCantidad);
+        }
+    }
+
+    // Restaurar disponibilidad de equipamientos
+    List<Integer> equipamientoIds = obtenerEquipamientosPrestamo(idPrestamo);
+    for (Integer idEquipamiento : equipamientoIds) {
+        controladorEquipamiento.actualizarDisponibilidad(idEquipamiento, "Disponible");
+    }
+}
+
+    
+    // Método faltante en ControladorPrestamo
+    public Integer obtenerHorarioPrestamo(int idPrestamo) throws SQLException {
+        String sql = "SELECT id_horario FROM prestamo WHERE id_prestamo = ?";
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idPrestamo);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getObject("id_horario") != null ? rs.getInt("id_horario") : null;
+                }
+            }
+        }
+        return null;
     }
 }

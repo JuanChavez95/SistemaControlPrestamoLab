@@ -45,7 +45,7 @@ public class login extends JFrame {
                 Graphics2D g2d = (Graphics2D) g;
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-                // Cargar la imagen de fondo - Usar la ruta del MODELO 2 si está disponible
+                // Cargar la imagen de fondo
                 ImageIcon backgroundImage = new ImageIcon("C:\\Users\\DOC\\Desktop\\PROYECTO V\\fondo.jpg");
                 if (backgroundImage.getIconWidth() == -1) {
                     System.err.println("No se pudo cargar la imagen de fondo.");
@@ -280,7 +280,7 @@ public class login extends JFrame {
         int buttonWidth = fieldWidth;
         int toggleButtonWidth = 30;
 
-        // Título - Ahora solo hay un componente de título
+        // Título
         panel.getComponent(0).setBounds(0, 20, panelSize.width, 40); // sistemaLabel
 
         // RU
@@ -292,7 +292,7 @@ public class login extends JFrame {
         panel.getComponent(4).setBounds(padding, 220, fieldWidth - toggleButtonWidth - 10, fieldHeight); // cajaPassword
         panel.getComponent(5).setBounds(padding + fieldWidth - toggleButtonWidth, 220, toggleButtonWidth, fieldHeight); // togglePasswordButton
 
-        // Botones - Uso exactamente las posiciones del CÓDIGO 1
+        // Botones
         panel.getComponent(6).setBounds(padding, 290, buttonWidth, fieldHeight); // botonIngresar
         panel.getComponent(7).setBounds(padding, 350, buttonWidth, 30); // botonNuevo
     }
@@ -327,16 +327,17 @@ public class login extends JFrame {
                     throw new CredencialesInvalidas("Usuario o contraseña incorrectos");
                 }
 
-                // Si pasa la validación, redireccionar según el rol
+                // Redireccionar según el rol, pasando ruUsuario
                 if (rol.equals("Administrador")) {
-                    new Principal().setVisible(true);
+                    new Principal(ru).setVisible(true);
                 } else if (rol.equals("Estudiante")) {
-                    new Principal3().setVisible(true);
+                    new Principal3(ru).setVisible(true);
                 } else {
-                    new Principal2().setVisible(true);
+                    new Principal2(ru).setVisible(true);
                 }
-                
-                // Mantenemos la lógica del MODELO 2 de no cerrar la ventana de login
+
+                // Cerrar la ventana de login
+                dispose();
                 
             } catch (NumberFormatException ex) {
                 throw new CredencialesInvalidas("El RU debe ser un número válido");
@@ -374,26 +375,27 @@ public class login extends JFrame {
             mostrarMensajeError("Error al abrir el formulario: " + ex.getMessage());
         }
     }
-
     private boolean validarEnBD(int ru, String password) throws SQLException {
-        String sql = "SELECT * FROM usuario WHERE ru = ? AND contra = ?";
+    String sql = "SELECT * FROM usuario WHERE ru = ? AND contra = ?";
+    System.out.println("Validando en BD: RU = " + ru + ", Contraseña = [oculta]");
+    
+    try (Connection conn = ConexionBD.conectar();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
         
-        try (Connection conn = ConexionBD.conectar();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setInt(1, ru);
-            stmt.setString(2, password);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    rol = rs.getString("rol");
-                    System.out.println("Rol identificado: " + rol);
-                    return true;
-                }
-                return false;
+        stmt.setInt(1, ru);
+        stmt.setString(2, password);
+        
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                rol = rs.getString("rol");
+                System.out.println("Usuario encontrado: RU = " + ru + ", Rol = " + rol);
+                return true;
             }
+            System.out.println("No se encontró usuario con RU = " + ru);
+            return false;
         }
     }
+}
 
     private void mostrarMensajeError(String mensaje) {
         JOptionPane optionPane = new JOptionPane(
@@ -408,3 +410,4 @@ public class login extends JFrame {
         dialog.setVisible(true);
     }
 }
+

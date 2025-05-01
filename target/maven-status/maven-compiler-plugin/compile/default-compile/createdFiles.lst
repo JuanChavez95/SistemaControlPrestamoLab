@@ -8,6 +8,7 @@ Ventanas\login$6.class
 Clases\HistorialGeneral.class
 Reportes\PanelReportePrestamo$ReportePrestamo.class
 Ventanas\Principal3$4.class
+Prestamos\PanelNotificacion$2.class
 PanelesMateriales\PanelHerramientas$RoundedButton.class
 Controles\ControladorHistorialEquipamiento.class
 Paneles\PanelLaboratorio.class
@@ -19,6 +20,7 @@ Clases\HistorialEquipamiento.class
 Paneles\PanelEstudiantes.class
 Clases\SancionEquipo.class
 Prestamos\PanelNotificacion.class
+Prestamos\PanelSolicitarPrestamo$6.class
 Paneles\PanelHorario.class
 Clases\Laboratorio.class
 Ventanas\NuevoUsuario.class
@@ -26,6 +28,8 @@ Ventanas\NuevoUsuario$1.class
 Paneles\PanelHistorialEquipo.class
 Controles\ControladorEquipo.class
 Paneles\PanelEquipo.class
+Prestamos\PanelSolicitarPrestamo$3.class
+Prestamos\PanelVisualizarPrestamos$1.class
 Reportes\PanelReporteEquipos.class
 PanelesMateriales\PanelEditarHerramientas$1.class
 PanelesMateriales\PanelDetalleHerramientas$2.class
@@ -33,13 +37,16 @@ PanelesMateriales\PanelEditarHerramientas.class
 PanelesMateriales\PanelHerramientas.class
 Prestamos\PanelVisualizarPrestamos.class
 Reportes\PanelReportePrestamo$ReporteInsumo.class
+Prestamos\PanelNotificacion$CustomTableCellRenderer.class
 Clases\Sancion.class
+Prestamos\PanelNotificacion$4.class
 Clases\Equipamiento.class
 Ventanas\login$8.class
 Paneles\PanelVisualizarHorario.class
 PanelesMateriales\PanelEditarInsumos$1.class
 Paneles\PanelEditar$2.class
 DataBase\ConexionBD.class
+Prestamos\PanelSolicitarPrestamo$2.class
 PanelesMateriales\PanelEditarInsumos.class
 exceptions\CredencialesInvalidas.class
 Ventanas\login$1.class
@@ -58,9 +65,11 @@ Paneles\PanelEditar.class
 Clases\Rol.class
 Ventanas\login$2.class
 Clases\CategoriaEquipo.class
+Prestamos\PanelSolicitarPrestamo$1.class
 Reportes\PanelReportePrestamo$1.class
 Controles\ControlUsuario.class
 PanelesMateriales\PanelHerramientas$RoundedBorder.class
+Prestamos\PanelNotificacion$5.class
 Ventanas\Principal3$1.class
 Paneles\PanelAdministradores.class
 Controles\ControladorPrestamo.class
@@ -100,6 +109,8 @@ Clases\HistorialEquipos.class
 Ventanas\login.class
 Controles\ControladorSancionEquipamiento.class
 PanelesMateriales\PanelDetalleHerramientas$1.class
+Prestamos\PanelSolicitarPrestamo$4.class
+Prestamos\PanelNotificacion$3.class
 com\mycompany\sistemacontrolprestamolab\SistemaControlPrestamoLab.class
 Ventanas\login$4.class
 Ventanas\NuevoUsuario$5.class
@@ -112,6 +123,7 @@ Reportes\PanelReportePrestamo$ReporteEquipamiento.class
 Servicios\PrestamoService.class
 Controles\ControladorHorario.class
 Ventanas\Principal3$3.class
+Prestamos\PanelSolicitarPrestamo$5.class
 Prestamos\PanelSolicitarPrestamo.class
 Ventanas\NuevoUsuario$9.class
 Controles\ControladorHistorialEquipos.class
@@ -138,6 +150,7 @@ Clases\Horario.class
 Paneles\PanelAdministradores$1.class
 Dao\UsuarioDAOImpl.class
 Ventanas\NuevoUsuario$3.class
+Prestamos\PanelNotificacion$1.class
 Clases\Equipos.class
 Clases\Prestamo.class
 Paneles\PanelVisualizarEquipo.class

@@ -164,4 +164,21 @@ public class ControladorInsumo {
             stmt.executeUpdate();
         }
     }
+    
+    public String obtenerNombreInsumo(int idInsumo) throws SQLException {
+    String sql = "SELECT nombre_insumo FROM insumos WHERE id_insumo = ?";
+    try (Connection conn = ConexionBD.conectar();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, idInsumo);
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getString("nombre_insumo");
+            }
+        }
+    }
+    return "Desconocido";   
+    }
+    
+    
+
 }
