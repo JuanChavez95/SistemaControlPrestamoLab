@@ -1,6 +1,6 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Click nfs://.netbeans/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nfs://.netbeans/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package Ventanas;
 
@@ -12,6 +12,7 @@ import java.sql.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import org.mindrot.jbcrypt.BCrypt;
 
 /**
  * Ventana de inicio de sesión para el Sistema de Control de Préstamos de Laboratorio
@@ -46,7 +47,7 @@ public class login extends JFrame {
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
                 // Cargar la imagen de fondo
-                ImageIcon backgroundImage = new ImageIcon("C:\\Users\\DOC\\Desktop\\PROYECTO V\\fondo.jpg");
+                ImageIcon backgroundImage = new ImageIcon("C:\\Users\\Windows\\Documents\\NetBeansProjects\\SistemaControlPrestamoLab\\fondo.jpg");
                 if (backgroundImage.getIconWidth() == -1) {
                     System.err.println("No se pudo cargar la imagen de fondo.");
                     // Fondo de respaldo (degradado) si la imagen no se carga
@@ -347,6 +348,9 @@ public class login extends JFrame {
         } catch (SQLException ex) {
             mostrarMensajeError("Error al conectar con la base de datos: " + ex.getMessage());
             ex.printStackTrace();
+        } catch (Exception ex) {
+            mostrarMensajeError("Error inesperado: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
@@ -360,7 +364,8 @@ public class login extends JFrame {
                 !password.isEmpty() && !password.equals("••••••••")) {
                 try {
                     int ru = Integer.parseInt(ruText);
-                    if (ru == 100 && password.equals("alfha phils")) {
+                    // Usar BCrypt para verificar la contraseña de administrador
+                    if (ru == 100 && BCrypt.checkpw(password, "$2a$10$YOUR_HASH_HERE")) { // Reemplazar con el hash real de "alfha phils"
                         new NuevoAdministrador().setVisible(true);
                         return;
                     }
@@ -375,27 +380,62 @@ public class login extends JFrame {
             mostrarMensajeError("Error al abrir el formulario: " + ex.getMessage());
         }
     }
+
     private boolean validarEnBD(int ru, String password) throws SQLException {
-    String sql = "SELECT * FROM usuario WHERE ru = ? AND contra = ?";
-    System.out.println("Validando en BD: RU = " + ru + ", Contraseña = [oculta]");
-    
-    try (Connection conn = ConexionBD.conectar();
-         PreparedStatement stmt = conn.prepareStatement(sql)) {
-        
-        stmt.setInt(1, ru);
-        stmt.setString(2, password);
-        
-        try (ResultSet rs = stmt.executeQuery()) {
-            if (rs.next()) {
-                rol = rs.getString("rol");
-                System.out.println("Usuario encontrado: RU = " + ru + ", Rol = " + rol);
-                return true;
+        String sql = "SELECT ru, contra, rol FROM usuario WHERE ru = ? AND BINARY contra = ?";
+        System.out.println("Validando en BD: RU = " + ru + ", Contraseña = [oculta]");
+
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, ru);
+            stmt.setString(2, password);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String storedHash = rs.getString("contra");
+                    try {
+                        // Intentar validar con BCrypt
+                        if (BCrypt.checkpw(password, storedHash)) {
+                            rol = rs.getString("rol");
+                            System.out.println("Usuario encontrado: RU = " + ru + ", Rol = " + rol);
+                            return true;
+                        }
+                    } catch (IllegalArgumentException e) {
+                        System.err.println("Invalid BCrypt hash for RU = " + ru + ". Falling back to legacy check.");
+                        // Fallback para contraseñas legacy (plain text)
+                        if (password.equals(storedHash)) {
+                            rol = rs.getString("rol");
+                            System.out.println("Usuario legacy encontrado: RU = " + ru + ", Rol = " + rol);
+                            // Opcional: Actualizar a hash para próxima vez
+                            // String newHash = BCrypt.hashpw(password, BCrypt.gensalt());
+                            // updatePasswordInDB(ru, newHash);
+                            return true;
+                        }
+                    }
+                }
+                System.out.println("No se encontró usuario con RU = " + ru + " o la contraseña no coincide.");
+                return false;
             }
-            System.out.println("No se encontró usuario con RU = " + ru);
-            return false;
         }
     }
-}
+
+    private boolean isPasswordStrong(String password) {
+        // Requisitos: al menos 8 caracteres, 1 mayúscula, 1 minúscula, 1 número, 1 carácter especial
+        String regex = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
+        return password.matches(regex);
+    }
+
+    // Método auxiliar para actualizar contraseña a hash (opcional)
+    private void updatePasswordInDB(int ru, String newHash) throws SQLException {
+        String sql = "UPDATE usuario SET contra = ? WHERE ru = ?";
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, newHash);
+            stmt.setInt(2, ru);
+            stmt.executeUpdate();
+        }
+    }
 
     private void mostrarMensajeError(String mensaje) {
         JOptionPane optionPane = new JOptionPane(
@@ -410,4 +450,3 @@ public class login extends JFrame {
         dialog.setVisible(true);
     }
 }
-
