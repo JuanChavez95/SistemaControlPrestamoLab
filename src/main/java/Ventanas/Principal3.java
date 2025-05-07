@@ -9,7 +9,12 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.SQLException;
+import java.util.Date;
+import java.util.List;
 
+import Clases.Sancion;
+import Controles.ControladorSancion;
 import Paneles.PanelDocentes;
 import Paneles.PanelAdministradores;
 import Paneles.PanelEditar;
@@ -40,9 +45,12 @@ public class Principal3 extends JFrame {
     private static final Font HEADER_FONT = new Font("Segoe UI", Font.BOLD, 20);
     private static final Font BUTTON_FONT = new Font("Segoe UI", Font.BOLD, 14);
     private static final Font LABEL_FONT = new Font("Segoe UI", Font.PLAIN, 14);
+    private boolean tieneSancionActiva = false;
 
     public Principal3(int ruUsuario) {
         this.ruUsuario = ruUsuario;
+        verificarSancionesActivas();
+        
         setTitle("Sistema de Control y Préstamo de Laboratorios - Estudiantes");
         setSize(1200, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -60,6 +68,33 @@ public class Principal3 extends JFrame {
 
         setLocationRelativeTo(null);
         setVisible(true);
+    }
+    
+    /**
+     * Verifica si el usuario tiene sanciones activas que impidan el uso del sistema de préstamos
+     */
+    private void verificarSancionesActivas() {
+        try {
+            ControladorSancion controlSancion = new ControladorSancion();
+            List<Sancion> sanciones = controlSancion.buscarPorUsuario(ruUsuario);
+            
+            Date fechaActual = new Date();
+            
+            for (Sancion sancion : sanciones) {
+                // Verificar si la sanción está activa y la fecha actual está dentro del período de la sanción
+                if ("ACTIVA".equals(sancion.getEstadoSancion()) && 
+                    fechaActual.after(sancion.getFechaInicio()) && 
+                    (sancion.getFechaFin() == null || fechaActual.before(sancion.getFechaFin()))) {
+                    tieneSancionActiva = true;
+                    break;
+                }
+            }
+        } catch (SQLException ex) {
+            System.err.println("Error al verificar sanciones: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, 
+                "Error al verificar estado de sanciones: " + ex.getMessage(), 
+                "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private JPanel createBackgroundPanel() {
@@ -93,7 +128,9 @@ public class Principal3 extends JFrame {
         JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
         userPanel.setOpaque(false);
 
-        usuarioLabel = new JLabel("Estudiante ▼");
+        // Mostrar indicador si el usuario tiene sanciones activas
+        String estadoUsuario = tieneSancionActiva ? "Estudiante [SANCIONADO] ▼" : "Estudiante ▼";
+        usuarioLabel = new JLabel(estadoUsuario);
         usuarioLabel.setForeground(Color.WHITE);
         usuarioLabel.setFont(BUTTON_FONT);
         usuarioLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -136,10 +173,25 @@ public class Principal3 extends JFrame {
         contentPanel.setBackground(Color.WHITE);
         contentPanel.setBorder(new RoundedBorder(10));
 
+        // Mostrar mensaje de bienvenida o notificación si está sancionado
+        JPanel welcomePanel = new JPanel(new BorderLayout());
+        welcomePanel.setOpaque(false);
+        
         JLabel welcomeLabel = new JLabel("Bienvenido al Sistema de Control y Préstamo de Laboratorios", SwingConstants.CENTER);
         welcomeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
         welcomeLabel.setForeground(new Color(44, 62, 80));
-        contentPanel.add(welcomeLabel, BorderLayout.CENTER);
+        welcomePanel.add(welcomeLabel, BorderLayout.CENTER);
+        
+        if (tieneSancionActiva) {
+            JLabel warningLabel = new JLabel(
+                "ATENCIÓN: Tiene una sanción ACTIVA. No podrá realizar préstamos hasta que finalice la sanción.", 
+                SwingConstants.CENTER);
+            warningLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            warningLabel.setForeground(new Color(231, 76, 60));
+            welcomePanel.add(warningLabel, BorderLayout.SOUTH);
+        }
+        
+        contentPanel.add(welcomePanel, BorderLayout.CENTER);
 
         buttonPanel.add(createMenuButton("Laboratorios", new String[]{"Horarios"}));
         buttonPanel.add(createMenuButton("Usuarios", new String[]{"Docentes", "Estudiantes"}));
@@ -162,7 +214,14 @@ public class Principal3 extends JFrame {
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2d.setColor(SHADOW_COLOR);
                 g2d.fillRoundRect(3, 3, getWidth() - 4, getHeight() - 4, 20, 20);
-                GradientPaint gradient = new GradientPaint(0, 0, ACCENT_COLOR, 0, getHeight(), new Color(41, 128, 185));
+                
+                // Si el botón es "Préstamos" y hay sanción activa, mostrar en color gris
+                Color buttonColor = (title.equals("Préstamos") && tieneSancionActiva) ? 
+                    new Color(150, 150, 150) : ACCENT_COLOR;
+                Color gradientColor = (title.equals("Préstamos") && tieneSancionActiva) ? 
+                    new Color(120, 120, 120) : new Color(41, 128, 185);
+                
+                GradientPaint gradient = new GradientPaint(0, 0, buttonColor, 0, getHeight(), gradientColor);
                 g2d.setPaint(gradient);
                 g2d.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 20, 20);
                 g2d.dispose();
@@ -193,14 +252,20 @@ public class Principal3 extends JFrame {
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                button.setBackground(new Color(52, 170, 220));
-                button.repaint();
+                // Solo cambiar el color si no es el botón de préstamos con sanción activa
+                if (!(title.equals("Préstamos") && tieneSancionActiva)) {
+                    button.setBackground(new Color(52, 170, 220));
+                    button.repaint();
+                }
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                button.setBackground(ACCENT_COLOR);
-                button.repaint();
+                // Solo cambiar el color si no es el botón de préstamos con sanción activa
+                if (!(title.equals("Préstamos") && tieneSancionActiva)) {
+                    button.setBackground(ACCENT_COLOR);
+                    button.repaint();
+                }
             }
         });
 
@@ -229,12 +294,33 @@ public class Principal3 extends JFrame {
             popupMenu.add(menuItem);
         }
 
-        button.addActionListener(e -> popupMenu.show(button, 0, button.getHeight()));
+        button.addActionListener(e -> {
+            // Si es el botón de préstamos y hay sanción activa, mostrar advertencia
+            if (title.equals("Préstamos") && tieneSancionActiva) {
+                JOptionPane.showMessageDialog(this,
+                    "No puede acceder al módulo de préstamos porque tiene una sanción ACTIVA.\n" +
+                    "Por favor revise sus sanciones vigentes para más información.",
+                    "Acceso Restringido",
+                    JOptionPane.WARNING_MESSAGE);
+            } else {
+                popupMenu.show(button, 0, button.getHeight());
+            }
+        });
         return button;
     }
 
     private void mostrarContenido(String categoria, String subOpcion) {
         try {
+            // Si intenta acceder a Préstamos con sanción activa, bloquear acceso
+            if (categoria.equals("Préstamos") && tieneSancionActiva) {
+                JOptionPane.showMessageDialog(this,
+                    "No puede acceder al módulo de préstamos porque tiene una sanción ACTIVA.\n" +
+                    "Por favor revise sus sanciones vigentes para más información.",
+                    "Acceso Restringido",
+                    JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            
             contentPanel.removeAll();
 
             JPanel contentWrapper = new JPanel(new BorderLayout());
@@ -317,6 +403,10 @@ public class Principal3 extends JFrame {
 
     private JPanel crearPanelSolicitarPrestamo() {
         try {
+            // Verificación adicional de seguridad en caso de que se intente acceder directamente
+            if (tieneSancionActiva) {
+                throw new Exception("Usuario actualmente sancionado. No puede realizar préstamos.");
+            }
             return new PanelSolicitarPrestamo(ruUsuario);
         } catch (Exception ex) {
             System.err.println("Error al crear PanelSolicitarPrestamo: " + ex.getMessage());
@@ -368,4 +458,3 @@ public class Principal3 extends JFrame {
         }
     }
 }
-//autenticar//

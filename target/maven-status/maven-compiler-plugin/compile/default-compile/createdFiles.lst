@@ -33,10 +33,10 @@ Prestamos\PanelVisualizarPrestamos$1.class
 Reportes\PanelReporteEquipos.class
 PanelesMateriales\PanelEditarHerramientas$1.class
 PanelesMateriales\PanelDetalleHerramientas$2.class
+Prestamos\PanelVisualizarPrestamos$4.class
 PanelesMateriales\PanelEditarHerramientas.class
 PanelesMateriales\PanelHerramientas.class
 Prestamos\PanelVisualizarPrestamos.class
-Reportes\PanelReportePrestamo$ReporteInsumo.class
 Prestamos\PanelNotificacion$CustomTableCellRenderer.class
 Clases\Sancion.class
 Prestamos\PanelNotificacion$4.class
@@ -72,6 +72,7 @@ Reportes\PanelReportePrestamo$1.class
 Controles\ControlUsuario.class
 PanelesMateriales\PanelHerramientas$RoundedBorder.class
 Prestamos\PanelNotificacion$5.class
+Prestamos\PanelVisualizarPrestamos$2.class
 Ventanas\Principal3$1.class
 Paneles\PanelAdministradores.class
 Controles\ControladorPrestamo.class
@@ -100,6 +101,7 @@ Controles\ControladorInsumo.class
 Reportes\PanelReportePrestamo$PrestamoCompleto.class
 Ventanas\Principal2$5.class
 Controles\ControladorDetallePrestamoInsumo.class
+Prestamos\PanelVisualizarPrestamos$3.class
 Clases\SancionInsumo.class
 Ventanas\Principal2$2.class
 PanelesMateriales\PanelDetalleHerramientas.class
@@ -123,13 +125,13 @@ Clases\EquipoPrestamo.class
 Reportes\PanelReportePrestamo$DetalleEquipamiento.class
 Servicios\HorarioService.class
 PanelSanciones\PanelListaSanciones$4.class
-Reportes\PanelReportePrestamo$ReporteEquipamiento.class
 PanelSanciones\PanelSancionesVigentes$2.class
 Servicios\PrestamoService.class
 Controles\ControladorHorario.class
 Ventanas\Principal3$3.class
 Prestamos\PanelSolicitarPrestamo$5.class
 Prestamos\PanelSolicitarPrestamo.class
+Prestamos\PanelVisualizarPrestamos$5.class
 Ventanas\NuevoUsuario$9.class
 Controles\ControladorHistorialEquipos.class
 Controles\ControlAdministrador.class

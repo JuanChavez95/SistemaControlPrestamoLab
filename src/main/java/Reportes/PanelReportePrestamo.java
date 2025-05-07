@@ -34,6 +34,20 @@ import Controles.ControladorDetallePrestamoEquipamiento;
 import java.util.HashMap;
 import java.util.Map;
 
+//Librerías para los pdf
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+import java.awt.Desktop;
+
 public class PanelReportePrestamo extends JPanel {
     private JComboBox<String> comboLaboratorio;
     private JComboBox<String> comboTipoReporte;
@@ -82,8 +96,6 @@ public class PanelReportePrestamo extends JPanel {
         JLabel lblTipoReporte = crearEtiqueta("Tipo de Reporte:");
         comboTipoReporte = crearComboBox();
         comboTipoReporte.addItem("Reporte de préstamos por laboratorio");
-        comboTipoReporte.addItem("Reporte de insumos");
-        comboTipoReporte.addItem("Reporte de equipamiento");
         comboTipoReporte.addItem("Reporte general de préstamos");
 
         JLabel lblFechaInicio = crearEtiqueta("Fecha Inicial (dd/mm/yyyy):");
@@ -258,39 +270,9 @@ public class PanelReportePrestamo extends JPanel {
             }
 
             // Generar el documento Word para préstamos por laboratorio
-            generarDocumentoWord(prestamos, idLaboratorio);
+            generarDocumentoPDF(prestamos, idLaboratorio);
 
-        } else if ("Reporte de equipamiento".equals(tipoReporte)) {
-            // Generar reporte de equipamiento
-            List<ReporteEquipamiento> equipamientos = obtenerEquipamientosPrestados(fechaInicial, fechaFinal);
-
-            if (equipamientos.isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                    "No se encontraron préstamos de equipamiento en el rango de fechas indicado",
-                    "Información",
-                    JOptionPane.INFORMATION_MESSAGE);
-                return;
-            }
-
-            // Generar el documento Word para reporte de equipamiento
-            generarDocumentoWordEquipamiento(equipamientos, fechaInicial, fechaFinal);
-            
-        } else if ("Reporte de insumos".equals(tipoReporte)) {
-            // Generar reporte de insumos
-            List<ReporteInsumo> insumos = obtenerInsumosPrestados(fechaInicial, fechaFinal);
-
-            if (insumos.isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                    "No se encontraron préstamos de insumos en el rango de fechas indicado",
-                    "Información",
-                    JOptionPane.INFORMATION_MESSAGE);
-                return;
-            }
-
-            // Generar el documento Word para reporte de insumos
-            generarDocumentoWordInsumos(insumos, fechaInicial, fechaFinal);
-
-        } else if ("Reporte general de préstamos".equals(tipoReporte)) {
+        }else if ("Reporte general de préstamos".equals(tipoReporte)) {
             // Verificar que se haya seleccionado un laboratorio
             if (comboLaboratorio.getSelectedIndex() == -1) {
                 JOptionPane.showMessageDialog(this,
@@ -305,13 +287,10 @@ public class PanelReportePrestamo extends JPanel {
             int idLaboratorio = Integer.parseInt(selectedLab.split(" - ")[0]);
 
             // Generar reporte general de préstamos
-            generarReporteGeneralPrestamos(idLaboratorio, fechaInicial, fechaFinal);
+            generarReporteGeneralPrestamosPDF(idLaboratorio, fechaInicial, fechaFinal);
         }
 
-        JOptionPane.showMessageDialog(this,
-            "Reporte generado exitosamente",
-            "Éxito",
-            JOptionPane.INFORMATION_MESSAGE);
+        
 
     } catch (ParseException e) {
         JOptionPane.showMessageDialog(this,
@@ -558,7 +537,14 @@ private List<PrestamoCompleto> obtenerPrestamosCompletos(int idLaboratorio, java
 }
 
 // Método para generar el reporte general de préstamos
-private void generarReporteGeneralPrestamos(int idLaboratorio, java.sql.Date fechaInicial, java.sql.Date fechaFinal) {
+/**
+ * Genera un reporte general en formato PDF con los datos completos de préstamos del laboratorio
+ * Muestra dos reportes por página para optimizar el espacio
+ * @param idLaboratorio Identificador del laboratorio
+ * @param fechaInicial Fecha de inicio del período a reportar
+ * @param fechaFinal Fecha de fin del período a reportar
+ */
+private void generarReporteGeneralPrestamosPDF(int idLaboratorio, java.sql.Date fechaInicial, java.sql.Date fechaFinal) {
     try {
         // Obtener todos los préstamos completos
         List<PrestamoCompleto> prestamos = obtenerPrestamosCompletos(idLaboratorio, fechaInicial, fechaFinal);
@@ -571,188 +557,248 @@ private void generarReporteGeneralPrestamos(int idLaboratorio, java.sql.Date fec
             return;
         }
         
-        // Crear un nuevo documento
-        Document documento = new Document();
+        // Obtener la ruta del directorio actual
+        String directorioActual = System.getProperty("user.dir");
+        String fechaStr = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
+        String nombreArchivo = directorioActual + "/ReporteGeneralPrestamos_Lab" + idLaboratorio + "_" + fechaStr + ".pdf";
         
-        // Obtener la sección y el formato de la página
-        Section seccion = documento.addSection();
-        seccion.getPageSetup().setMargins(new MarginsF(72f, 72f, 72f, 72f)); // Márgenes de 1 pulgada
+        // Crear el documento PDF
+        Document documento = new Document(PageSize.A4);
+        PdfWriter writer = PdfWriter.getInstance(documento, new FileOutputStream(nombreArchivo));
         
-        // Crear el título principal con formato centrado
-        Paragraph titulo1 = seccion.addParagraph();
-        titulo1.getFormat().setHorizontalAlignment(HorizontalAlignment.Center);
-        TextRange textoTitulo1 = titulo1.appendText("Universidad Salesiana de Bolivia");
-        textoTitulo1.getCharacterFormat().setFontName("Arial");
-        textoTitulo1.getCharacterFormat().setFontSize(18);
-        textoTitulo1.getCharacterFormat().setBold(true);
+        // Abrir el documento para escribir
+        documento.open();
         
-        // Agregar el segundo título
-        Paragraph titulo2 = seccion.addParagraph();
-        titulo2.getFormat().setHorizontalAlignment(HorizontalAlignment.Center);
-        TextRange textoTitulo2 = titulo2.appendText("Reporte General de Préstamos del Laboratorio \"" + idLaboratorio + "\"");
-        textoTitulo2.getCharacterFormat().setFontName("Arial");
-        textoTitulo2.getCharacterFormat().setFontSize(16);
-        textoTitulo2.getCharacterFormat().setBold(true);
+        // Configurar fuentes (com.itextpdf.text.)
+        com.itextpdf.text.Font fontTituloPrincipal = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 16, com.itextpdf.text.Font.BOLD);
+        com.itextpdf.text.Font fontTituloSecundario = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 14, com.itextpdf.text.Font.BOLD);
+        com.itextpdf.text.Font fontSubtitulo = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.BOLD);
+        com.itextpdf.text.Font fontTablaEncabezado = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.BOLD, BaseColor.WHITE);
+        com.itextpdf.text.Font fontTablaEncabezadoEquip = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 9, com.itextpdf.text.Font.BOLD);
+        com.itextpdf.text.Font fontTablaEncabezadoInsumo = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 9, com.itextpdf.text.Font.BOLD);
+        com.itextpdf.text.Font fontTablaNormal = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 8);
         
-        // Agregar el rango de fechas
-        Paragraph titulo3 = seccion.addParagraph();
-        titulo3.getFormat().setHorizontalAlignment(HorizontalAlignment.Center);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        String rangoFechas = "Del " + dateFormat.format(fechaInicial) + " al " + dateFormat.format(fechaFinal);
-        TextRange textoTitulo3 = titulo3.appendText(rangoFechas);
-        textoTitulo3.getCharacterFormat().setFontName("Arial");
-        textoTitulo3.getCharacterFormat().setFontSize(14);
-        textoTitulo3.getCharacterFormat().setBold(true);
+        // Formatear fechas para el título
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        String periodoFecha = "Del " + sdf.format(fechaInicial) + " al " + sdf.format(fechaFinal);
         
-        // Agregar espacio
-        seccion.addParagraph();
+        int prestamosPerPage = 2; // Número de préstamos por página
+        int prestamosCount = 0;
         
-        // Procesar cada préstamo
-        int contador = 1;
-        for (PrestamoCompleto prestamo : prestamos) {
-            // Agregar título del préstamo
-            Paragraph tituloPrestamo = seccion.addParagraph();
-            tituloPrestamo.getFormat().setHorizontalAlignment(HorizontalAlignment.Left);
-            TextRange textoTituloPrestamo = tituloPrestamo.appendText("Préstamo " + contador + ":");
-            textoTituloPrestamo.getCharacterFormat().setFontName("Arial");
-            textoTituloPrestamo.getCharacterFormat().setFontSize(14);
-            textoTituloPrestamo.getCharacterFormat().setBold(true);
+        for (int i = 0; i < prestamos.size(); i++) {
+            PrestamoCompleto prestamo = prestamos.get(i);
+            prestamosCount++;
             
-            // Crear tabla de detalles del préstamo
-            Table tablaPrestamo = seccion.addTable(true);
-            tablaPrestamo.resetCells(2, 6); // 2 filas (encabezado y datos), 6 columnas
+            // Si es el primer préstamo de la página o el primer préstamo en general, agregar el encabezado
+            if (prestamosCount == 1 || (prestamosCount - 1) % prestamosPerPage == 0) {
+                // Título principal - Universidad
+                Paragraph tituloPrincipal = new Paragraph("Universidad Salesiana de Bolivia", fontTituloPrincipal);
+                tituloPrincipal.setAlignment(Element.ALIGN_CENTER);
+                documento.add(tituloPrincipal);
+                
+                // Título secundario - Reporte
+                Paragraph tituloSecundario = new Paragraph("Reporte General de Préstamos del Laboratorio \"" + idLaboratorio + "\"", fontTituloSecundario);
+                tituloSecundario.setAlignment(Element.ALIGN_CENTER);
+                documento.add(tituloSecundario);
+                
+                // Periodo de fechas
+                Paragraph periodoFechas = new Paragraph(periodoFecha, fontTituloSecundario);
+                periodoFechas.setAlignment(Element.ALIGN_CENTER);
+                documento.add(periodoFechas);
+                
+                documento.add(new Paragraph(" "));
+            }
             
-            // Encabezado de la tabla de préstamo
-            TableRow encabezadoPrestamo = tablaPrestamo.getRows().get(0);
+            // Título del préstamo
+            Paragraph tituloPrestamo = new Paragraph("Préstamo " + (i + 1) + ":", fontSubtitulo);
+            documento.add(tituloPrestamo);
+            
+            // Tabla de datos básicos del préstamo
+            PdfPTable tablaPrestamo = new PdfPTable(6);
+            tablaPrestamo.setWidthPercentage(100);
+            
+            // Establecer anchos relativos de columnas
+            float[] anchosPrestamo = {1.3f, 1f, 1.2f, 1.5f, 1.2f, 2f};
+            tablaPrestamo.setWidths(anchosPrestamo);
+            
+            // Encabezados de la tabla de préstamo
             String[] titulosPrestamo = {"Fecha", "Hora", "RU Usuario", "RU Administrador", "ID Horario", "Observaciones"};
+            BaseColor colorEncabezadoPrestamo = new BaseColor(0, 63, 135);
             
-            for (int i = 0; i < titulosPrestamo.length; i++) {
-                encabezadoPrestamo.getCells().get(i).getCellFormat().setBackColor(new Color(0, 63, 135));
-                TextRange textoEncabezado = encabezadoPrestamo.getCells().get(i).addParagraph().appendText(titulosPrestamo[i]);
-                textoEncabezado.getCharacterFormat().setFontName("Arial");
-                textoEncabezado.getCharacterFormat().setFontSize(12);
-                textoEncabezado.getCharacterFormat().setBold(true);
-                textoEncabezado.getCharacterFormat().setTextColor(Color.WHITE);
+            for (String titulo : titulosPrestamo) {
+                PdfPCell celda = new PdfPCell(new Phrase(titulo, fontTablaEncabezado));
+                celda.setBackgroundColor(colorEncabezadoPrestamo);
+                celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+                celda.setPadding(4);
+                tablaPrestamo.addCell(celda);
             }
             
             // Datos del préstamo
-            TableRow filaPrestamo = tablaPrestamo.getRows().get(1);
-            filaPrestamo.getCells().get(0).addParagraph().appendText(dateFormat.format(prestamo.getFecha()));
-            filaPrestamo.getCells().get(1).addParagraph().appendText(prestamo.getHora());
-            filaPrestamo.getCells().get(2).addParagraph().appendText(String.valueOf(prestamo.getRuUsuario()));
-            filaPrestamo.getCells().get(3).addParagraph().appendText(prestamo.getRuAdministrador() != null ? 
-                String.valueOf(prestamo.getRuAdministrador()) : "N/A");
-            filaPrestamo.getCells().get(4).addParagraph().appendText(prestamo.getIdHorario() != null ? 
-                String.valueOf(prestamo.getIdHorario()) : "N/A");
-            filaPrestamo.getCells().get(5).addParagraph().appendText(prestamo.getObservaciones() != null ? 
-                prestamo.getObservaciones() : "Sin observaciones");
+            PdfPCell celdaFecha = new PdfPCell(new Phrase(sdf.format(prestamo.getFecha()), fontTablaNormal));
+            celdaFecha.setHorizontalAlignment(Element.ALIGN_CENTER);
+            celdaFecha.setPadding(4);
+            tablaPrestamo.addCell(celdaFecha);
             
-            // Espacio después de la tabla de préstamo
-            seccion.addParagraph();
+            PdfPCell celdaHora = new PdfPCell(new Phrase(prestamo.getHora(), fontTablaNormal));
+            celdaHora.setHorizontalAlignment(Element.ALIGN_CENTER);
+            celdaHora.setPadding(4);
+            tablaPrestamo.addCell(celdaHora);
             
-            // Agregar sección de equipamiento si hay equipamiento en este préstamo
+            PdfPCell celdaUsuario = new PdfPCell(new Phrase(String.valueOf(prestamo.getRuUsuario()), fontTablaNormal));
+            celdaUsuario.setHorizontalAlignment(Element.ALIGN_CENTER);
+            celdaUsuario.setPadding(4);
+            tablaPrestamo.addCell(celdaUsuario);
+            
+            String valorAdmin = prestamo.getRuAdministrador() != null ? 
+                String.valueOf(prestamo.getRuAdministrador()) : "N/A";
+            PdfPCell celdaAdmin = new PdfPCell(new Phrase(valorAdmin, fontTablaNormal));
+            celdaAdmin.setHorizontalAlignment(Element.ALIGN_CENTER);
+            celdaAdmin.setPadding(4);
+            tablaPrestamo.addCell(celdaAdmin);
+            
+            String valorHorario = prestamo.getIdHorario() != null ? 
+                String.valueOf(prestamo.getIdHorario()) : "N/A";
+            PdfPCell celdaHorario = new PdfPCell(new Phrase(valorHorario, fontTablaNormal));
+            celdaHorario.setHorizontalAlignment(Element.ALIGN_CENTER);
+            celdaHorario.setPadding(4);
+            tablaPrestamo.addCell(celdaHorario);
+            
+            String valorObs = prestamo.getObservaciones() != null && !prestamo.getObservaciones().isEmpty() ? 
+                prestamo.getObservaciones() : "Ninguna observación";
+            PdfPCell celdaObs = new PdfPCell(new Phrase(valorObs, fontTablaNormal));
+            celdaObs.setPadding(4);
+            tablaPrestamo.addCell(celdaObs);
+            
+            documento.add(tablaPrestamo);
+            documento.add(new com.itextpdf.text.Paragraph(" ", new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 6)));
+
+            
+            // Equipamiento
             if (!prestamo.getEquipamientos().isEmpty()) {
-                Paragraph tituloEquipamiento = seccion.addParagraph();
-                tituloEquipamiento.getFormat().setHorizontalAlignment(HorizontalAlignment.Left);
-                TextRange textoTituloEquipamiento = tituloEquipamiento.appendText("Equipamiento:");
-                textoTituloEquipamiento.getCharacterFormat().setFontName("Arial");
-                textoTituloEquipamiento.getCharacterFormat().setFontSize(12);
-                textoTituloEquipamiento.getCharacterFormat().setBold(true);
+                Paragraph tituloEquipamiento = new Paragraph("Equipamiento:", fontSubtitulo);
+                documento.add(tituloEquipamiento);
                 
-                // Crear tabla de equipamiento
-                Table tablaEquipamiento = seccion.addTable(true);
-                tablaEquipamiento.resetCells(prestamo.getEquipamientos().size() + 1, 3); // filas + 1 para encabezado, 3 columnas
+                PdfPTable tablaEquipamiento = new PdfPTable(3);
+                tablaEquipamiento.setWidthPercentage(100);
                 
-                // Encabezado de la tabla de equipamiento
-                TableRow encabezadoEquipamiento = tablaEquipamiento.getRows().get(0);
+                // Establecer anchos relativos de columnas para equipamiento
+                float[] anchosEquipamiento = {1f, 2f, 1f};
+                tablaEquipamiento.setWidths(anchosEquipamiento);
+                
+                // Encabezados para tabla de equipamiento
                 String[] titulosEquipamiento = {"ID Equipamiento", "Nombre", "Estado"};
+                BaseColor colorEncabezadoEquip = new BaseColor(153, 204, 255);
                 
-                for (int i = 0; i < titulosEquipamiento.length; i++) {
-                    encabezadoEquipamiento.getCells().get(i).getCellFormat().setBackColor(new Color(153, 204, 255));
-                    TextRange textoEncabezado = encabezadoEquipamiento.getCells().get(i).addParagraph().appendText(titulosEquipamiento[i]);
-                    textoEncabezado.getCharacterFormat().setFontName("Arial");
-                    textoEncabezado.getCharacterFormat().setFontSize(11);
-                    textoEncabezado.getCharacterFormat().setBold(true);
+                for (String titulo : titulosEquipamiento) {
+                    PdfPCell celda = new PdfPCell(new Phrase(titulo, fontTablaEncabezadoEquip));
+                    celda.setBackgroundColor(colorEncabezadoEquip);
+                    celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    celda.setPadding(3);
+                    tablaEquipamiento.addCell(celda);
                 }
                 
                 // Datos de equipamiento
-                for (int i = 0; i < prestamo.getEquipamientos().size(); i++) {
-                    DetalleEquipamiento equipamiento = prestamo.getEquipamientos().get(i);
-                    TableRow filaEquipamiento = tablaEquipamiento.getRows().get(i + 1);
+                BaseColor colorFilaAlternaEquip = new BaseColor(240, 240, 255);
+                
+                for (int j = 0; j < prestamo.getEquipamientos().size(); j++) {
+                    DetalleEquipamiento equipamiento = prestamo.getEquipamientos().get(j);
+                    BaseColor colorFondo = (j % 2 == 1) ? colorFilaAlternaEquip : BaseColor.WHITE;
                     
-                    filaEquipamiento.getCells().get(0).addParagraph().appendText(String.valueOf(equipamiento.getIdEquipamiento()));
-                    filaEquipamiento.getCells().get(1).addParagraph().appendText(equipamiento.getNombreEquipamiento());
-                    filaEquipamiento.getCells().get(2).addParagraph().appendText(equipamiento.getEstado());
+                    PdfPCell celdaIdEquip = new PdfPCell(new Phrase(String.valueOf(equipamiento.getIdEquipamiento()), fontTablaNormal));
+                    celdaIdEquip.setBackgroundColor(colorFondo);
+                    celdaIdEquip.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    celdaIdEquip.setPadding(3);
+                    tablaEquipamiento.addCell(celdaIdEquip);
                     
-                    // Alternar colores de fondo para las filas
-                    if (i % 2 == 1) {
-                        for (int j = 0; j < 3; j++) {
-                            filaEquipamiento.getCells().get(j).getCellFormat().setBackColor(new Color(240, 240, 255));
-                        }
-                    }
+                    PdfPCell celdaNombreEquip = new PdfPCell(new Phrase(equipamiento.getNombreEquipamiento(), fontTablaNormal));
+                    celdaNombreEquip.setBackgroundColor(colorFondo);
+                    celdaNombreEquip.setPadding(3);
+                    tablaEquipamiento.addCell(celdaNombreEquip);
+                    
+                    PdfPCell celdaEstadoEquip = new PdfPCell(new Phrase(equipamiento.getEstado(), fontTablaNormal));
+                    celdaEstadoEquip.setBackgroundColor(colorFondo);
+                    celdaEstadoEquip.setPadding(3);
+                    tablaEquipamiento.addCell(celdaEstadoEquip);
                 }
                 
-                // Espacio después de la tabla de equipamiento
-                seccion.addParagraph();
+                documento.add(tablaEquipamiento);
+                documento.add(new com.itextpdf.text.Paragraph(" ", new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 6)));
+
             }
             
-            // Agregar sección de insumos si hay insumos en este préstamo
+            // Insumos
             if (!prestamo.getInsumos().isEmpty()) {
-                Paragraph tituloInsumo = seccion.addParagraph();
-                tituloInsumo.getFormat().setHorizontalAlignment(HorizontalAlignment.Left);
-                TextRange textoTituloInsumo = tituloInsumo.appendText("Insumo:");
-                textoTituloInsumo.getCharacterFormat().setFontName("Arial");
-                textoTituloInsumo.getCharacterFormat().setFontSize(12);
-                textoTituloInsumo.getCharacterFormat().setBold(true);
+                Paragraph tituloInsumo = new Paragraph("Insumo:", fontSubtitulo);
+                documento.add(tituloInsumo);
                 
-                // Crear tabla de insumos
-                Table tablaInsumo = seccion.addTable(true);
-                tablaInsumo.resetCells(prestamo.getInsumos().size() + 1, 4); // filas + 1 para encabezado, 4 columnas
+                PdfPTable tablaInsumo = new PdfPTable(4);
+                tablaInsumo.setWidthPercentage(100);
                 
-                // Encabezado de la tabla de insumos
-                TableRow encabezadoInsumo = tablaInsumo.getRows().get(0);
+                // Establecer anchos relativos de columnas para insumos
+                float[] anchosInsumo = {1f, 2f, 1f, 1f};
+                tablaInsumo.setWidths(anchosInsumo);
+                
+                // Encabezados para tabla de insumos
                 String[] titulosInsumo = {"ID Insumo", "Nombre", "Cantidad Inicial", "Cantidad Final"};
+                BaseColor colorEncabezadoInsumo = new BaseColor(204, 255, 204);
                 
-                for (int i = 0; i < titulosInsumo.length; i++) {
-                    encabezadoInsumo.getCells().get(i).getCellFormat().setBackColor(new Color(204, 255, 204));
-                    TextRange textoEncabezado = encabezadoInsumo.getCells().get(i).addParagraph().appendText(titulosInsumo[i]);
-                    textoEncabezado.getCharacterFormat().setFontName("Arial");
-                    textoEncabezado.getCharacterFormat().setFontSize(11);
-                    textoEncabezado.getCharacterFormat().setBold(true);
+                for (String titulo : titulosInsumo) {
+                    PdfPCell celda = new PdfPCell(new Phrase(titulo, fontTablaEncabezadoInsumo));
+                    celda.setBackgroundColor(colorEncabezadoInsumo);
+                    celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    celda.setPadding(3);
+                    tablaInsumo.addCell(celda);
                 }
                 
                 // Datos de insumos
-                for (int i = 0; i < prestamo.getInsumos().size(); i++) {
-                    DetalleInsumo insumo = prestamo.getInsumos().get(i);
-                    TableRow filaInsumo = tablaInsumo.getRows().get(i + 1);
+                BaseColor colorFilaAlternaInsumo = new BaseColor(240, 255, 240);
+                
+                for (int j = 0; j < prestamo.getInsumos().size(); j++) {
+                    DetalleInsumo insumo = prestamo.getInsumos().get(j);
+                    BaseColor colorFondo = (j % 2 == 1) ? colorFilaAlternaInsumo : BaseColor.WHITE;
                     
-                    filaInsumo.getCells().get(0).addParagraph().appendText(String.valueOf(insumo.getIdInsumo()));
-                    filaInsumo.getCells().get(1).addParagraph().appendText(insumo.getNombreInsumo());
-                    filaInsumo.getCells().get(2).addParagraph().appendText(String.valueOf(insumo.getCantidadInicial()));
-                    filaInsumo.getCells().get(3).addParagraph().appendText(insumo.getCantidadFinal() != null ? 
-                        String.valueOf(insumo.getCantidadFinal()) : "No devuelto");
+                    PdfPCell celdaIdInsumo = new PdfPCell(new Phrase(String.valueOf(insumo.getIdInsumo()), fontTablaNormal));
+                    celdaIdInsumo.setBackgroundColor(colorFondo);
+                    celdaIdInsumo.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    celdaIdInsumo.setPadding(3);
+                    tablaInsumo.addCell(celdaIdInsumo);
                     
-                    // Alternar colores de fondo para las filas
-                    if (i % 2 == 1) {
-                        for (int j = 0; j < 4; j++) {
-                            filaInsumo.getCells().get(j).getCellFormat().setBackColor(new Color(240, 255, 240));
-                        }
-                    }
+                    PdfPCell celdaNombreInsumo = new PdfPCell(new Phrase(insumo.getNombreInsumo(), fontTablaNormal));
+                    celdaNombreInsumo.setBackgroundColor(colorFondo);
+                    celdaNombreInsumo.setPadding(3);
+                    tablaInsumo.addCell(celdaNombreInsumo);
+                    
+                    PdfPCell celdaCantInicial = new PdfPCell(new Phrase(String.valueOf(insumo.getCantidadInicial()), fontTablaNormal));
+                    celdaCantInicial.setBackgroundColor(colorFondo);
+                    celdaCantInicial.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    celdaCantInicial.setPadding(3);
+                    tablaInsumo.addCell(celdaCantInicial);
+                    
+                    String valorCantFinal = insumo.getCantidadFinal() != null ? 
+                        String.valueOf(insumo.getCantidadFinal()) : "No devuelto";
+                    PdfPCell celdaCantFinal = new PdfPCell(new Phrase(valorCantFinal, fontTablaNormal));
+                    celdaCantFinal.setBackgroundColor(colorFondo);
+                    celdaCantFinal.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    celdaCantFinal.setPadding(3);
+                    tablaInsumo.addCell(celdaCantFinal);
                 }
+                
+                documento.add(tablaInsumo);
             }
             
-            // Espacio entre préstamos
-            seccion.addParagraph();
-            seccion.addParagraph();
+            // Espacio entre préstamos en la misma página
+            documento.add(new Paragraph(" "));
+            documento.add(new Paragraph(" "));
             
-            contador++;
+            // Si hemos alcanzado el límite de préstamos por página y no es el último préstamo, añadir una nueva página
+            if (prestamosCount % prestamosPerPage == 0 && i < prestamos.size() - 1) {
+                documento.newPage();
+                prestamosCount = 0;
+            }
         }
         
-        // Guardar el documento
-        String directorioActual = System.getProperty("user.dir");
-        String fechaStr = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
-        String nombreArchivo = directorioActual + "/ReporteGeneralPrestamos_Lab" + idLaboratorio + "_" + fechaStr + ".docx";
-        documento.saveToFile(nombreArchivo, FileFormat.Docx);
+        // Cerrar el documento
+        documento.close();
         
         // Abrir el documento con la aplicación predeterminada
         try {
@@ -765,6 +811,11 @@ private void generarReporteGeneralPrestamos(int idLaboratorio, java.sql.Date fec
                 "Información",
                 JOptionPane.INFORMATION_MESSAGE);
         }
+        
+        JOptionPane.showMessageDialog(this,
+            "Reporte general PDF generado correctamente.",
+            "Éxito",
+            JOptionPane.INFORMATION_MESSAGE);
         
     } catch (Exception e) {
         JOptionPane.showMessageDialog(this,
@@ -776,481 +827,6 @@ private void generarReporteGeneralPrestamos(int idLaboratorio, java.sql.Date fec
 }
 
     //SECCIÓN REFERENTE A REPORTE GENERAL DE PRÉSTAMOS (FINAL)
-    
-    //SECCIÓN REFERENTE A LOS INSUMOS INICIO
-    // Clase interna para manejar los datos del reporte de insumos
-private class ReporteInsumo {
-    private int idInsumo;
-    private String nombreInsumo;
-    private int idPrestamo;
-    private java.sql.Date fechaPrestamo;
-    private int cantidadInicial;
-    private Integer cantidadFinal;
-    private Integer idLaboratorio;
-
-    public ReporteInsumo(int idInsumo, String nombreInsumo, int idPrestamo, 
-                         java.sql.Date fechaPrestamo, int cantidadInicial, 
-                         Integer cantidadFinal, Integer idLaboratorio) {
-        this.idInsumo = idInsumo;
-        this.nombreInsumo = nombreInsumo;
-        this.idPrestamo = idPrestamo;
-        this.fechaPrestamo = fechaPrestamo;
-        this.cantidadInicial = cantidadInicial;
-        this.cantidadFinal = cantidadFinal;
-        this.idLaboratorio = idLaboratorio;
-    }
-
-    public int getIdInsumo() {
-        return idInsumo;
-    }
-
-    public String getNombreInsumo() {
-        return nombreInsumo;
-    }
-
-    public int getIdPrestamo() {
-        return idPrestamo;
-    }
-
-    public java.sql.Date getFechaPrestamo() {
-        return fechaPrestamo;
-    }
-
-    public int getCantidadInicial() {
-        return cantidadInicial;
-    }
-
-    public Integer getCantidadFinal() {
-        return cantidadFinal;
-    }
-
-    public Integer getIdLaboratorio() {
-        return idLaboratorio;
-    }
-}
-
-// Método para obtener los insumos prestados en un rango de fechas
-private List<ReporteInsumo> obtenerInsumosPrestados(java.sql.Date fechaInicial, java.sql.Date fechaFinal) {
-    List<ReporteInsumo> reporteInsumos = new ArrayList<>();
-    
-    try {
-        // Consulta SQL para obtener los detalles de préstamos de insumos en el rango de fechas
-        String sql = "SELECT dpi.id_detalle_insumo, dpi.id_prestamo, dpi.id_insumo, " +
-                     "i.nombre_insumo, p.fecha_prestamo, dpi.cantidad_inicial, dpi.cantidad_final, " +
-                     "h.id_laboratorio " +
-                     "FROM detalle_prestamo_insumo dpi " +
-                     "JOIN prestamo p ON dpi.id_prestamo = p.id_prestamo " +
-                     "JOIN insumos i ON dpi.id_insumo = i.id_insumo " +
-                     "LEFT JOIN horario h ON p.id_horario = h.id_horario " +
-                     "WHERE p.fecha_prestamo BETWEEN ? AND ? " +
-                     "ORDER BY i.id_insumo, p.fecha_prestamo";
-
-        try (Connection conn = ConexionBD.conectar();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setDate(1, fechaInicial);
-            stmt.setDate(2, fechaFinal);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    int idInsumo = rs.getInt("id_insumo");
-                    String nombreInsumo = rs.getString("nombre_insumo");
-                    int idPrestamo = rs.getInt("id_prestamo");
-                    java.sql.Date fechaPrestamo = rs.getDate("fecha_prestamo");
-                    int cantidadInicial = rs.getInt("cantidad_inicial");
-                    Integer cantidadFinal = rs.getObject("cantidad_final") != null ? 
-                                          rs.getInt("cantidad_final") : null;
-                    Integer idLaboratorio = rs.getObject("id_laboratorio") != null ? 
-                                          rs.getInt("id_laboratorio") : null;
-                    
-                    reporteInsumos.add(new ReporteInsumo(
-                        idInsumo,
-                        nombreInsumo,
-                        idPrestamo,
-                        fechaPrestamo,
-                        cantidadInicial,
-                        cantidadFinal,
-                        idLaboratorio
-                    ));
-                }
-            }
-        }
-    } catch (SQLException e) {
-        JOptionPane.showMessageDialog(this,
-            "Error al obtener los datos de insumos: " + e.getMessage(),
-            "Error",
-            JOptionPane.ERROR_MESSAGE);
-        e.printStackTrace();
-    }
-    
-    return reporteInsumos;
-}
-
-// Método para generar el documento Word con el reporte de insumos
-private void generarDocumentoWordInsumos(List<ReporteInsumo> insumos, 
-                                         java.sql.Date fechaInicial, 
-                                         java.sql.Date fechaFinal) {
-    try {
-        // Crear un nuevo documento
-        Document documento = new Document();
-        
-        // Obtener la sección y el formato de la página
-        Section seccion = documento.addSection();
-        seccion.getPageSetup().setMargins(new MarginsF(72f, 72f, 72f, 72f)); // Márgenes de 1 pulgada
-        
-        // Crear el título principal con formato centrado
-        Paragraph titulo1 = seccion.addParagraph();
-        titulo1.getFormat().setHorizontalAlignment(HorizontalAlignment.Center);
-        TextRange textoTitulo1 = titulo1.appendText("Universidad Salesiana de Bolivia");
-        textoTitulo1.getCharacterFormat().setFontName("Arial");
-        textoTitulo1.getCharacterFormat().setFontSize(18);
-        textoTitulo1.getCharacterFormat().setBold(true);
-        
-        // Agregar el segundo título
-        Paragraph titulo2 = seccion.addParagraph();
-        titulo2.getFormat().setHorizontalAlignment(HorizontalAlignment.Center);
-        TextRange textoTitulo2 = titulo2.appendText("Reporte de Préstamos de Insumos");
-        textoTitulo2.getCharacterFormat().setFontName("Arial");
-        textoTitulo2.getCharacterFormat().setFontSize(16);
-        textoTitulo2.getCharacterFormat().setBold(true);
-        
-        // Agregar el rango de fechas
-        Paragraph titulo3 = seccion.addParagraph();
-        titulo3.getFormat().setHorizontalAlignment(HorizontalAlignment.Center);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        String rangoFechas = "Del " + dateFormat.format(fechaInicial) + " al " + dateFormat.format(fechaFinal);
-        TextRange textoTitulo3 = titulo3.appendText(rangoFechas);
-        textoTitulo3.getCharacterFormat().setFontName("Arial");
-        textoTitulo3.getCharacterFormat().setFontSize(14);
-        textoTitulo3.getCharacterFormat().setBold(true);
-        
-        // Agregar espacio
-        seccion.addParagraph();
-        
-        // Agregar subtítulo
-        Paragraph subtitulo = seccion.addParagraph();
-        subtitulo.getFormat().setHorizontalAlignment(HorizontalAlignment.Left);
-        TextRange textoSubtitulo = subtitulo.appendText("PRÉSTAMOS DE INSUMOS:");
-        textoSubtitulo.getCharacterFormat().setFontName("Arial");
-        textoSubtitulo.getCharacterFormat().setFontSize(14);
-        textoSubtitulo.getCharacterFormat().setBold(true);
-        
-        // Crear la tabla de insumos
-        Table tabla = seccion.addTable(true);
-        tabla.resetCells(insumos.size() + 1, 7); // Filas + 1 para el encabezado, 7 columnas
-        
-        // Establecer el ancho de las columnas
-        tabla.autoFit(AutoFitBehaviorType.Auto_Fit_To_Contents);
-        
-        // Estilos para la tabla
-        TableRow encabezado = tabla.getRows().get(0);
-        String[] titulos = {"ID Insumo", "Nombre", "ID Préstamo", "Fecha", "Cantidad Inicial", "Cantidad Final", "ID Laboratorio"};
-        
-        for (int i = 0; i < titulos.length; i++) {
-            encabezado.getCells().get(i).getCellFormat().setBackColor(new Color(0, 63, 135));
-            TextRange textoEncabezado = encabezado.getCells().get(i).addParagraph().appendText(titulos[i]);
-            textoEncabezado.getCharacterFormat().setFontName("Arial");
-            textoEncabezado.getCharacterFormat().setFontSize(12);
-            textoEncabezado.getCharacterFormat().setBold(true);
-            textoEncabezado.getCharacterFormat().setTextColor(Color.WHITE);
-        }
-        
-        // Llenar la tabla con los datos
-        for (int i = 0; i < insumos.size(); i++) {
-            ReporteInsumo insumo = insumos.get(i);
-            TableRow fila = tabla.getRows().get(i + 1);
-            
-            // Agregar datos a cada celda
-            fila.getCells().get(0).addParagraph().appendText(String.valueOf(insumo.getIdInsumo()));
-            fila.getCells().get(1).addParagraph().appendText(insumo.getNombreInsumo());
-            fila.getCells().get(2).addParagraph().appendText(String.valueOf(insumo.getIdPrestamo()));
-            fila.getCells().get(3).addParagraph().appendText(dateFormat.format(insumo.getFechaPrestamo()));
-            fila.getCells().get(4).addParagraph().appendText(String.valueOf(insumo.getCantidadInicial()));
-            fila.getCells().get(5).addParagraph().appendText(insumo.getCantidadFinal() != null ? 
-                String.valueOf(insumo.getCantidadFinal()) : "No devuelto");
-            fila.getCells().get(6).addParagraph().appendText(insumo.getIdLaboratorio() != null ? 
-                String.valueOf(insumo.getIdLaboratorio()) : "N/A");
-            
-            // Alternar colores de fondo para las filas (para mejor legibilidad)
-            if (i % 2 == 1) {
-                for (int j = 0; j < 7; j++) {
-                    fila.getCells().get(j).getCellFormat().setBackColor(new Color(240, 240, 255));
-                }
-            }
-        }
-        
-        // Guardar el documento
-        // Obtener la ruta del directorio actual
-        String directorioActual = System.getProperty("user.dir");
-        String fechaStr = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
-        String nombreArchivo = directorioActual + "/ReporteInsumos_" + fechaStr + ".docx";
-        documento.saveToFile(nombreArchivo, FileFormat.Docx);
-        
-        // Abrir el documento con la aplicación predeterminada
-        try {
-            if (Desktop.isDesktopSupported()) {
-                Desktop.getDesktop().open(new java.io.File(nombreArchivo));
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                "El reporte se guardó correctamente pero no se pudo abrir automáticamente. Ubicación: " + nombreArchivo,
-                "Información",
-                JOptionPane.INFORMATION_MESSAGE);
-        }
-        
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this,
-            "Error al generar el documento Word: " + e.getMessage(),
-            "Error",
-            JOptionPane.ERROR_MESSAGE);
-        e.printStackTrace();
-    }
-}
-
-
-    //SECCIÓN REFERENTE A LOS INSUMOS FINAL
-    //TODO LO REFERENTE A EQUIPAMIENTO INICIO
-    // Clase interna para manejar los datos del reporte de equipamiento
-private class ReporteEquipamiento {
-    private int idEquipamiento;
-    private String nombreEquipamiento;
-    private int idPrestamo;
-    private int idDetalle;
-    private String estado;
-    private Integer idLaboratorio;
-
-    public ReporteEquipamiento(int idEquipamiento, String nombreEquipamiento, int idPrestamo, 
-                              int idDetalle, String estado, Integer idLaboratorio) {
-        this.idEquipamiento = idEquipamiento;
-        this.nombreEquipamiento = nombreEquipamiento;
-        this.idPrestamo = idPrestamo;
-        this.idDetalle = idDetalle;
-        this.estado = estado;
-        this.idLaboratorio = idLaboratorio;
-    }
-
-    public int getIdEquipamiento() {
-        return idEquipamiento;
-    }
-
-    public String getNombreEquipamiento() {
-        return nombreEquipamiento;
-    }
-
-    public int getIdPrestamo() {
-        return idPrestamo;
-    }
-
-    public int getIdDetalle() {
-        return idDetalle;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public Integer getIdLaboratorio() {
-        return idLaboratorio;
-    }
-}
-
-// Método para obtener los equipamientos prestados en un rango de fechas
-private List<ReporteEquipamiento> obtenerEquipamientosPrestados(java.sql.Date fechaInicial, java.sql.Date fechaFinal) {
-    List<ReporteEquipamiento> reporteEquipamientos = new ArrayList<>();
-    
-    try {
-        // Consulta SQL para obtener los detalles de préstamos de equipamiento en el rango de fechas
-        String sql = "SELECT dpe.id_detalle, dpe.id_prestamo, dpe.id_equipamiento, " +
-                     "e.nombre_equipamiento, e.estado, p.id_horario " +
-                     "FROM detalle_prestamo_equipamiento dpe " +
-                     "JOIN prestamo p ON dpe.id_prestamo = p.id_prestamo " +
-                     "JOIN equipamiento e ON dpe.id_equipamiento = e.id_equipamiento " +
-                     "WHERE p.fecha_prestamo BETWEEN ? AND ? " +
-                     "ORDER BY e.id_equipamiento, p.fecha_prestamo";
-
-        try (Connection conn = ConexionBD.conectar();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setDate(1, fechaInicial);
-            stmt.setDate(2, fechaFinal);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                // Mapa para almacenar los ID de horario y su laboratorio asociado
-                Map<Integer, Integer> horarioLaboratorioMap = new HashMap<>();
-                
-                while (rs.next()) {
-                    int idPrestamo = rs.getInt("id_prestamo");
-                    int idEquipamiento = rs.getInt("id_equipamiento");
-                    int idDetalle = rs.getInt("id_detalle");
-                    String nombreEquipamiento = rs.getString("nombre_equipamiento");
-                    String estado = rs.getString("estado");
-                    Integer idHorario = rs.getObject("id_horario") != null ? rs.getInt("id_horario") : null;
-                    
-                    // Obtener el ID del laboratorio asociado al horario
-                    Integer idLaboratorio = null;
-                    if (idHorario != null) {
-                        // Verificar si ya tenemos el ID del laboratorio para este horario
-                        if (horarioLaboratorioMap.containsKey(idHorario)) {
-                            idLaboratorio = horarioLaboratorioMap.get(idHorario);
-                        } else {
-                            // Consultar el ID del laboratorio para este horario
-                            try {
-                                String sqlHorario = "SELECT id_laboratorio FROM horario WHERE id_horario = ?";
-                                try (PreparedStatement stmtHorario = conn.prepareStatement(sqlHorario)) {
-                                    stmtHorario.setInt(1, idHorario);
-                                    try (ResultSet rsHorario = stmtHorario.executeQuery()) {
-                                        if (rsHorario.next()) {
-                                            idLaboratorio = rsHorario.getInt("id_laboratorio");
-                                            // Guardar en el mapa para futuras referencias
-                                            horarioLaboratorioMap.put(idHorario, idLaboratorio);
-                                        }
-                                    }
-                                }
-                            } catch (SQLException e) {
-                                System.err.println("Error al obtener el laboratorio del horario: " + e.getMessage());
-                            }
-                        }
-                    }
-                    
-                    reporteEquipamientos.add(new ReporteEquipamiento(
-                        idEquipamiento,
-                        nombreEquipamiento,
-                        idPrestamo,
-                        idDetalle,
-                        estado,
-                        idLaboratorio
-                    ));
-                }
-            }
-        }
-    } catch (SQLException e) {
-        JOptionPane.showMessageDialog(this,
-            "Error al obtener los datos de equipamiento: " + e.getMessage(),
-            "Error",
-            JOptionPane.ERROR_MESSAGE);
-        e.printStackTrace();
-    }
-    
-    return reporteEquipamientos;
-}
-
-// Método para generar el documento Word con el reporte de equipamiento
-private void generarDocumentoWordEquipamiento(List<ReporteEquipamiento> equipamientos, 
-                                               java.sql.Date fechaInicial, 
-                                               java.sql.Date fechaFinal) {
-    try {
-        // Crear un nuevo documento
-        Document documento = new Document();
-        
-        // Obtener la sección y el formato de la página
-        Section seccion = documento.addSection();
-        seccion.getPageSetup().setMargins(new MarginsF(72f, 72f, 72f, 72f)); // Márgenes de 1 pulgada
-        
-        // Crear el título principal con formato centrado
-        Paragraph titulo1 = seccion.addParagraph();
-        titulo1.getFormat().setHorizontalAlignment(HorizontalAlignment.Center);
-        TextRange textoTitulo1 = titulo1.appendText("Universidad Salesiana de Bolivia");
-        textoTitulo1.getCharacterFormat().setFontName("Arial");
-        textoTitulo1.getCharacterFormat().setFontSize(18);
-        textoTitulo1.getCharacterFormat().setBold(true);
-        
-        // Agregar el segundo título
-        Paragraph titulo2 = seccion.addParagraph();
-        titulo2.getFormat().setHorizontalAlignment(HorizontalAlignment.Center);
-        TextRange textoTitulo2 = titulo2.appendText("Reporte de Préstamos de Equipamiento");
-        textoTitulo2.getCharacterFormat().setFontName("Arial");
-        textoTitulo2.getCharacterFormat().setFontSize(16);
-        textoTitulo2.getCharacterFormat().setBold(true);
-        
-        // Agregar el rango de fechas
-        Paragraph titulo3 = seccion.addParagraph();
-        titulo3.getFormat().setHorizontalAlignment(HorizontalAlignment.Center);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        String rangoFechas = "Del " + dateFormat.format(fechaInicial) + " al " + dateFormat.format(fechaFinal);
-        TextRange textoTitulo3 = titulo3.appendText(rangoFechas);
-        textoTitulo3.getCharacterFormat().setFontName("Arial");
-        textoTitulo3.getCharacterFormat().setFontSize(14);
-        textoTitulo3.getCharacterFormat().setBold(true);
-        
-        // Agregar espacio
-        seccion.addParagraph();
-        
-        // Agregar subtítulo
-        Paragraph subtitulo = seccion.addParagraph();
-        subtitulo.getFormat().setHorizontalAlignment(HorizontalAlignment.Left);
-        TextRange textoSubtitulo = subtitulo.appendText("PRÉSTAMOS DE EQUIPAMIENTO:");
-        textoSubtitulo.getCharacterFormat().setFontName("Arial");
-        textoSubtitulo.getCharacterFormat().setFontSize(14);
-        textoSubtitulo.getCharacterFormat().setBold(true);
-        
-        // Crear la tabla de equipamientos
-        Table tabla = seccion.addTable(true);
-        tabla.resetCells(equipamientos.size() + 1, 6); // Filas + 1 para el encabezado, 6 columnas
-        
-        // Establecer el ancho de las columnas
-        tabla.autoFit(AutoFitBehaviorType.Auto_Fit_To_Contents);
-        
-        // Estilos para la tabla
-        TableRow encabezado = tabla.getRows().get(0);
-        String[] titulos = {"ID Equipamiento", "Nombre", "ID Préstamo", "ID Detalle", "Estado", "ID Laboratorio"};
-        
-        for (int i = 0; i < titulos.length; i++) {
-            encabezado.getCells().get(i).getCellFormat().setBackColor(new Color(0, 63, 135));
-            TextRange textoEncabezado = encabezado.getCells().get(i).addParagraph().appendText(titulos[i]);
-            textoEncabezado.getCharacterFormat().setFontName("Arial");
-            textoEncabezado.getCharacterFormat().setFontSize(12);
-            textoEncabezado.getCharacterFormat().setBold(true);
-            textoEncabezado.getCharacterFormat().setTextColor(Color.WHITE);
-        }
-        
-        // Llenar la tabla con los datos
-        for (int i = 0; i < equipamientos.size(); i++) {
-            ReporteEquipamiento equipamiento = equipamientos.get(i);
-            TableRow fila = tabla.getRows().get(i + 1);
-            
-            // Agregar datos a cada celda
-            fila.getCells().get(0).addParagraph().appendText(String.valueOf(equipamiento.getIdEquipamiento()));
-            fila.getCells().get(1).addParagraph().appendText(equipamiento.getNombreEquipamiento());
-            fila.getCells().get(2).addParagraph().appendText(String.valueOf(equipamiento.getIdPrestamo()));
-            fila.getCells().get(3).addParagraph().appendText(String.valueOf(equipamiento.getIdDetalle()));
-            fila.getCells().get(4).addParagraph().appendText(equipamiento.getEstado());
-            fila.getCells().get(5).addParagraph().appendText(equipamiento.getIdLaboratorio() != null ? 
-                String.valueOf(equipamiento.getIdLaboratorio()) : "N/A");
-            
-            // Alternar colores de fondo para las filas (para mejor legibilidad)
-            if (i % 2 == 1) {
-                for (int j = 0; j < 6; j++) {
-                    fila.getCells().get(j).getCellFormat().setBackColor(new Color(240, 240, 255));
-                }
-            }
-        }
-        
-        // Guardar el documento
-        // Obtener la ruta del directorio actual
-        String directorioActual = System.getProperty("user.dir");
-        String fechaStr = new SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
-        String nombreArchivo = directorioActual + "/ReporteEquipamiento_" + fechaStr + ".docx";
-        documento.saveToFile(nombreArchivo, FileFormat.Docx);
-        
-        // Abrir el documento con la aplicación predeterminada
-        try {
-            if (Desktop.isDesktopSupported()) {
-                Desktop.getDesktop().open(new java.io.File(nombreArchivo));
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                "El reporte se guardó correctamente pero no se pudo abrir automáticamente. Ubicación: " + nombreArchivo,
-                "Información",
-                JOptionPane.INFORMATION_MESSAGE);
-        }
-        
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this,
-            "Error al generar el documento Word: " + e.getMessage(),
-            "Error",
-            JOptionPane.ERROR_MESSAGE);
-        e.printStackTrace();
-    }
-}
-    //TODO LO REFERENTE A EQUIPAMIENTO FINAL
 
     // Clase interna para manejar los datos del reporte
     private class ReportePrestamo {
@@ -1337,110 +913,195 @@ private void generarDocumentoWordEquipamiento(List<ReporteEquipamiento> equipami
         return prestamos;
     }
 
-    private void generarDocumentoWord(List<ReportePrestamo> prestamos, int idLaboratorio) {
+    /**
+ * Genera un reporte en formato PDF con los datos de préstamos del laboratorio
+ * @param prestamos Lista de préstamos a incluir en el reporte
+ * @param idLaboratorio Identificador del laboratorio
+ */
+private void generarDocumentoPDF(List<ReportePrestamo> prestamos, int idLaboratorio) {
+    try {
+        // Obtener la ruta del directorio actual
+        String directorioActual = System.getProperty("user.dir");
+        String nombreArchivo = directorioActual + "/ReportePrestamos_Lab" + idLaboratorio + ".pdf";
+        
+        // Crear el documento PDF
+        Document documento = new Document(PageSize.A4);
+        documento.setMargins(72, 72, 72, 72); // Márgenes de 1 pulgada (72 puntos)
+        
+        // Crear el escritor PDF
+        PdfWriter writer = PdfWriter.getInstance(documento, new FileOutputStream(nombreArchivo));
+        
+        // Abrir el documento para escribir
+        documento.open();
+        
+        // Configurar fuentes
+        com.itextpdf.text.Font fontTituloPrincipal = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 18, com.itextpdf.text.Font.BOLD);
+        com.itextpdf.text.Font fontTituloSecundario = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 16, com.itextpdf.text.Font.BOLD);
+        com.itextpdf.text.Font fontSubtitulo = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 14, com.itextpdf.text.Font.BOLD);
+        com.itextpdf.text.Font fontTablaEncabezado = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.BOLD, BaseColor.WHITE);
+        com.itextpdf.text.Font fontTablaNormal = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10);
+        
+        // Obtener fechas para el título
+        java.sql.Date fechaInicial = null;
+        java.sql.Date fechaFinal = null;
+        
+        if (!prestamos.isEmpty()) {
+            // Si hay préstamos, usar la primera fecha como referencia inicial
+            fechaInicial = prestamos.get(0).getFecha();
+            fechaFinal = prestamos.get(prestamos.size() - 1).getFecha();
+        } else {
+            // Si no hay préstamos, usar la fecha actual
+            fechaInicial = new java.sql.Date(System.currentTimeMillis());
+            fechaFinal = new java.sql.Date(System.currentTimeMillis());
+        }
+        
+        // Formatear fechas para el título
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        String periodoFecha = "DEL " + sdf.format(fechaInicial) + " AL " + sdf.format(fechaFinal);
+        
+        // Título principal - Universidad
+        Paragraph tituloPrincipal = new Paragraph("UNIVERSIDAD SALESIANA DE BOLIVIA", fontTituloPrincipal);
+        tituloPrincipal.setAlignment(Element.ALIGN_CENTER);
+        documento.add(tituloPrincipal);
+        
+        // Título secundario - Reporte
+        Paragraph tituloSecundario = new Paragraph("REPORTE DE PRÉSTAMOS DE LABORATORIO " + idLaboratorio, fontTituloSecundario);
+        tituloSecundario.setAlignment(Element.ALIGN_CENTER);
+        documento.add(tituloSecundario);
+        
+        // Periodo de fechas
+        Paragraph periodoFechas = new Paragraph(periodoFecha, fontTituloSecundario);
+        periodoFechas.setAlignment(Element.ALIGN_CENTER);
+        documento.add(periodoFechas);
+        
+        // Espacio después de los títulos
+        documento.add(new Paragraph(" "));
+        
+        // Subtítulo - Préstamos
+        Paragraph subtitulo = new Paragraph("PRÉSTAMOS REALIZADOS", fontSubtitulo);
+        subtitulo.setAlignment(Element.ALIGN_CENTER);
+        documento.add(subtitulo);
+        
+        documento.add(new Paragraph(" "));
+        
+        // Crear tabla
+        PdfPTable tabla = new PdfPTable(6); // 6 columnas
+        tabla.setWidthPercentage(100); // Ancho completo de la página
+        
+        // Establecer el ancho relativo de las columnas
+        float[] anchos = {1.5f, 1f, 1.5f, 2f, 1.5f, 2.5f};
+        tabla.setWidths(anchos);
+        
+        // Añadir encabezados de tabla
+        String[] titulos = {"Fecha", "Hora", "RU Usuario", "RU Administrador", "ID Horario", "Observaciones"};
+        
+        // Color de fondo del encabezado (azul oscuro)
+        BaseColor colorEncabezado = new BaseColor(0, 63, 135);
+        
+        for (String titulo : titulos) {
+            PdfPCell celda = new PdfPCell(new Phrase(titulo, fontTablaEncabezado));
+            celda.setBackgroundColor(colorEncabezado);
+            celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+            celda.setPadding(5);
+            tabla.addCell(celda);
+        }
+        
+        // Color para filas alternas
+        BaseColor colorFilaAlterna = new BaseColor(240, 240, 255);
+        
+        // Llenar la tabla con los datos
+        for (int i = 0; i < prestamos.size(); i++) {
+            ReportePrestamo prestamo = prestamos.get(i);
+            
+            // Definir el color de fondo para filas alternas
+            BaseColor colorFondo = (i % 2 == 1) ? colorFilaAlterna : BaseColor.WHITE;
+            
+            // Fecha
+            PdfPCell celdaFecha = new PdfPCell(new Phrase(sdf.format(prestamo.getFecha()), fontTablaNormal));
+            celdaFecha.setBackgroundColor(colorFondo);
+            celdaFecha.setHorizontalAlignment(Element.ALIGN_CENTER);
+            celdaFecha.setPadding(5);
+            tabla.addCell(celdaFecha);
+            
+            // Hora
+            PdfPCell celdaHora = new PdfPCell(new Phrase(prestamo.getHora(), fontTablaNormal));
+            celdaHora.setBackgroundColor(colorFondo);
+            celdaHora.setHorizontalAlignment(Element.ALIGN_CENTER);
+            celdaHora.setPadding(5);
+            tabla.addCell(celdaHora);
+            
+            // RU Usuario
+            PdfPCell celdaUsuario = new PdfPCell(new Phrase(String.valueOf(prestamo.getRuUsuario()), fontTablaNormal));
+            celdaUsuario.setBackgroundColor(colorFondo);
+            celdaUsuario.setHorizontalAlignment(Element.ALIGN_CENTER);
+            celdaUsuario.setPadding(5);
+            tabla.addCell(celdaUsuario);
+            
+            // RU Administrador
+            String valorAdmin = prestamo.getRuAdministrador() != null ? 
+                String.valueOf(prestamo.getRuAdministrador()) : "N/A";
+            PdfPCell celdaAdmin = new PdfPCell(new Phrase(valorAdmin, fontTablaNormal));
+            celdaAdmin.setBackgroundColor(colorFondo);
+            celdaAdmin.setHorizontalAlignment(Element.ALIGN_CENTER);
+            celdaAdmin.setPadding(5);
+            tabla.addCell(celdaAdmin);
+            
+            // ID Horario
+            String valorHorario = prestamo.getIdHorario() != null ? 
+                String.valueOf(prestamo.getIdHorario()) : "N/A";
+            PdfPCell celdaHorario = new PdfPCell(new Phrase(valorHorario, fontTablaNormal));
+            celdaHorario.setBackgroundColor(colorFondo);
+            celdaHorario.setHorizontalAlignment(Element.ALIGN_CENTER);
+            celdaHorario.setPadding(5);
+            tabla.addCell(celdaHorario);
+            
+            // Observaciones
+            String valorObs = prestamo.getObservaciones() != null && !prestamo.getObservaciones().isEmpty() ? 
+                prestamo.getObservaciones() : "Ninguna";
+            PdfPCell celdaObs = new PdfPCell(new Phrase(valorObs, fontTablaNormal));
+            celdaObs.setBackgroundColor(colorFondo);
+            celdaObs.setPadding(5);
+            tabla.addCell(celdaObs);
+        }
+        
+        // Si no hay datos, agregar una fila indicándolo
+        if (prestamos.isEmpty()) {
+            PdfPCell celdaNoData = new PdfPCell(new Phrase("No hay préstamos registrados en este período", fontTablaNormal));
+            celdaNoData.setColspan(6);
+            celdaNoData.setHorizontalAlignment(Element.ALIGN_CENTER);
+            celdaNoData.setPadding(10);
+            tabla.addCell(celdaNoData);
+        }
+        
+        // Añadir la tabla al documento
+        documento.add(tabla);
+        
+        // Cerrar el documento
+        documento.close();
+        
+        // Abrir el documento con la aplicación predeterminada
         try {
-            // Crear un nuevo documento
-            Document documento = new Document();
-            
-            // Obtener la sección y el formato de la página
-            Section seccion = documento.addSection();
-            seccion.getPageSetup().setMargins(new MarginsF(72f, 72f, 72f, 72f)); // Márgenes de 1 pulgada
-            
-            // Crear el título principal con formato centrado
-            Paragraph titulo1 = seccion.addParagraph();
-            titulo1.getFormat().setHorizontalAlignment(HorizontalAlignment.Center);
-            TextRange textoTitulo1 = titulo1.appendText("Universidad Salesiana de Bolivia");
-            textoTitulo1.getCharacterFormat().setFontName("Arial");
-            textoTitulo1.getCharacterFormat().setFontSize(18);
-            textoTitulo1.getCharacterFormat().setBold(true);
-            
-            // Agregar el segundo título
-            Paragraph titulo2 = seccion.addParagraph();
-            titulo2.getFormat().setHorizontalAlignment(HorizontalAlignment.Center);
-            TextRange textoTitulo2 = titulo2.appendText("Reporte de Préstamos de Laboratorio \"" + idLaboratorio + "\"");
-            textoTitulo2.getCharacterFormat().setFontName("Arial");
-            textoTitulo2.getCharacterFormat().setFontSize(16);
-            textoTitulo2.getCharacterFormat().setBold(true);
-            
-            // Agregar espacio
-            seccion.addParagraph();
-            
-            // Agregar subtítulo
-            Paragraph subtitulo = seccion.addParagraph();
-            subtitulo.getFormat().setHorizontalAlignment(HorizontalAlignment.Left);
-            TextRange textoSubtitulo = subtitulo.appendText("PRÉSTAMOS:");
-            textoSubtitulo.getCharacterFormat().setFontName("Arial");
-            textoSubtitulo.getCharacterFormat().setFontSize(14);
-            textoSubtitulo.getCharacterFormat().setBold(true);
-            
-            // Crear la tabla de préstamos
-            Table tabla = seccion.addTable(true);
-            tabla.resetCells(prestamos.size() + 1, 6); // Filas + 1 para el encabezado, 6 columnas (añadida columna de observaciones)
-            
-            // Establecer el ancho de las columnas
-            tabla.autoFit(AutoFitBehaviorType.Auto_Fit_To_Contents);
-            
-            // Estilos para la tabla
-            TableRow encabezado = tabla.getRows().get(0);
-            String[] titulos = {"Fecha", "Hora", "RU Usuario", "RU Administrador", "ID Horario", "Observaciones"};
-            
-            for (int i = 0; i < titulos.length; i++) {
-                encabezado.getCells().get(i).getCellFormat().setBackColor(new Color(0, 63, 135));
-                TextRange textoEncabezado = encabezado.getCells().get(i).addParagraph().appendText(titulos[i]);
-                textoEncabezado.getCharacterFormat().setFontName("Arial");
-                textoEncabezado.getCharacterFormat().setFontSize(12);
-                textoEncabezado.getCharacterFormat().setBold(true);
-                textoEncabezado.getCharacterFormat().setTextColor(Color.WHITE);
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(new java.io.File(nombreArchivo));
             }
-            
-            // Llenar la tabla con los datos
-            for (int i = 0; i < prestamos.size(); i++) {
-                ReportePrestamo prestamo = prestamos.get(i);
-                TableRow fila = tabla.getRows().get(i + 1);
-                
-                // Agregar datos a cada celda
-                fila.getCells().get(0).addParagraph().appendText(prestamo.getFecha().toString());
-                fila.getCells().get(1).addParagraph().appendText(prestamo.getHora());
-                fila.getCells().get(2).addParagraph().appendText(String.valueOf(prestamo.getRuUsuario()));
-                fila.getCells().get(3).addParagraph().appendText(prestamo.getRuAdministrador() != null ? 
-                    String.valueOf(prestamo.getRuAdministrador()) : "N/A");
-                fila.getCells().get(4).addParagraph().appendText(prestamo.getIdHorario() != null ? 
-                    String.valueOf(prestamo.getIdHorario()) : "N/A");
-                fila.getCells().get(5).addParagraph().appendText(prestamo.getObservaciones() != null ? 
-                    prestamo.getObservaciones() : "Sin observaciones");
-                
-                // Alternar colores de fondo para las filas (para mejor legibilidad)
-                if (i % 2 == 1) {
-                    for (int j = 0; j < 6; j++) {
-                        fila.getCells().get(j).getCellFormat().setBackColor(new Color(240, 240, 255));
-                    }
-                }
-            }
-            
-            // Guardar el documento
-            // Obtener la ruta del directorio actual
-            String directorioActual = System.getProperty("user.dir");
-            String nombreArchivo = directorioActual + "/ReportePrestamos_Lab" + idLaboratorio + ".docx";
-            documento.saveToFile(nombreArchivo, FileFormat.Docx);
-            
-            // Abrir el documento con la aplicación predeterminada
-            try {
-                if (Desktop.isDesktopSupported()) {
-                    Desktop.getDesktop().open(new java.io.File(nombreArchivo));
-                }
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this,
-                    "El reporte se guardó correctamente pero no se pudo abrir automáticamente. Ubicación: " + nombreArchivo,
-                    "Información",
-                    JOptionPane.INFORMATION_MESSAGE);
-            }
-            
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
-                "Error al generar el documento Word: " + e.getMessage(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
+                "El reporte se guardó correctamente pero no se pudo abrir automáticamente. Ubicación: " + nombreArchivo,
+                "Información",
+                JOptionPane.INFORMATION_MESSAGE);
         }
+        
+        JOptionPane.showMessageDialog(this,
+            "Reporte PDF generado correctamente.",
+            "Éxito",
+            JOptionPane.INFORMATION_MESSAGE);
+        
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this,
+            "Error al generar el documento PDF: " + e.getMessage(),
+            "Error",
+            JOptionPane.ERROR_MESSAGE);
+        e.printStackTrace();
     }
+}
 }
