@@ -12,36 +12,22 @@ import Controles.ControladorEquipamiento;
 import Controles.ControladorHorario;
 import Controles.ControladorInsumo;
 import Controles.ControladorPrestamo;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 /**
- *
  * @author Emmanuel (Modificado)
  */
 public class PanelVisualizarPrestamos extends JPanel {
@@ -59,6 +45,18 @@ public class PanelVisualizarPrestamos extends JPanel {
     private JComboBox<String> comboEstado;
     private JTextField campoRU;
 
+    // Color Palette
+    private static final Color PRIMARY_COLOR = new Color(33, 150, 243); // Material Blue
+    private static final Color SECONDARY_COLOR = new Color(100, 181, 246); // Light Blue
+    private static final Color BACKGROUND_COLOR = new Color(245, 245, 245); // Soft Gray
+    private static final Color CARD_COLOR = Color.WHITE;
+    private static final Color TEXT_COLOR = new Color(33, 33, 33); // Dark Gray
+    private static final Color BORDER_COLOR = new Color(200, 200, 200); // Light Gray
+    private static final Color ACCENT_COLOR = new Color(187, 222, 251); // Pale Blue
+    private static final Color SUCCESS_COLOR = new Color(76, 175, 80); // Green
+    private static final Color ERROR_COLOR = new Color(244, 67, 54); // Red
+    private static final Color WARNING_COLOR = new Color(255, 193, 7); // Amber
+
     public PanelVisualizarPrestamos(int ruAdministrador) {
         this.ruAdministrador = ruAdministrador;
         this.controladorPrestamo = new ControladorPrestamo();
@@ -71,36 +69,58 @@ public class PanelVisualizarPrestamos extends JPanel {
     }
 
     private void initComponents() {
-        setLayout(new BorderLayout(10, 10));
-        setBorder(new EmptyBorder(10, 10, 10, 10));
+        setLayout(new BorderLayout(15, 15));
+        setBackground(BACKGROUND_COLOR);
+        setBorder(new EmptyBorder(20, 20, 20, 20));
 
         // Título
-        JLabel lblTitulo = new JLabel("Visualizar Préstamos");
-        lblTitulo.setFont(new Font("Arial", Font.BOLD, 18));
-        lblTitulo.setForeground(new Color(128, 0, 128));
-        lblTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JLabel lblTitulo = new JLabel("Visualizar Préstamos", SwingConstants.CENTER);
+        lblTitulo.setFont(new Font("Roboto", Font.BOLD, 28));
+        lblTitulo.setForeground(PRIMARY_COLOR);
+        lblTitulo.setBorder(new EmptyBorder(10, 0, 20, 0));
+        add(lblTitulo, BorderLayout.NORTH);
 
         // Panel de filtros
-        JPanel panelFiltros = new JPanel();
+        JPanel panelFiltros = createCardPanel("Filtros");
         panelFiltros.setLayout(new BoxLayout(panelFiltros, BoxLayout.X_AXIS));
-        panelFiltros.setBorder(BorderFactory.createTitledBorder("Filtros"));
+        panelFiltros.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR, 1, true),
+                "Filtros",
+                javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                javax.swing.border.TitledBorder.DEFAULT_POSITION,
+                new Font("Roboto", Font.BOLD, 16),
+                PRIMARY_COLOR
+            ),
+            new EmptyBorder(10, 10, 10, 10)
+        ));
 
         JLabel lblRU = new JLabel("RU:");
+        lblRU.setFont(new Font("Roboto", Font.PLAIN, 16));
+        lblRU.setForeground(TEXT_COLOR);
         campoRU = new JTextField(10);
+        campoRU.setFont(new Font("Roboto", Font.PLAIN, 16));
+        campoRU.setBorder(new LineBorder(BORDER_COLOR, 1, true));
+        campoRU.setPreferredSize(new Dimension(120, 35));
+
         JLabel lblEstado = new JLabel("Estado:");
+        lblEstado.setFont(new Font("Roboto", Font.PLAIN, 16));
+        lblEstado.setForeground(TEXT_COLOR);
         comboEstado = new JComboBox<>(new String[]{"Todos", "Pendiente", "Aceptado", "Rechazado", "Terminado"});
-        JButton btnFiltrar = new JButton("Filtrar");
+        styleComboBox(comboEstado);
+
+        JButton btnFiltrar = createStyledButton("Filtrar", PRIMARY_COLOR);
         btnFiltrar.addActionListener(e -> filtrarPrestamos());
 
         panelFiltros.add(Box.createHorizontalStrut(10));
         panelFiltros.add(lblRU);
         panelFiltros.add(Box.createHorizontalStrut(5));
         panelFiltros.add(campoRU);
-        panelFiltros.add(Box.createHorizontalStrut(10));
+        panelFiltros.add(Box.createHorizontalStrut(15));
         panelFiltros.add(lblEstado);
         panelFiltros.add(Box.createHorizontalStrut(5));
         panelFiltros.add(comboEstado);
-        panelFiltros.add(Box.createHorizontalStrut(10));
+        panelFiltros.add(Box.createHorizontalStrut(15));
         panelFiltros.add(btnFiltrar);
         panelFiltros.add(Box.createHorizontalGlue());
 
@@ -112,51 +132,41 @@ public class PanelVisualizarPrestamos extends JPanel {
                 return false;
             }
         };
-        tablaPrestamos = new JTable(modeloTabla);
-        tablaPrestamos.setRowHeight(25);
-        tablaPrestamos.getTableHeader().setReorderingAllowed(false);
+        tablaPrestamos = createStyledTable(modeloTabla);
         tablaPrestamos.setAutoCreateRowSorter(true);
-
-        // Centrar contenido de las celdas
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        for (int i = 0; i < tablaPrestamos.getColumnCount(); i++) {
-            tablaPrestamos.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
-        }
-
-        JScrollPane scrollTabla = new JScrollPane(tablaPrestamos);
-        scrollTabla.setPreferredSize(new Dimension(800, 200));
+        JScrollPane scrollTabla = createStyledScrollPane(tablaPrestamos);
+        scrollTabla.setPreferredSize(new Dimension(800, 300));
 
         // Panel de detalles y acciones
         JPanel panelDetallesAcciones = new JPanel(new BorderLayout(10, 10));
+        panelDetallesAcciones.setBackground(BACKGROUND_COLOR);
 
         // Área de detalles
-        JPanel panelDetalles = new JPanel(new BorderLayout());
-        panelDetalles.setBorder(BorderFactory.createTitledBorder("Detalles del Préstamo"));
-        areaDetalles = new JTextArea(5, 30);
+        JPanel panelDetalles = createCardPanel("Detalles del Préstamo");
+        panelDetalles.setLayout(new BorderLayout());
+        areaDetalles = new JTextArea(8, 30);
+        areaDetalles.setFont(new Font("Roboto", Font.PLAIN, 14));
         areaDetalles.setEditable(false);
         areaDetalles.setLineWrap(true);
         areaDetalles.setWrapStyleWord(true);
-        JScrollPane scrollDetalles = new JScrollPane(areaDetalles);
+        areaDetalles.setBorder(new LineBorder(BORDER_COLOR, 1, true));
+        areaDetalles.setBackground(CARD_COLOR);
+        areaDetalles.setForeground(TEXT_COLOR);
+        JScrollPane scrollDetalles = createStyledScrollPane(areaDetalles);
         panelDetalles.add(scrollDetalles, BorderLayout.CENTER);
 
         // Botones de acciones
         JPanel panelBotones = new JPanel();
         panelBotones.setLayout(new BoxLayout(panelBotones, BoxLayout.X_AXIS));
+        panelBotones.setBackground(BACKGROUND_COLOR);
 
-        JButton btnAceptar = new JButton("Aceptar");
-        btnAceptar.setBackground(new Color(0, 128, 0));
-        btnAceptar.setForeground(Color.WHITE);
+        JButton btnAceptar = createStyledButton("Aceptar", SUCCESS_COLOR);
         btnAceptar.addActionListener(e -> aceptarPrestamo());
 
-        JButton btnRechazar = new JButton("Rechazar");
-        btnRechazar.setBackground(new Color(255, 0, 0));
-        btnRechazar.setForeground(Color.WHITE);
+        JButton btnRechazar = createStyledButton("Rechazar", ERROR_COLOR);
         btnRechazar.addActionListener(e -> rechazarPrestamo());
 
-        JButton btnTerminar = new JButton("Terminar");
-        btnTerminar.setBackground(new Color(0, 128, 0));
-        btnTerminar.setForeground(Color.WHITE);
+        JButton btnTerminar = createStyledButton("Terminar", SUCCESS_COLOR);
         btnTerminar.addActionListener(e -> terminarPrestamo());
 
         panelBotones.add(Box.createHorizontalGlue());
@@ -170,22 +180,162 @@ public class PanelVisualizarPrestamos extends JPanel {
         panelDetallesAcciones.add(panelDetalles, BorderLayout.CENTER);
         panelDetallesAcciones.add(panelBotones, BorderLayout.SOUTH);
 
-        // Panel superior (título y filtros)
-        JPanel panelSuperior = new JPanel();
-        panelSuperior.setLayout(new BoxLayout(panelSuperior, BoxLayout.Y_AXIS));
-        panelSuperior.add(lblTitulo);
-        panelSuperior.add(Box.createVerticalStrut(10));
-        panelSuperior.add(panelFiltros);
-
         // Añadir componentes al panel principal
-        add(panelSuperior, BorderLayout.NORTH);
-        add(scrollTabla, BorderLayout.CENTER);
-        add(panelDetallesAcciones, BorderLayout.SOUTH);
+        JPanel centerPanel = new JPanel(new BorderLayout(10, 10));
+        centerPanel.setBackground(BACKGROUND_COLOR);
+        centerPanel.add(scrollTabla, BorderLayout.CENTER);
+        centerPanel.add(panelDetallesAcciones, BorderLayout.SOUTH);
+
+        add(panelFiltros, BorderLayout.NORTH);
+        add(centerPanel, BorderLayout.CENTER);
 
         // Listener para mostrar detalles al seleccionar una fila
         tablaPrestamos.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 mostrarDetallesPrestamo();
+            }
+        });
+    }
+
+    // Styling Helper Methods
+    private JPanel createCardPanel(String title) {
+        JPanel panel = new JPanel();
+        panel.setBackground(CARD_COLOR);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(BORDER_COLOR, 1, true),
+            new EmptyBorder(10, 10, 10, 10)
+        ));
+        panel.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(BORDER_COLOR, 1, true),
+            title,
+            javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+            javax.swing.border.TitledBorder.DEFAULT_POSITION,
+            new Font("Roboto", Font.BOLD, 16),
+            PRIMARY_COLOR
+        ));
+        // Add subtle shadow
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 1, new Color(0, 0, 0, 30)),
+            panel.getBorder()
+        ));
+        return panel;
+    }
+
+    private JButton createStyledButton(String text, Color baseColor) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Roboto", Font.BOLD, 14));
+        button.setForeground(Color.WHITE);
+        button.setBackground(baseColor);
+        button.setBorder(new LineBorder(baseColor, 1, true));
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setBorder(new EmptyBorder(10, 25, 10, 25));
+        // Add hover effect
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(baseColor.brighter());
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(baseColor);
+            }
+        });
+        return button;
+    }
+
+    private JTable createStyledTable(DefaultTableModel model) {
+        JTable table = new JTable(model) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        table.setRowHeight(35);
+        table.setFont(new Font("Roboto", Font.PLAIN, 14));
+        table.setSelectionBackground(ACCENT_COLOR);
+        table.setGridColor(BORDER_COLOR);
+        table.setShowGrid(true);
+        table.getTableHeader().setFont(new Font("Roboto", Font.BOLD, 14));
+        table.getTableHeader().setBackground(PRIMARY_COLOR);
+        table.getTableHeader().setForeground(Color.WHITE);
+        table.getTableHeader().setBorder(new LineBorder(BORDER_COLOR, 1, true));
+
+        // Custom renderer for cells
+        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                           boolean isSelected, boolean hasFocus,
+                                                           int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                setHorizontalAlignment(JLabel.CENTER);
+                if (model.getColumnName(column).equals("Estado")) {
+                    if ("Pendiente".equals(value)) {
+                        c.setForeground(WARNING_COLOR);
+                    } else if ("Aceptado".equals(value)) {
+                        c.setForeground(SUCCESS_COLOR);
+                    } else if ("Rechazado".equals(value)) {
+                        c.setForeground(ERROR_COLOR);
+                    } else if ("Terminado".equals(value)) {
+                        c.setForeground(new Color(33, 150, 243)); // Blue for completed
+                    } else {
+                        c.setForeground(TEXT_COLOR);
+                    }
+                } else {
+                    c.setForeground(TEXT_COLOR);
+                }
+                if (isSelected) {
+                    c.setBackground(ACCENT_COLOR);
+                } else {
+                    c.setBackground(CARD_COLOR);
+                }
+                return c;
+            }
+        });
+
+        // Adjust column widths
+        table.getColumnModel().getColumn(0).setPreferredWidth(80);  // ID Préstamo
+        table.getColumnModel().getColumn(1).setPreferredWidth(80);  // RU Usuario
+        table.getColumnModel().getColumn(2).setPreferredWidth(120); // Nombre Usuario
+        table.getColumnModel().getColumn(3).setPreferredWidth(100); // Fecha
+        table.getColumnModel().getColumn(4).setPreferredWidth(60);  // Hora
+        table.getColumnModel().getColumn(5).setPreferredWidth(80);  // Estado
+        table.getColumnModel().getColumn(6).setPreferredWidth(150); // Horario
+        table.getColumnModel().getColumn(7).setPreferredWidth(200); // Equipamiento
+        table.getColumnModel().getColumn(8).setPreferredWidth(200); // Insumos
+
+        return table;
+    }
+
+    private JScrollPane createStyledScrollPane(Component view) {
+        JScrollPane scrollPane = new JScrollPane(view);
+        scrollPane.setBorder(new LineBorder(BORDER_COLOR, 1, true));
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        JScrollBar verticalScrollBar = scrollPane.getVerticalScrollBar();
+        verticalScrollBar.setUnitIncrement(15);
+        JScrollBar horizontalScrollBar = scrollPane.getHorizontalScrollBar();
+        horizontalScrollBar.setUnitIncrement(15);
+        return scrollPane;
+    }
+
+    private void styleComboBox(JComboBox<String> comboBox) {
+        comboBox.setFont(new Font("Roboto", Font.PLAIN, 16));
+        comboBox.setBackground(CARD_COLOR);
+        comboBox.setForeground(TEXT_COLOR);
+        comboBox.setBorder(new LineBorder(BORDER_COLOR, 1, true));
+        comboBox.setPreferredSize(new Dimension(150, 35));
+        comboBox.setUI(new BasicComboBoxUI() {
+            @Override
+            protected JButton createArrowButton() {
+                JButton button = new JButton("▼");
+                button.setFont(new Font("Roboto", Font.PLAIN, 12));
+                button.setBackground(CARD_COLOR);
+                button.setForeground(PRIMARY_COLOR);
+                button.setBorder(new LineBorder(BORDER_COLOR, 1, true));
+                button.setFocusPainted(false);
+                return button;
             }
         });
     }
@@ -251,7 +401,6 @@ public class PanelVisualizarPrestamos extends JPanel {
     }
 
     private String obtenerHorarioPrestamo(int idPrestamo) throws SQLException {
-        // Asumimos que hay un método para obtener el ID del horario asociado al préstamo
         Integer idHorario = controladorPrestamo.obtenerHorarioPrestamo(idPrestamo);
         if (idHorario == null) {
             return "Sin horario";
@@ -473,93 +622,92 @@ public class PanelVisualizarPrestamos extends JPanel {
     }
 
     private void terminarPrestamo() {
-    int filaSeleccionada = tablaPrestamos.getSelectedRow();
-    if (filaSeleccionada == -1) {
-        JOptionPane.showMessageDialog(this, "Por favor, seleccione un préstamo.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-        return;
-    }
-
-    int idPrestamo = (int) modeloTabla.getValueAt(filaSeleccionada, 0);
-    String estado = (String) modeloTabla.getValueAt(filaSeleccionada, 5);
-
-    if (!estado.equals("Aceptado")) {
-        JOptionPane.showMessageDialog(this, "Solo se pueden terminar préstamos en estado Aceptado.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-        return;
-    }
-
-    try {
-        // Cambiar estado del horario a "Asignado"
-        Integer idHorario = controladorPrestamo.obtenerHorarioPrestamo(idPrestamo);
-        if (idHorario != null) {
-            Horario horario = controladorHorario.buscarPorId(idHorario);
-            if (horario != null) {
-                horario.setEstado("Asignado");
-                controladorHorario.actualizar(horario);
-            }
-        }
-        
-        // Cambiar disponibilidad de equipamientos a "Disponible"
-        List<Integer> equipamientoIds = controladorPrestamo.obtenerEquipamientosPrestamo(idPrestamo);
-        for (Integer idEquipamiento : equipamientoIds) {
-            Clases.Equipamiento equipo = controladorEquipamiento.buscarPorId(idEquipamiento);
-            if (equipo != null) {
-                equipo.setDisponibilidad("Disponible");
-                controladorEquipamiento.actualizar(equipo);
-            }
-        }
-        
-        // Procesar los insumos
-        List<DetallePrestamoInsumo> detallesInsumo = controladorDetalleInsumo.listarPorPrestamo(idPrestamo);
-        if (detallesInsumo.isEmpty()) {
-            // Si no hay insumos, procedemos a terminar el préstamo directamente
-            controladorPrestamo.terminarPrestamo(idPrestamo, new ArrayList<>(), new ArrayList<>());
-            JOptionPane.showMessageDialog(this, "Préstamo terminado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            cargarPrestamos();
+        int filaSeleccionada = tablaPrestamos.getSelectedRow();
+        if (filaSeleccionada == -1) {
+            JOptionPane.showMessageDialog(this, "Por favor, seleccione un préstamo.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        List<Integer> insumoIds = new ArrayList<>();       // Cambiado de detalleInsumoIds a insumoIds
-        List<Integer> cantidadesDevueltas = new ArrayList<>();
+        int idPrestamo = (int) modeloTabla.getValueAt(filaSeleccionada, 0);
+        String estado = (String) modeloTabla.getValueAt(filaSeleccionada, 5);
 
-        for (DetallePrestamoInsumo detalle : detallesInsumo) {
-            int idInsumo = detalle.getIdInsumo();        // Ahora usamos idInsumo directamente
-            int cantidadInicial = detalle.getCantidadInicial();
-            String nombreInsumo = controladorInsumo.obtenerNombreInsumo(idInsumo);
-            
-            String input = JOptionPane.showInputDialog(this, 
-                "Ingrese la cantidad devuelta para el insumo " + nombreInsumo + " (ID: " + idInsumo + ")\n" +
-                "Cantidad prestada: " + cantidadInicial, 
-                "Cantidad Devuelta", JOptionPane.PLAIN_MESSAGE);
-            
-            if (input == null) {
-                return; // El usuario canceló
-            }
+        if (!estado.equals("Aceptado")) {
+            JOptionPane.showMessageDialog(this, "Solo se pueden terminar préstamos en estado Aceptado.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-            int cantidadDevuelta;
-            try {
-                cantidadDevuelta = Integer.parseInt(input);
-                if (cantidadDevuelta < 0 || cantidadDevuelta > cantidadInicial) {
-                    JOptionPane.showMessageDialog(this, "La cantidad devuelta debe estar entre 0 y " + cantidadInicial + ".", 
-                        "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
+        try {
+            // Cambiar estado del horario a "Asignado"
+            Integer idHorario = controladorPrestamo.obtenerHorarioPrestamo(idPrestamo);
+            if (idHorario != null) {
+                Horario horario = controladorHorario.buscarPorId(idHorario);
+                if (horario != null) {
+                    horario.setEstado("Asignado");
+                    controladorHorario.actualizar(horario);
                 }
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Por favor, ingrese un número válido.", "Error", JOptionPane.ERROR_MESSAGE);
-                
+            }
+            
+            // Cambiar disponibilidad de equipamientos a "Disponible"
+            List<Integer> equipamientoIds = controladorPrestamo.obtenerEquipamientosPrestamo(idPrestamo);
+            for (Integer idEquipamiento : equipamientoIds) {
+                Clases.Equipamiento equipo = controladorEquipamiento.buscarPorId(idEquipamiento);
+                if (equipo != null) {
+                    equipo.setDisponibilidad("Disponible");
+                    controladorEquipamiento.actualizar(equipo);
+                }
+            }
+            
+            // Procesar los insumos
+            List<DetallePrestamoInsumo> detallesInsumo = controladorDetalleInsumo.listarPorPrestamo(idPrestamo);
+            if (detallesInsumo.isEmpty()) {
+                // Si no hay insumos, procedemos a terminar el préstamo directamente
+                controladorPrestamo.terminarPrestamo(idPrestamo, new ArrayList<>(), new ArrayList<>());
+                JOptionPane.showMessageDialog(this, "Préstamo terminado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                cargarPrestamos();
                 return;
             }
 
-            insumoIds.add(idInsumo);                     // Agregamos ID de insumo en vez de ID de detalle
-            cantidadesDevueltas.add(cantidadDevuelta);
-        }
+            List<Integer> insumoIds = new ArrayList<>();
+            List<Integer> cantidadesDevueltas = new ArrayList<>();
 
-        // Procesar el préstamo
-        controladorPrestamo.terminarPrestamo(idPrestamo, insumoIds, cantidadesDevueltas);
-        JOptionPane.showMessageDialog(this, "Préstamo terminado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        cargarPrestamos();
-    } catch (SQLException ex) {
-        LOGGER.log(Level.SEVERE, "Error al terminar préstamo ID " + idPrestamo, ex);
-        JOptionPane.showMessageDialog(this, "Error al terminar préstamo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            for (DetallePrestamoInsumo detalle : detallesInsumo) {
+                int idInsumo = detalle.getIdInsumo();
+                int cantidadInicial = detalle.getCantidadInicial();
+                String nombreInsumo = controladorInsumo.obtenerNombreInsumo(idInsumo);
+                
+                String input = JOptionPane.showInputDialog(this, 
+                    "Ingrese la cantidad devuelta para el insumo " + nombreInsumo + " (ID: " + idInsumo + ")\n" +
+                    "Cantidad prestada: " + cantidadInicial, 
+                    "Cantidad Devuelta", JOptionPane.PLAIN_MESSAGE);
+                
+                if (input == null) {
+                    return; // El usuario canceló
+                }
+
+                int cantidadDevuelta;
+                try {
+                    cantidadDevuelta = Integer.parseInt(input);
+                    if (cantidadDevuelta < 0 || cantidadDevuelta > cantidadInicial) {
+                        JOptionPane.showMessageDialog(this, "La cantidad devuelta debe estar entre 0 y " + cantidadInicial + ".", 
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this, "Por favor, ingrese un número válido.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                insumoIds.add(idInsumo);
+                cantidadesDevueltas.add(cantidadDevuelta);
+            }
+
+            // Procesar el préstamo
+            controladorPrestamo.terminarPrestamo(idPrestamo, insumoIds, cantidadesDevueltas);
+            JOptionPane.showMessageDialog(this, "Préstamo terminado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            cargarPrestamos();
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Error al terminar préstamo ID " + idPrestamo, ex);
+            JOptionPane.showMessageDialog(this, "Error al terminar préstamo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
-}
 }
