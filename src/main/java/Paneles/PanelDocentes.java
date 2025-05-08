@@ -9,6 +9,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.sql.*;
+import DataBase.ConexionBD; // Importando la clase ConexionBD
 
 public class PanelDocentes extends JPanel {
 
@@ -84,11 +85,7 @@ public class PanelDocentes extends JPanel {
     }
 
     private void cargarDatosDesdeBD() {
-        String url = "jdbc:mysql://localhost:3306/prestamo_controles_lab1111";
-        String usuario = "root";
-        String contraseña = "root";
-
-        try (Connection conn = DriverManager.getConnection(url, usuario, contraseña)) {
+        try (Connection conn = ConexionBD.conectar()) { // Usando el método conectar de ConexionBD
             String sql = "SELECT ru, nombre, apellido_paterno, apellido_materno, email, rol FROM usuario WHERE rol = 'DOCENTE'";
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
