@@ -2,13 +2,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
+
 package Paneles;
 
-/**
- *
- * @author DOC
- */
-
+// Importación de clases necesarias
 import Clases.Horario;
 import Clases.Laboratorio;
 import Controles.ControladorHorario;
@@ -24,29 +21,35 @@ import java.util.List;
 import java.util.Map;
 
 public class PanelHorario extends JPanel {
+    // Campos del formulario
     private JTextField cajaMateria;
     private JComboBox<String> comboParalelo, comboSemestre, comboCarrera, comboHora, comboDia, comboEstado, comboLaboratorio;
     private JTable tablaHorario;
     private DefaultTableModel modelo;
     private JButton btnAgregar, btnActualizar, btnEliminar, btnLimpiar;
 
+    // Controladores y mapeo de laboratorios
     private ControladorHorario controlador;
     private ControladorLaboratorio controladorLab;
     private Map<String, Integer> mapLaboratorios;
-    private Integer idSeleccionado = null;
+    private Integer idSeleccionado = null; // ID del horario actualmente seleccionado en la tabla
 
     public PanelHorario() {
+        // Inicialización de controladores
         controlador = new ControladorHorario();
         controladorLab = new ControladorLaboratorio();
         mapLaboratorios = new HashMap<>();
 
+        // Establece layout general y color de fondo del panel principal
         setLayout(new BorderLayout());
         setBackground(new Color(81, 0, 255));
 
+        // Panel de formulario (formulario de ingreso/edición de datos)
         JPanel panelForm = new JPanel(new GridLayout(9, 2, 10, 10));
         panelForm.setBorder(BorderFactory.createTitledBorder("GESTOR DE HORARIOS"));
         panelForm.setBackground(new Color(81, 0, 255));
 
+        // Creación de etiquetas
         JLabel lblMateria = new JLabel("Materia:");
         JLabel lblParalelo = new JLabel("Paralelo:");
         JLabel lblSemestre = new JLabel("Semestre:");
@@ -56,12 +59,13 @@ public class PanelHorario extends JPanel {
         JLabel lblEstado = new JLabel("Estado:");
         JLabel lblLab = new JLabel("Laboratorio:");
 
+        // Establece el color blanco para las etiquetas
         for (JLabel label : new JLabel[]{lblMateria, lblParalelo, lblSemestre, lblCarrera, lblHora, lblDia, lblEstado, lblLab}) {
             label.setForeground(Color.WHITE);
         }
 
+        // Inicializa campos del formulario
         cajaMateria = new JTextField();
-        // Cambiado de String[] a Integer[] para paralelo
         comboParalelo = new JComboBox<>(new String[]{"111", "112", "113"});
         comboSemestre = new JComboBox<>(new String[]{"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"});
         comboCarrera = new JComboBox<>(new String[]{"Ingeniería de Sistemas", "Derecho", "Contaduría", "Gastronomía", "Psicomotricidad", "Ingeniería Comercial", "Parvularía"});
@@ -69,9 +73,11 @@ public class PanelHorario extends JPanel {
         comboDia = new JComboBox<>(new String[]{"Lunes", "Martes", "Miércoles", "Jueves", "Viernes"});
         comboEstado = new JComboBox<>(new String[]{"Asignado", "Disponible", "No Disponible", "Préstamo"});
 
+        // ComboBox de laboratorios (se carga dinámicamente)
         comboLaboratorio = new JComboBox<>();
-        cargarLaboratorios();
+        cargarLaboratorios(); // Llama a función que carga laboratorios desde la base de datos
 
+        // Añade componentes al formulario
         panelForm.add(lblMateria); panelForm.add(cajaMateria);
         panelForm.add(lblParalelo); panelForm.add(comboParalelo);
         panelForm.add(lblSemestre); panelForm.add(comboSemestre);
@@ -81,64 +87,64 @@ public class PanelHorario extends JPanel {
         panelForm.add(lblEstado); panelForm.add(comboEstado);
         panelForm.add(lblLab); panelForm.add(comboLaboratorio);
 
+        // Panel de botones
         JPanel panelBotones = new JPanel(new GridLayout(1, 4, 10, 10));
         btnAgregar = new JButton("AGREGAR");
         btnActualizar = new JButton("ACTUALIZAR");
         btnEliminar = new JButton("ELIMINAR");
         btnLimpiar = new JButton("LIMPIAR");
 
+        // Estilo y color para botones
         btnAgregar.setBackground(new Color(25, 209, 49));
         btnActualizar.setBackground(new Color(210, 79, 9));
         btnEliminar.setBackground(new Color(220, 20, 60));
         btnLimpiar.setBackground(new Color(0, 63, 135));
-
         for (JButton btn : new JButton[]{btnAgregar, btnActualizar, btnEliminar, btnLimpiar}) {
             btn.setForeground(Color.WHITE);
             panelBotones.add(btn);
         }
 
+        // Panel que agrupa formulario y botones
         JPanel panelSuperior = new JPanel(new BorderLayout());
         panelSuperior.add(panelForm, BorderLayout.NORTH);
         panelSuperior.add(panelBotones, BorderLayout.SOUTH);
 
+        // Tabla para mostrar horarios
         modelo = new DefaultTableModel(new String[]{
                 "ID", "Materia", "Paralelo", "Semestre", "Carrera", "Hora", "Día", "Laboratorio", "Estado"
         }, 0);
         tablaHorario = new JTable(modelo);
-        tablaHorario.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        JScrollPane scroll = new JScrollPane(tablaHorario);
+        tablaHorario.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); // Solo permite seleccionar una fila
+        JScrollPane scroll = new JScrollPane(tablaHorario); // Añade scroll a la tabla
 
+        // Añade paneles al contenedor principal
         add(panelSuperior, BorderLayout.NORTH);
         add(scroll, BorderLayout.CENTER);
 
+        // Evento al presionar botón AGREGAR
         btnAgregar.addActionListener(e -> {
             try {
-                Horario horario = obtenerHorarioDesdeFormulario();
-                controlador.insertar(horario);
-                cargarDatos();
-                limpiarFormulario();
+                Horario horario = obtenerHorarioDesdeFormulario(); // Obtiene los datos ingresados
+                controlador.insertar(horario); // Inserta en BD
+                cargarDatos(); // Recarga tabla
+                limpiarFormulario(); // Limpia formulario
             } catch (Exception ex) {
-                mostrarError(ex);
+                mostrarError(ex); // Muestra error si ocurre
             }
         });
 
+        // Evento al presionar botón ACTUALIZAR
         btnActualizar.addActionListener(e -> {
             try {
                 if (idSeleccionado == null) throw new IllegalArgumentException("Seleccione un horario.");
                 Horario horario = obtenerHorarioDesdeFormulario();
-                // Crear nuevo objeto con ID incluido
                 Horario horarioActualizar = new Horario(
                     idSeleccionado,
-                    horario.getMateria(),
-                    horario.getParalelo(),
-                    horario.getSemestre(),
-                    horario.getCarrera(),
-                    horario.getHora(),
-                    horario.getDia(),
-                    horario.getIdLaboratorio(),
-                    horario.getEstado()
+                    horario.getMateria(), horario.getParalelo(), horario.getSemestre(),
+                    horario.getCarrera(), horario.getHora(), horario.getDia(),
+                    horario.getIdLaboratorio(), horario.getEstado()
                 );
-                controlador.actualizar(horarioActualizar);
+                controlador.actualizar(horarioActualizar); // Actualiza en BD
                 cargarDatos();
                 limpiarFormulario();
             } catch (Exception ex) {
@@ -146,12 +152,13 @@ public class PanelHorario extends JPanel {
             }
         });
 
+        // Evento al presionar botón ELIMINAR
         btnEliminar.addActionListener(e -> {
             try {
                 if (idSeleccionado == null) throw new IllegalArgumentException("Seleccione un horario.");
                 int confirm = JOptionPane.showConfirmDialog(this, "¿Eliminar este horario?", "Confirmación", JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
-                    controlador.eliminar(idSeleccionado);
+                    controlador.eliminar(idSeleccionado); // Elimina de BD
                     cargarDatos();
                     limpiarFormulario();
                 }
@@ -160,11 +167,14 @@ public class PanelHorario extends JPanel {
             }
         });
 
+        // Evento al presionar botón LIMPIAR
         btnLimpiar.addActionListener(e -> limpiarFormulario());
 
+        // Evento al seleccionar una fila en la tabla
         tablaHorario.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
             int fila = tablaHorario.getSelectedRow();
             if (fila >= 0) {
+                // Carga datos de la fila seleccionada en el formulario
                 idSeleccionado = Integer.parseInt(modelo.getValueAt(fila, 0).toString());
                 cajaMateria.setText(modelo.getValueAt(fila, 1).toString());
                 comboParalelo.setSelectedItem(modelo.getValueAt(fila, 2).toString());
@@ -172,14 +182,15 @@ public class PanelHorario extends JPanel {
                 comboCarrera.setSelectedItem(modelo.getValueAt(fila, 4).toString());
                 comboHora.setSelectedItem(modelo.getValueAt(fila, 5).toString());
                 comboDia.setSelectedItem(modelo.getValueAt(fila, 6).toString());
-                seleccionarLaboratorio(Integer.parseInt(modelo.getValueAt(fila, 7).toString()));
+                seleccionarLaboratorio(Integer.parseInt(modelo.getValueAt(fila, 7).toString())); // Selecciona laboratorio en combo
                 comboEstado.setSelectedItem(modelo.getValueAt(fila, 8).toString());
             }
         });
 
-        cargarDatos();
+        cargarDatos(); // Carga inicial de datos en la tabla
     }
 
+    // Carga laboratorios desde la base de datos al combo
     private void cargarLaboratorios() {
         try {
             comboLaboratorio.removeAllItems();
@@ -195,6 +206,7 @@ public class PanelHorario extends JPanel {
         }
     }
 
+    // Selecciona un laboratorio en el combo a partir de su ID
     private void seleccionarLaboratorio(int idLab) {
         for (Map.Entry<String, Integer> entry : mapLaboratorios.entrySet()) {
             if (entry.getValue() == idLab) {
@@ -204,6 +216,7 @@ public class PanelHorario extends JPanel {
         }
     }
 
+    // Extrae los datos del formulario y crea un objeto Horario
     private Horario obtenerHorarioDesdeFormulario() {
         String materia = cajaMateria.getText();
         int paralelo = Integer.parseInt(comboParalelo.getSelectedItem().toString());
@@ -214,13 +227,13 @@ public class PanelHorario extends JPanel {
         String estado = comboEstado.getSelectedItem().toString();
         int idLab = mapLaboratorios.get(comboLaboratorio.getSelectedItem().toString());
 
-        // Correcto orden de parámetros según el constructor
         return new Horario(materia, paralelo, semestre, carrera, hora, dia, idLab, estado);
     }
 
+    // Carga todos los horarios desde la base de datos a la tabla
     private void cargarDatos() {
         try {
-            modelo.setRowCount(0);
+            modelo.setRowCount(0); // Limpia la tabla
             List<Horario> lista = controlador.listar();
             for (Horario h : lista) {
                 modelo.addRow(new Object[]{
@@ -233,6 +246,7 @@ public class PanelHorario extends JPanel {
         }
     }
 
+    // Limpia todos los campos del formulario
     private void limpiarFormulario() {
         idSeleccionado = null;
         cajaMateria.setText("");
@@ -246,7 +260,10 @@ public class PanelHorario extends JPanel {
         tablaHorario.clearSelection();
     }
 
+    // Muestra un mensaje de error emergente
     private void mostrarError(Exception ex) {
         JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
+}
+
 }
