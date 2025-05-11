@@ -4,6 +4,7 @@
  */
 package Paneles;
 
+import DataBase.ConexionBD;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
@@ -94,13 +95,10 @@ public class PanelEstudiantes extends JPanel {
 
     /**
      * Método para conectar con la base de datos y cargar la lista de estudiantes en la tabla.
+     * Ahora utiliza la clase ConexionBD para establecer la conexión.
      */
     private void cargarDatosDesdeBD() {
-        String url = "jdbc:mysql://localhost:3306/prestamo_controles_lab1111";
-        String usuario = "root";
-        String contraseña = "root";
-
-        try (Connection conn = DriverManager.getConnection(url, usuario, contraseña)) {
+        try (Connection conn = ConexionBD.conectar()) {
             // Consulta SQL para obtener estudiantes
             String sql = "SELECT ru, nombre, apellido_paterno, apellido_materno, email, rol FROM usuario WHERE rol = 'ESTUDIANTE'";
             Statement stmt = conn.createStatement();

@@ -6,7 +6,7 @@ package DataBase;
 
 /**
  *
- * @author Juan Carlos Chavez Machaca
+ * @author EQUIPO DE LOS SOLDADOS CAÍDOS
  */
 import java.sql.Connection;
 import java.sql.DriverManager;

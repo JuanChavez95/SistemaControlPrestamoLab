@@ -69,7 +69,7 @@ public class PanelListaSanciones extends JPanel {
             inicializarControladores();
             inicializarComponentes();
         } catch (SQLException ex) {
-            mostrarError("Error al conectar con la base de datos", ex);
+            JOptionPane.showMessageDialog(this, "Error al conectar con la base de datos:\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
     
@@ -93,7 +93,8 @@ public class PanelListaSanciones extends JPanel {
             this.controladorSancionEquipo = new ControladorSancionEquipo();
             this.controladorSancionInsumo = new ControladorSancionInsumo();
         } catch (Exception ex) {
-            mostrarError("Error al inicializar controladores", ex);
+            JOptionPane.showMessageDialog(this, "Error al inicializar controladores:\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
         }
     }
 
@@ -504,9 +505,11 @@ public class PanelListaSanciones extends JPanel {
                 }
             }
         } catch (SQLException ex) {
-            mostrarError("Error al cargar las sanciones", ex);
+            JOptionPane.showMessageDialog(this, "Error al cargar las sanciones:\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
         }
     }
+    
     
     /**
      * Actualiza los contadores de estadísticas
