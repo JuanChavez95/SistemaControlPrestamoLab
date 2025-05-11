@@ -381,6 +381,60 @@ public class PanelListaSanciones extends JPanel {
         return panel;
     }
 
+    /**
+     * Crea un botón estilizado para la interfaz
+     * @param texto Texto del botón
+     * @param tipo Tipo de botón (determina estilo)
+     * @param esSecundario Si es un botón secundario
+     * @return Botón configurado
+     */
+    private JButton crearBoton(String texto, String tipo, boolean esSecundario) {
+        JButton boton = new JButton(texto);
+        
+        boton.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        boton.setFocusPainted(false);
+        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        if (esSecundario) {
+            boton.setBackground(Color.WHITE);
+            boton.setForeground(COLOR_SECUNDARIO);
+            boton.setBorder(BorderFactory.createLineBorder(COLOR_SECUNDARIO));
+        } else {
+            boton.setBackground(COLOR_ACENTO);
+            boton.setForeground(Color.WHITE);
+            boton.setBorder(BorderFactory.createEmptyBorder());
+        }
+        
+        // Tamaño uniforme para los botones
+        Dimension dim = new Dimension(140, 35);
+        boton.setPreferredSize(dim);
+        boton.setMinimumSize(dim);
+        boton.setMaximumSize(dim);
+        
+        // Efectos hover
+        boton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (esSecundario) {
+                    boton.setBackground(new Color(245, 245, 255));
+                } else {
+                    boton.setBackground(COLOR_ACENTO.darker());
+                }
+            }
+            
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (esSecundario) {
+                    boton.setBackground(Color.WHITE);
+                } else {
+                    boton.setBackground(COLOR_ACENTO);
+                }
+            }
+        });
+        
+        return boton;
+    }
+
     private void filtrarSanciones() {
         String estadoFiltro = cmbFiltroEstado.getSelectedItem().toString();
         String busquedaUsuario = txtBuscarUsuario.getText().trim();
