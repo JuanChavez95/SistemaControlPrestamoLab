@@ -247,6 +247,113 @@ public class PanelListaSanciones extends JPanel {
         ));
     }
 
+    /**
+     * Crea el panel que contiene la tabla de sanciones
+     */
+    private JPanel crearPanelTabla() {
+        JPanel panel = new JPanel(new BorderLayout(5, 5));
+        panel.setOpaque(false);
+        
+        // Definir el modelo de la tabla
+        String[] columnas = {"ID", "Usuario", "Tipo", "Fecha Sanción", "Estado", "Días Suspensión", "Fecha Inicio", "Fecha Fin", "Elementos Afectados"};
+        modeloTabla = new DefaultTableModel(columnas, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+            
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                return columnIndex == 0 ? Integer.class : String.class;
+            }
+        };
+
+        // Crear y configurar la tabla
+        tablaSanciones = new JTable(modeloTabla);
+        tablaSanciones.setRowHeight(28);
+        tablaSanciones.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        tablaSanciones.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        tablaSanciones.getTableHeader().setBackground(COLOR_PRIMARIO);
+        tablaSanciones.getTableHeader().setForeground(Color.WHITE);
+        tablaSanciones.setSelectionBackground(new Color(232, 240, 254));
+        tablaSanciones.setSelectionForeground(Color.BLACK);
+        tablaSanciones.setShowGrid(false);
+        tablaSanciones.setIntercellSpacing(new Dimension(0, 0));
+        tablaSanciones.setFillsViewportHeight(true);
+        
+        // Configura el renderizador personalizado para colorear estados
+        tablaSanciones.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, 
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                
+                if (column == 4 && value != null) { // Columna de Estado
+                    String estado = value.toString();
+                    if (estado.equals("ACTIVA")) {
+                        setForeground(COLOR_ACTIVA);
+                        setFont(getFont().deriveFont(Font.BOLD));
+                    } else if (estado.equals("CUMPLIDA")) {
+                        setForeground(COLOR_CUMPLIDA);
+                        setFont(getFont().deriveFont(Font.BOLD));
+                    } else if (estado.equals("NO CUMPLIDA")) {
+                        setForeground(COLOR_NO_CUMPLIDA);
+                        setFont(getFont().deriveFont(Font.BOLD));
+                    } else {
+                        setForeground(table.getForeground());
+                        setFont(getFont().deriveFont(Font.PLAIN));
+                    }
+                } else {
+                    setForeground(table.getForeground());
+                    setFont(getFont().deriveFont(Font.PLAIN));
+                }
+                
+                // Agregar padding
+                ((JLabel)c).setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+                ((JLabel)c).setHorizontalAlignment(column == 0 ? JLabel.CENTER : JLabel.LEFT);
+                
+                return c;
+            }
+        });
+        
+        // Configurar anchos de columna
+        TableColumnModel columnModel = tablaSanciones.getColumnModel();
+        columnModel.getColumn(0).setPreferredWidth(50);  // ID
+        columnModel.getColumn(0).setMaxWidth(60);
+        columnModel.getColumn(1).setPreferredWidth(180); // Usuario
+        columnModel.getColumn(2).setPreferredWidth(120); // Tipo
+        columnModel.getColumn(3).setPreferredWidth(100); // Fecha Sanción
+        columnModel.getColumn(4).setPreferredWidth(100); // Estado
+        columnModel.getColumn(5).setPreferredWidth(60);  // Días
+        columnModel.getColumn(6).setPreferredWidth(100); // Fecha Inicio
+        columnModel.getColumn(7).setPreferredWidth(100); // Fecha Fin
+        columnModel.getColumn(8).setPreferredWidth(250); // Elementos
+        
+        // Añadir sorter para ordenamiento
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(modeloTabla);
+        tablaSanciones.setRowSorter(sorter);
+        
+        // Configurar doble clic para ver detalles
+        tablaSanciones.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    verDetallesSancion();
+                }
+            }
+        });
+        
+        // Scroll pane para la tabla
+        JScrollPane scrollPane = new JScrollPane(tablaSanciones);
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
+        scrollPane.getViewport().setBackground(Color.WHITE);
+        
+        panel.add(scrollPane, BorderLayout.CENTER);
+        
+        return panel;
+    }
+
     private void filtrarSanciones() {
         String estadoFiltro = cmbFiltroEstado.getSelectedItem().toString();
         String busquedaUsuario = txtBuscarUsuario.getText().trim();
