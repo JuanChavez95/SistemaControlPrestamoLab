@@ -123,6 +123,46 @@ public class PanelListaSanciones extends JPanel {
         actualizarEstadisticas();
     }
     
+    /**
+     * Crea el panel superior con título y estadísticas
+     * @return Panel configurado
+     */
+    private JPanel crearPanelSuperior() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setOpaque(false);
+        
+        // Panel de título
+        JPanel panelTitulo = new JPanel(new BorderLayout());
+        panelTitulo.setOpaque(false);
+        
+        JLabel labelTitulo = new JLabel("GESTIÓN DE SANCIONES");
+        labelTitulo.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        labelTitulo.setForeground(COLOR_PRIMARIO);
+        labelTitulo.setBorder(BorderFactory.createEmptyBorder(5, 10, 15, 10));
+        panelTitulo.add(labelTitulo, BorderLayout.WEST);
+        
+        // Panel de estadísticas
+        JPanel panelEstadisticas = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panelEstadisticas.setOpaque(false);
+        
+        lblTotalSanciones = crearLabelEstadistica("Total: 0", null);
+        lblActivasSanciones = crearLabelEstadistica("Activas: 0", COLOR_ACTIVA);
+        lblCumplidasSanciones = crearLabelEstadistica("Cumplidas: 0", COLOR_CUMPLIDA);
+        
+        panelEstadisticas.add(lblTotalSanciones);
+        panelEstadisticas.add(lblActivasSanciones);
+        panelEstadisticas.add(lblCumplidasSanciones);
+        
+        panelTitulo.add(panelEstadisticas, BorderLayout.EAST);
+        panel.add(panelTitulo, BorderLayout.NORTH);
+        
+        // Panel de filtros
+        JPanel panelFiltros = crearPanelFiltros();
+        panel.add(panelFiltros, BorderLayout.CENTER);
+        
+        return panel;
+    }
+
     private void filtrarSanciones() {
         String estadoFiltro = cmbFiltroEstado.getSelectedItem().toString();
         String busquedaUsuario = txtBuscarUsuario.getText().trim();
