@@ -73,12 +73,13 @@ public class PanelListaSanciones extends JPanel {
         }
     }
     
+    /**
+     * Constructor que utiliza una conexión existente a la base de datos
+     * @param conexion La conexión a la base de datos
+     */
     public PanelListaSanciones(Connection conexion) {
         this.conexion = conexion;
-        this.controladorSancion = new ControladorSancion();
-        this.controladorSancionEquipamiento = new ControladorSancionEquipamiento();
-        this.controladorSancionEquipo = new ControladorSancionEquipo();
-        this.controladorSancionInsumo = new ControladorSancionInsumo();
+        inicializarControladores();
         inicializarComponentes();
     }
     
