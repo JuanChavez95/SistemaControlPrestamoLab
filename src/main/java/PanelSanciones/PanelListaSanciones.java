@@ -508,6 +508,33 @@ public class PanelListaSanciones extends JPanel {
         }
     }
     
+    /**
+     * Actualiza los contadores de estadísticas
+     */
+    private void actualizarEstadisticas() {
+        try {
+            // Contar sanciones totales
+            String sqlTotal = "SELECT COUNT(*) FROM sancion";
+            int totalSanciones = obtenerContador(sqlTotal);
+            
+            // Contar sanciones activas
+            String sqlActivas = "SELECT COUNT(*) FROM sancion WHERE estado_sancion = 'ACTIVA'";
+            int sancionesActivas = obtenerContador(sqlActivas);
+            
+            // Contar sanciones cumplidas
+            String sqlCumplidas = "SELECT COUNT(*) FROM sancion WHERE estado_sancion = 'CUMPLIDA'";
+            int sancionesCumplidas = obtenerContador(sqlCumplidas);
+            
+            // Actualizar las etiquetas
+            lblTotalSanciones.setText("Total: " + totalSanciones);
+            lblActivasSanciones.setText("Activas: " + sancionesActivas);
+            lblCumplidasSanciones.setText("Cumplidas: " + sancionesCumplidas);
+            
+        } catch (SQLException ex) {
+            System.err.println("Error al actualizar estadísticas: " + ex.getMessage());
+        }
+    }
+
     private String obtenerResumenElementosAfectados(int idSancion) {
         StringBuilder resumen = new StringBuilder();
         try {
