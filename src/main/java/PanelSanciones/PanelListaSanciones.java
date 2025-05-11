@@ -97,85 +97,30 @@ public class PanelListaSanciones extends JPanel {
         }
     }
 
+    /**
+     * Inicializa todos los componentes de la interfaz de usuario
+     */
     private void inicializarComponentes() {
-        // Configuración visual
-        setBackground(Color.WHITE);
+        // Configuración visual del panel principal
+        setBackground(COLOR_FONDO);
+        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         setLayout(new BorderLayout(10, 10));
 
-        // Panel superior con título y herramientas de búsqueda
-        JPanel panelSuperior = new JPanel(new BorderLayout());
-        panelSuperior.setBackground(Color.WHITE);
-        
-        JLabel titleLabel = new JLabel("Visualizar Sanciones");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        panelSuperior.add(titleLabel, BorderLayout.NORTH);
-        
-        // Panel de filtros
-        JPanel panelFiltros = new JPanel();
-        panelFiltros.setBackground(Color.WHITE);
-        
-        panelFiltros.add(new JLabel("Filtrar por estado:"));
-        cmbFiltroEstado = new JComboBox<>(new String[]{"Todos", "ACTIVA", "CUMPLIDA", "NO CUMPLIDA"});
-        panelFiltros.add(cmbFiltroEstado);
-        
-        panelFiltros.add(new JLabel("Buscar por RU/Nombre:"));
-        txtBuscarUsuario = new JTextField(15);
-        panelFiltros.add(txtBuscarUsuario);
-        
-        btnFiltrar = new JButton("Filtrar");
-        btnFiltrar.addActionListener(e -> filtrarSanciones());
-        panelFiltros.add(btnFiltrar);
-        
-        panelSuperior.add(panelFiltros, BorderLayout.CENTER);
-        
+        // Panel superior con título y dashboard
+        JPanel panelSuperior = crearPanelSuperior();
         add(panelSuperior, BorderLayout.NORTH);
 
-        // Tabla y modelo
-        String[] columnas = {"ID Sanción", "RU Usuario", "Tipo", "Fecha Sanción", "Estado", "Días Suspensión", "Fecha Inicio", "Fecha Fin", "Elementos"};
-        modeloTabla = new DefaultTableModel(columnas, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-
-        tablaSanciones = new JTable(modeloTabla);
-        tablaSanciones.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-        tablaSanciones.getColumnModel().getColumn(0).setPreferredWidth(70);
-        tablaSanciones.getColumnModel().getColumn(1).setPreferredWidth(200);
-        tablaSanciones.getColumnModel().getColumn(8).setPreferredWidth(250);
+        // Crear y agregar la tabla de sanciones
+        JPanel panelTabla = crearPanelTabla();
+        add(panelTabla, BorderLayout.CENTER);
         
-        // Agregar sorter para ordenar la tabla
-        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(modeloTabla);
-        tablaSanciones.setRowSorter(sorter);
-        
-        JScrollPane scrollPane = new JScrollPane(tablaSanciones);
-        add(scrollPane, BorderLayout.CENTER);
+        // Panel de acciones (botones)
+        JPanel panelAcciones = crearPanelAcciones();
+        add(panelAcciones, BorderLayout.SOUTH);
 
-        // Botones - Eliminando los iconos que causan el error
-        JPanel panelBotones = new JPanel();
-        panelBotones.setBackground(Color.WHITE);
-
-        btnActualizar = new JButton("Actualizar Lista");
-        // Quitamos la referencia al icono que causa el error
-        btnActualizar.addActionListener(e -> cargarSanciones());
-        panelBotones.add(btnActualizar);
-
-        btnDetalles = new JButton("Ver Detalles");
-        // Quitamos la referencia al icono que causa el error
-        btnDetalles.addActionListener(e -> verDetallesSancion());
-        panelBotones.add(btnDetalles);
-
-        btnCambiarEstado = new JButton("Cambiar Estado");
-        // Quitamos la referencia al icono que causa el error
-        btnCambiarEstado.addActionListener(e -> cambiarEstadoSancion());
-        panelBotones.add(btnCambiarEstado);
-
-        add(panelBotones, BorderLayout.SOUTH);
-
-        // Cargar datos al iniciar
+        // Cargar datos iniciales
         cargarSanciones();
+        actualizarEstadisticas();
     }
     
     private void filtrarSanciones() {
