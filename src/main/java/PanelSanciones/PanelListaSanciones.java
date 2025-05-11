@@ -163,6 +163,27 @@ public class PanelListaSanciones extends JPanel {
         return panel;
     }
 
+    /**
+     * Crea un label para mostrar estadísticas con formato
+     */
+    private JLabel crearLabelEstadistica(String texto, Color colorBorde) {
+        JLabel label = new JLabel(texto);
+        label.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        label.setForeground(Color.DARK_GRAY);
+        
+        // Aplicar borde con color si se especifica
+        if (colorBorde != null) {
+            label.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 2, 0, colorBorde),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+            ));
+        } else {
+            label.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        }
+        
+        return label;
+    }
+
     private void filtrarSanciones() {
         String estadoFiltro = cmbFiltroEstado.getSelectedItem().toString();
         String busquedaUsuario = txtBuscarUsuario.getText().trim();
