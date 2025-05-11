@@ -1,6 +1,5 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Panel de visualización y gestión de sanciones
  */
 package PanelSanciones;
 
@@ -15,18 +14,28 @@ import Controles.ControladorSancionInsumo;
 import DataBase.ConexionBD;
 
 import javax.swing.*;
+import javax.swing.border.*;
+import javax.swing.table.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableRowSorter;
+import java.util.Date;
 
+/**
+ * Panel que implementa la visualización y gestión de sanciones en el sistema
+ * Permite filtrar, buscar y administrar los estados de las sanciones
+ */
 public class PanelListaSanciones extends JPanel {
-    
+
+    // Constantes de la interfaz
+    private static final Color COLOR_FONDO = new Color(245, 245, 250);
+    private static final Color COLOR_PRIMARIO = new Color(25, 63, 95);
+    private static final Color COLOR_SECUNDARIO = new Color(72, 126, 176);
+    private static final Color COLOR_ACENTO = new Color(0, 103, 177);
+        
     private JTable tablaSanciones;
     private DefaultTableModel modeloTabla;
     private JButton btnActualizar;
