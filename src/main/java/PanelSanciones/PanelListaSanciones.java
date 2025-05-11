@@ -535,6 +535,16 @@ public class PanelListaSanciones extends JPanel {
         }
     }
 
+    private int obtenerContador(String sql) throws SQLException {
+        try (PreparedStatement stmt = conexion.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+        return 0;
+    }
+
     private String obtenerResumenElementosAfectados(int idSancion) {
         StringBuilder resumen = new StringBuilder();
         try {
