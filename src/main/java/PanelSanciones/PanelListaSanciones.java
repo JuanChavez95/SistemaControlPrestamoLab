@@ -35,7 +35,12 @@ public class PanelListaSanciones extends JPanel {
     private static final Color COLOR_PRIMARIO = new Color(25, 63, 95);
     private static final Color COLOR_SECUNDARIO = new Color(72, 126, 176);
     private static final Color COLOR_ACENTO = new Color(0, 103, 177);
-        
+
+    // Estados de sanción y sus colores
+    private static final Color COLOR_ACTIVA = new Color(25, 118, 210);
+    private static final Color COLOR_CUMPLIDA = new Color(56, 142, 60);
+    private static final Color COLOR_NO_CUMPLIDA = new Color(211, 47, 47);
+    
     private JTable tablaSanciones;
     private DefaultTableModel modeloTabla;
     private JButton btnActualizar;
