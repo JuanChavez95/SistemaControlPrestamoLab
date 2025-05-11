@@ -467,8 +467,8 @@ public class PanelListaSanciones extends JPanel {
             
             if (!filtroUsuario.isEmpty()) {
                 sqlBuilder.append(" AND (CAST(u.ru AS CHAR) LIKE '%").append(filtroUsuario).append("%'")
-                         .append(" OR u.nombre LIKE '%").append(filtroUsuario).append("%'")
-                         .append(" OR u.apellido_paterno LIKE '%").append(filtroUsuario).append("%')");
+                         .append(" OR LOWER(u.nombre) LIKE LOWER('%").append(filtroUsuario).append("%')")
+                         .append(" OR LOWER(u.apellido_paterno) LIKE LOWER('%").append(filtroUsuario).append("%')");
             }
             
             sqlBuilder.append(" ORDER BY s.fecha_sancion DESC");
@@ -504,7 +504,7 @@ public class PanelListaSanciones extends JPanel {
                 }
             }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error al cargar las sanciones: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            mostrarError("Error al cargar las sanciones", ex);
         }
     }
     
