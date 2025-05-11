@@ -435,11 +435,15 @@ public class PanelListaSanciones extends JPanel {
         return boton;
     }
 
+    /**
+     * Filtra las sanciones según los criterios seleccionados
+     */
     private void filtrarSanciones() {
         String estadoFiltro = cmbFiltroEstado.getSelectedItem().toString();
         String busquedaUsuario = txtBuscarUsuario.getText().trim();
         
         cargarSanciones(estadoFiltro, busquedaUsuario);
+        actualizarEstadisticas();
     }
 
     private void cargarSanciones() {
