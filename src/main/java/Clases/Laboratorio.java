@@ -5,28 +5,45 @@
 package Clases;
 
 /*
- * Autor: Equipo Soldados Caídos
+ * Clase que representa la entidad Laboratorio.
+ * Se usa para mapear objetos a registros de la base de datos.
+ * Autor: Soldados Caídos
  */
 public class Laboratorio {
-    private int idLaboratorio; //Para lectura y edición
-    private String ubicacion;
-    private String descripcion;
-    private int capacidad;
 
-    // Constructor sin ID (para inserción de datos)
+    // Atributos privados que representan las columnas de la tabla laboratorio
+    private int idLaboratorio;     // ID del laboratorio (clave primaria, generado automáticamente)
+    private String ubicacion;      // Ubicación física del laboratorio (ej. "Bloque A")
+    private String descripcion;    // Descripción general del laboratorio
+    private int capacidad;         // Número máximo de personas o equipos que puede alojar
+
+    /**
+     * Constructor utilizado al crear un nuevo laboratorio (sin ID, ya que lo asigna la base de datos).
+     * @param ubicacion Ubicación del laboratorio.
+     * @param descripcion Descripción del laboratorio.
+     * @param capacidad Capacidad máxima del laboratorio.
+     */
     public Laboratorio(String ubicacion, String descripcion, int capacidad) {
         this.ubicacion = ubicacion;
         this.descripcion = descripcion;
         this.capacidad = capacidad;
     }
 
-    // Constructor con ID (para la lectura y actualización de datos)
+    /**
+     * Constructor utilizado al cargar o actualizar un laboratorio existente.
+     * @param idLaboratorio ID del laboratorio.
+     * @param ubicacion Ubicación del laboratorio.
+     * @param descripcion Descripción del laboratorio.
+     * @param capacidad Capacidad del laboratorio.
+     */
     public Laboratorio(int idLaboratorio, String ubicacion, String descripcion, int capacidad) {
         this.idLaboratorio = idLaboratorio;
         this.ubicacion = ubicacion;
         this.descripcion = descripcion;
         this.capacidad = capacidad;
     }
+
+    // Métodos getter y setter para acceder y modificar los atributos
 
     public int getIdLaboratorio() {
         return idLaboratorio;
