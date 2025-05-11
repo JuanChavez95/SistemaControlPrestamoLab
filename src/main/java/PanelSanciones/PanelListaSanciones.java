@@ -184,6 +184,47 @@ public class PanelListaSanciones extends JPanel {
         return label;
     }
 
+    /**
+     * Crea el panel con los filtros de búsqueda
+     */
+    private JPanel crearPanelFiltros() {
+        JPanel panel = new JPanel();
+        panel.setBackground(COLOR_FONDO);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            new MatteBorder(1, 0, 1, 0, new Color(220, 220, 220)),
+            BorderFactory.createEmptyBorder(15, 10, 15, 10)
+        ));
+        
+        // Filtro por estado
+        panel.add(new JLabel("Estado:"));
+        cmbFiltroEstado = new JComboBox<>(new String[]{"Todos", "ACTIVA", "CUMPLIDA", "NO CUMPLIDA"});
+        personalizarComboBox(cmbFiltroEstado);
+        panel.add(cmbFiltroEstado);
+        
+        // Filtro por usuario
+        panel.add(Box.createHorizontalStrut(20));
+        panel.add(new JLabel("RU/Nombre:"));
+        txtBuscarUsuario = new JTextField(15);
+        personalizarTextField(txtBuscarUsuario);
+        panel.add(txtBuscarUsuario);
+        
+        // Botón de filtrado
+        btnFiltrar = crearBoton("Aplicar Filtros", "filter", false);
+        btnFiltrar.addActionListener(e -> filtrarSanciones());
+        panel.add(btnFiltrar);
+        
+        // Botón para limpiar filtros
+        JButton btnLimpiar = crearBoton("Limpiar", "clear", true);
+        btnLimpiar.addActionListener(e -> {
+            cmbFiltroEstado.setSelectedIndex(0);
+            txtBuscarUsuario.setText("");
+            cargarSanciones();
+        });
+        panel.add(btnLimpiar);
+        
+        return panel;
+    }
+
     private void filtrarSanciones() {
         String estadoFiltro = cmbFiltroEstado.getSelectedItem().toString();
         String busquedaUsuario = txtBuscarUsuario.getText().trim();
