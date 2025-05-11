@@ -60,17 +60,16 @@ public class PanelListaSanciones extends JPanel {
     private ControladorSancionEquipo controladorSancionEquipo;
     private ControladorSancionInsumo controladorSancionInsumo;
     
+    /**
+     * Constructor que inicializa una nueva conexión a la base de datos
+     */
     public PanelListaSanciones() {
         try {
             this.conexion = ConexionBD.conectar();
-            this.controladorSancion = new ControladorSancion();
-            this.controladorSancionEquipamiento = new ControladorSancionEquipamiento();
-            this.controladorSancionEquipo = new ControladorSancionEquipo();
-            this.controladorSancionInsumo = new ControladorSancionInsumo();
+            inicializarControladores();
             inicializarComponentes();
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error al conectar con la base de datos: " + ex.getMessage(), 
-                    "Error de Conexión", JOptionPane.ERROR_MESSAGE);
+            mostrarError("Error al conectar con la base de datos", ex);
         }
     }
     
