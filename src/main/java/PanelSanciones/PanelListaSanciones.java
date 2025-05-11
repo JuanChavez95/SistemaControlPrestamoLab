@@ -235,6 +235,18 @@ public class PanelListaSanciones extends JPanel {
         ((JComponent) comboBox.getRenderer()).setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
     }
 
+    /**
+     * Personaliza el aspecto de un JTextField
+     */
+    private void personalizarTextField(JTextField textField) {
+        textField.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        textField.setPreferredSize(new Dimension(textField.getPreferredSize().width, 30));
+        textField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(0, 5, 0, 5)
+        ));
+    }
+
     private void filtrarSanciones() {
         String estadoFiltro = cmbFiltroEstado.getSelectedItem().toString();
         String busquedaUsuario = txtBuscarUsuario.getText().trim();
