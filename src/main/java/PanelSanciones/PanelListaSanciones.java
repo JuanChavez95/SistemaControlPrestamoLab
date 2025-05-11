@@ -40,7 +40,7 @@ public class PanelListaSanciones extends JPanel {
     private static final Color COLOR_ACTIVA = new Color(25, 118, 210);
     private static final Color COLOR_CUMPLIDA = new Color(56, 142, 60);
     private static final Color COLOR_NO_CUMPLIDA = new Color(211, 47, 47);
-    
+
     private JTable tablaSanciones;
     private DefaultTableModel modeloTabla;
     private JButton btnActualizar;
@@ -49,6 +49,9 @@ public class PanelListaSanciones extends JPanel {
     private JButton btnFiltrar;
     private JComboBox<String> cmbFiltroEstado;
     private JTextField txtBuscarUsuario;
+    private JLabel lblTotalSanciones;
+    private JLabel lblActivasSanciones;
+    private JLabel lblCumplidasSanciones;
     private Connection conexion;
     
     // Controladores para manejar las sanciones y sus relaciones
