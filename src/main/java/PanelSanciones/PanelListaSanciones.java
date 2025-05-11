@@ -83,6 +83,20 @@ public class PanelListaSanciones extends JPanel {
         inicializarComponentes();
     }
     
+    /**
+     * Inicializa los controladores necesarios para gestionar sanciones
+     */
+    private void inicializarControladores() {
+        try {
+            this.controladorSancion = new ControladorSancion();
+            this.controladorSancionEquipamiento = new ControladorSancionEquipamiento();
+            this.controladorSancionEquipo = new ControladorSancionEquipo();
+            this.controladorSancionInsumo = new ControladorSancionInsumo();
+        } catch (Exception ex) {
+            mostrarError("Error al inicializar controladores", ex);
+        }
+    }
+
     private void inicializarComponentes() {
         // Configuración visual
         setBackground(Color.WHITE);
