@@ -225,6 +225,16 @@ public class PanelListaSanciones extends JPanel {
         return panel;
     }
 
+    /**
+     * Personaliza el aspecto de un JComboBox
+     */
+    private void personalizarComboBox(JComboBox<?> comboBox) {
+        comboBox.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        comboBox.setBackground(Color.WHITE);
+        comboBox.setPreferredSize(new Dimension(comboBox.getPreferredSize().width, 30));
+        ((JComponent) comboBox.getRenderer()).setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+    }
+
     private void filtrarSanciones() {
         String estadoFiltro = cmbFiltroEstado.getSelectedItem().toString();
         String busquedaUsuario = txtBuscarUsuario.getText().trim();
