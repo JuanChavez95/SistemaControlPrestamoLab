@@ -354,6 +354,33 @@ public class PanelListaSanciones extends JPanel {
         return panel;
     }
 
+    /**
+     * Crea el panel de acciones con los botones principales
+     */
+    private JPanel crearPanelAcciones() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 15));
+        panel.setOpaque(false);
+        
+        btnActualizar = crearBoton("Actualizar Lista", "refresh", false);
+        btnActualizar.addActionListener(e -> {
+            cargarSanciones();
+            actualizarEstadisticas();
+        });
+        
+        btnDetalles = crearBoton("Ver Detalles", "details", false);
+        btnDetalles.addActionListener(e -> verDetallesSancion());
+        
+        btnCambiarEstado = crearBoton("Cambiar Estado", "edit", false);
+        btnCambiarEstado.addActionListener(e -> cambiarEstadoSancion());
+        
+        // Añadir botones al panel
+        panel.add(btnActualizar);
+        panel.add(btnDetalles);
+        panel.add(btnCambiarEstado);
+        
+        return panel;
+    }
+
     private void filtrarSanciones() {
         String estadoFiltro = cmbFiltroEstado.getSelectedItem().toString();
         String busquedaUsuario = txtBuscarUsuario.getText().trim();
