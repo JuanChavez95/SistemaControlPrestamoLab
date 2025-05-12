@@ -4,7 +4,6 @@
  */
 package PanelesMateriales;
 
-
 import Clases.Equipamiento;
 import Clases.HistorialEquipamiento;
 import Clases.HistorialGeneral;
@@ -19,6 +18,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import com.toedter.calendar.JDateChooser;
 
 public class PanelDetalleHerramientas extends JPanel {
@@ -186,10 +186,27 @@ public class PanelDetalleHerramientas extends JPanel {
         tablaHistorial.setRowHeight(30);
         tablaHistorial.setGridColor(new Color(200, 200, 200));
         
-        tablaHistorial.setModel(new DefaultTableModel(
+        // Configurar modelo de tabla
+        DefaultTableModel model = new DefaultTableModel(
             new Object[]{"ID", "RU Admin", "Fecha", "Categoría", "Descripción", "Equipamiento", "Disponibilidad"}, 0
-        ));
-        JScrollPane tablaScrollPane = new JScrollPane(tablaHistorial);
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Hacer que la tabla no sea editable
+            }
+        };
+        tablaHistorial.setModel(model);
+
+        // Configurar ancho de columnas
+        configurarAnchoColumnas();
+
+        // Hacer que la tabla sea redimensionable horizontalmente
+        tablaHistorial.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+        // Crear scroll pane con barras de desplazamiento horizontal y vertical
+        JScrollPane tablaScrollPane = new JScrollPane(tablaHistorial, 
+            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
+            JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         tablaScrollPane.setBorder(BorderFactory.createTitledBorder(
             BorderFactory.createLineBorder(new Color(200, 200, 200)),
             "Historial de Herramientas",
@@ -199,10 +216,10 @@ public class PanelDetalleHerramientas extends JPanel {
         ));
 
         // Agregar formulario y tabla al panel central
-        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 1; gbc.weightx = 0.4; gbc.weighty = 1.0;
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 1; gbc.weightx = 0.3; gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
         contentPanel.add(formPanel, gbc);
-        gbc.gridx = 1; gbc.weightx = 0.6;
+        gbc.gridx = 1; gbc.weightx = 0.7;
         contentPanel.add(tablaScrollPane, gbc);
 
         add(contentPanel, BorderLayout.CENTER);
@@ -222,6 +239,37 @@ public class PanelDetalleHerramientas extends JPanel {
         cargarHistorial();
     }
 
+    // Método para configurar el ancho de las columnas
+    private void configurarAnchoColumnas() {
+        // Configurar ancho de columnas
+        TableColumn columna;
+        for (int i = 0; i < tablaHistorial.getColumnModel().getColumnCount(); i++) {
+            columna = tablaHistorial.getColumnModel().getColumn(i);
+            switch (i) {
+                case 0: // ID
+                    columna.setPreferredWidth(50);
+                    break;
+                case 1: // RU Admin
+                    columna.setPreferredWidth(100);
+                    break;
+                case 2: // Fecha
+                    columna.setPreferredWidth(100);
+                    break;
+                case 3: // Categoría
+                    columna.setPreferredWidth(100);
+                    break;
+                case 4: // Descripción
+                    columna.setPreferredWidth(250);
+                    break;
+                case 5: // Equipamiento
+                    columna.setPreferredWidth(150);
+                    break;
+                case 6: // Disponibilidad
+                    columna.setPreferredWidth(100);
+                    break;
+            }
+        }
+    }
     private JButton createStyledButton(String text, Color bgColor) {
         JButton button = new JButton(text);
         button.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -245,7 +293,6 @@ public class PanelDetalleHerramientas extends JPanel {
         });
         return button;
     }
-
     private void cargarEquipamientos() {
         cbEquipamiento.removeAllItems();
         try {
