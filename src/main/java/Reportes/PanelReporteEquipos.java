@@ -73,141 +73,131 @@ private static final com.itextpdf.text.Font FONT_TABLA_CELDA =
 
 
     public PanelReporteEquipos() {
-        // Inicializar controladores
         controlEquipo = new ControladorEquipo();
         controlHistorial = new ControladorHistorialEquipos();
-        
-        // Crear directorio de reportes si no existe
         crearDirectorioReportes();
-        
-        // Configurar panel
-        setLayout(new BorderLayout(10, 10));
-        setBorder(new EmptyBorder(20, 20, 20, 20));
-        
-        // Panel de título
-        JPanel panelTitulo = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JLabel lblTitulo = new JLabel("Generación de Reportes de Equipos (PDF)");
-        lblTitulo.setFont(new Font("Arial", Font.BOLD, 18));
-        panelTitulo.add(lblTitulo);
-        add(panelTitulo, BorderLayout.NORTH);
-        
+
+        setLayout(new BorderLayout(20, 20));
+        setBackground(Color.WHITE);
+        setBorder(new EmptyBorder(25, 25, 25, 25));
+
+        // Título
+        JLabel lblTitulo = new JLabel("Generación de Reportes de Equipos (PDF)", SwingConstants.CENTER);
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        lblTitulo.setForeground(new Color(45, 62, 80));
+        add(lblTitulo, BorderLayout.NORTH);
+
         // Panel de opciones
-        JPanel panelOpciones = new JPanel();
-        panelOpciones.setLayout(new GridBagLayout());
+        JPanel panelOpciones = new JPanel(new GridBagLayout());
         panelOpciones.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(), 
-                "Opciones de Reporte", 
-                TitledBorder.LEFT, 
+                BorderFactory.createLineBorder(new Color(100, 149, 237), 2),
+                "Opciones de Reporte",
+                TitledBorder.LEFT,
                 TitledBorder.TOP,
-                new Font("Arial", Font.BOLD, 14)));
-        
+                new Font("Segoe UI", Font.BOLD, 14),
+                new Color(25, 25, 112)));
+        panelOpciones.setBackground(new Color(250, 250, 255));
+
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(8, 8, 8, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        
-        // Tipo de reporte
-        gbc.gridx = 0;
-        gbc.gridy = 0;
+
+        // Etiquetas y campos con nueva estética
         JLabel lblTipoReporte = new JLabel("Tipo de Reporte:");
-        lblTipoReporte.setFont(new Font("Arial", Font.PLAIN, 12));
+        lblTipoReporte.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         panelOpciones.add(lblTipoReporte, gbc);
-        
+
         gbc.gridx = 1;
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
         String[] opciones = {"Reporte por ID de Equipo", "Reporte de Todos los Equipos"};
         cboTipoReporte = new JComboBox<>(opciones);
-        cboTipoReporte.setPreferredSize(new Dimension(250, 25));
+        cboTipoReporte.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        cboTipoReporte.setBackground(Color.WHITE);
+        cboTipoReporte.setPreferredSize(new Dimension(240, 30));
         panelOpciones.add(cboTipoReporte, gbc);
-        
-        // ID Equipo
+
         gbc.gridx = 0;
         gbc.gridy = 1;
-        gbc.gridwidth = 1;
         JLabel lblIdEquipo = new JLabel("ID Equipo:");
-        lblIdEquipo.setFont(new Font("Arial", Font.PLAIN, 12));
+        lblIdEquipo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         panelOpciones.add(lblIdEquipo, gbc);
-        
+
         gbc.gridx = 1;
-        gbc.gridy = 1;
-        gbc.gridwidth = 2;
-        txtIdEquipo = new JTextField(15);
-        txtIdEquipo.setPreferredSize(new Dimension(250, 25));
+        txtIdEquipo = new JTextField();
+        txtIdEquipo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        txtIdEquipo.setPreferredSize(new Dimension(240, 30));
         panelOpciones.add(txtIdEquipo, gbc);
-        
-        // Fecha
+
         gbc.gridx = 0;
         gbc.gridy = 2;
-        gbc.gridwidth = 1;
         JLabel lblFecha = new JLabel("Fecha:");
-        lblFecha.setFont(new Font("Arial", Font.PLAIN, 12));
+        lblFecha.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         panelOpciones.add(lblFecha, gbc);
-        
+
         gbc.gridx = 1;
-        gbc.gridy = 2;
-        txtFecha = new JTextField(15);
-        txtFecha.setPreferredSize(new Dimension(150, 25));
-        // Establecer fecha actual
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        txtFecha.setText(dateFormat.format(new Date()));
+        txtFecha = new JTextField();
+        txtFecha.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        txtFecha.setPreferredSize(new Dimension(240, 30));
+        txtFecha.setText(new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
         panelOpciones.add(txtFecha, gbc);
-        
+
         gbc.gridx = 2;
-        gbc.gridy = 2;
         JButton btnFechaActual = new JButton("Hoy");
-        btnFechaActual.setPreferredSize(new Dimension(80, 25));
-        btnFechaActual.addActionListener(e -> txtFecha.setText(dateFormat.format(new Date())));
+        btnFechaActual.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        btnFechaActual.setBackground(new Color(100, 149, 237));
+        btnFechaActual.setForeground(Color.WHITE);
+        btnFechaActual.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnFechaActual.setFocusPainted(false);
+        btnFechaActual.addActionListener(e -> txtFecha.setText(new SimpleDateFormat("dd/MM/yyyy").format(new Date())));
         panelOpciones.add(btnFechaActual, gbc);
-        
-        // Botón generar
+
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.gridwidth = 3;
         gbc.anchor = GridBagConstraints.CENTER;
         btnGenerarPDF = new JButton("Generar Reporte PDF");
-        btnGenerarPDF.setFont(new Font("Arial", Font.BOLD, 12));
-        btnGenerarPDF.setPreferredSize(new Dimension(200, 30));
-        btnGenerarPDF.setBackground(new Color(70, 130, 180));
+        btnGenerarPDF.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnGenerarPDF.setBackground(new Color(60, 179, 113));
         btnGenerarPDF.setForeground(Color.WHITE);
-        btnGenerarPDF.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnGenerarPDF.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnGenerarPDF.setPreferredSize(new Dimension(240, 35));
         btnGenerarPDF.setFocusPainted(false);
         panelOpciones.add(btnGenerarPDF, gbc);
-        
-        // Oyente para tipo de reporte
+
+        add(panelOpciones, BorderLayout.CENTER);
+
+        // Instrucciones
+        JPanel panelInstrucciones = new JPanel();
+        panelInstrucciones.setLayout(new BorderLayout());
+        panelInstrucciones.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(new Color(100, 149, 237), 2),
+                "Instrucciones",
+                TitledBorder.LEFT,
+                TitledBorder.TOP,
+                new Font("Segoe UI", Font.BOLD, 14),
+                new Color(25, 25, 112)));
+        panelInstrucciones.setBackground(new Color(245, 245, 255));
+
+        JTextArea txtInstrucciones = new JTextArea(
+                "✔ Seleccione el tipo de reporte a generar.\n" +
+                "✔ Ingrese el ID del equipo si aplica.\n" +
+                "✔ Verifique la fecha del reporte.\n" +
+                "✔ Presione 'Generar Reporte PDF' para continuar.");
+        txtInstrucciones.setEditable(false);
+        txtInstrucciones.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtInstrucciones.setBackground(new Color(245, 245, 255));
+        txtInstrucciones.setBorder(new EmptyBorder(10, 10, 10, 10));
+        panelInstrucciones.add(txtInstrucciones);
+
+        add(panelInstrucciones, BorderLayout.SOUTH);
+
+        // Comportamiento dinámico
         cboTipoReporte.addActionListener(e -> {
             boolean esReportePorId = cboTipoReporte.getSelectedIndex() == 0;
             txtIdEquipo.setEnabled(esReportePorId);
             lblIdEquipo.setEnabled(esReportePorId);
         });
-        
-        // Oyente para generar reporte
+
         btnGenerarPDF.addActionListener(e -> generarReporte());
-        
-        // Añadir panel de opciones
-        add(panelOpciones, BorderLayout.CENTER);
-        
-        // Panel de instrucciones
-        JPanel panelInstrucciones = new JPanel();
-        panelInstrucciones.setLayout(new BoxLayout(panelInstrucciones, BoxLayout.Y_AXIS));
-        panelInstrucciones.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(), 
-                "Instrucciones", 
-                TitledBorder.LEFT, 
-                TitledBorder.TOP,
-                new Font("Arial", Font.BOLD, 14)));
-        
-        JTextArea txtInstrucciones = new JTextArea(
-                "1. Seleccione el tipo de reporte a generar.\n" +
-                "2. Para reportes individuales, ingrese el ID del equipo.\n" +
-                "3. Verifique la fecha del reporte (formato: dd/MM/yyyy).\n" +
-                "4. Haga clic en 'Generar Reporte PDF' para crear el documento.");
-        txtInstrucciones.setEditable(false);
-        txtInstrucciones.setBackground(new Color(240, 240, 240));
-        txtInstrucciones.setFont(new Font("Arial", Font.PLAIN, 12));
-        txtInstrucciones.setBorder(new EmptyBorder(10, 10, 10, 10));
-        panelInstrucciones.add(txtInstrucciones);
-        
-        add(panelInstrucciones, BorderLayout.SOUTH);
     }
     
     /**
