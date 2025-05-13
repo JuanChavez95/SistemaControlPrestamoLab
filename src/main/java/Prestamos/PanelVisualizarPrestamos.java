@@ -1,6 +1,6 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Panel para visualizar y gestionar préstamos de equipamiento e insumos.
+ * Permite filtrar préstamos, mostrar detalles y realizar acciones como aceptar, rechazar o terminar un préstamo.
  */
 package Prestamos;
 
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.plaf.basic.BasicComboBoxUI;
@@ -28,35 +29,47 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 /**
- * @author Emmanuel (Modificado)
+ * Clase que representa un panel para visualizar y gestionar préstamos.
+ * @author 
  */
 public class PanelVisualizarPrestamos extends JPanel {
 
+    // Logger para registrar errores y eventos
     private static final Logger LOGGER = Logger.getLogger(PanelVisualizarPrestamos.class.getName());
+    
+    // Controladores para interactuar con la lógica de negocio
     private final ControladorPrestamo controladorPrestamo;
     private final ControladorEquipamiento controladorEquipamiento;
     private final ControladorInsumo controladorInsumo;
     private final ControladorDetallePrestamoInsumo controladorDetalleInsumo;
     private final ControladorHorario controladorHorario;
+    
+    // Identificador del administrador
     private final int ruAdministrador;
+    
+    // Componentes de la interfaz gráfica
     private JTable tablaPrestamos;
     private DefaultTableModel modeloTabla;
     private JTextArea areaDetalles;
     private JComboBox<String> comboEstado;
     private JTextField campoRU;
 
-    // Color Palette
-    private static final Color PRIMARY_COLOR = new Color(33, 150, 243); // Material Blue
-    private static final Color SECONDARY_COLOR = new Color(100, 181, 246); // Light Blue
-    private static final Color BACKGROUND_COLOR = new Color(245, 245, 245); // Soft Gray
-    private static final Color CARD_COLOR = Color.WHITE;
-    private static final Color TEXT_COLOR = new Color(33, 33, 33); // Dark Gray
-    private static final Color BORDER_COLOR = new Color(200, 200, 200); // Light Gray
-    private static final Color ACCENT_COLOR = new Color(187, 222, 251); // Pale Blue
-    private static final Color SUCCESS_COLOR = new Color(76, 175, 80); // Green
-    private static final Color ERROR_COLOR = new Color(244, 67, 54); // Red
-    private static final Color WARNING_COLOR = new Color(255, 193, 7); // Amber
+    // Paleta de colores para la interfaz
+    private static final Color PRIMARY_COLOR = new Color(21, 101, 192); // Azul oscuro
+    private static final Color SECONDARY_COLOR = new Color(66, 133, 244); // Azul claro
+    private static final Color BACKGROUND_COLOR = new Color(238, 238, 238); // Gris claro
+    private static final Color CARD_COLOR = new Color(250, 250, 250); // Blanco suave
+    private static final Color TEXT_COLOR = new Color(33, 33, 33); // Gris oscuro
+    private static final Color BORDER_COLOR = new Color(189, 189, 189); // Gris claro
+    private static final Color ACCENT_COLOR = new Color(187, 222, 251); // Azul pálido
+    private static final Color SUCCESS_COLOR = new Color(46, 125, 50); // Verde
+    private static final Color ERROR_COLOR = new Color(211, 47, 47); // Rojo
+    private static final Color WARNING_COLOR = new Color(239, 108, 0); // Ámbar
 
+    /**
+     * Constructor del panel.
+     * @param ruAdministrador Identificador del administrador que usa el panel.
+     */
     public PanelVisualizarPrestamos(int ruAdministrador) {
         this.ruAdministrador = ruAdministrador;
         this.controladorPrestamo = new ControladorPrestamo();
@@ -68,63 +81,79 @@ public class PanelVisualizarPrestamos extends JPanel {
         cargarPrestamos();
     }
 
+    /**
+     * Inicializa los componentes gráficos del panel.
+     */
     private void initComponents() {
-        setLayout(new BorderLayout(15, 15));
+        setLayout(new BorderLayout(20, 20));
         setBackground(BACKGROUND_COLOR);
-        setBorder(new EmptyBorder(20, 20, 20, 20));
+        setBorder(new EmptyBorder(30, 30, 30, 30));
 
-        // Título
+        // Panel principal con desplazamiento
+        JPanel contentPanel = new JPanel(new BorderLayout(20, 20));
+        contentPanel.setBackground(BACKGROUND_COLOR);
+        JScrollPane mainScrollPane = createStyledScrollPane(contentPanel);
+        mainScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        mainScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        mainScrollPane.getVerticalScrollBar().setUnitIncrement(20);
+        add(mainScrollPane, BorderLayout.CENTER);
+
+        // Título del panel
         JLabel lblTitulo = new JLabel("Visualizar Préstamos", SwingConstants.CENTER);
-        lblTitulo.setFont(new Font("Roboto", Font.BOLD, 28));
+        lblTitulo.setFont(new Font("Roboto", Font.BOLD, 30));
         lblTitulo.setForeground(PRIMARY_COLOR);
-        lblTitulo.setBorder(new EmptyBorder(10, 0, 20, 0));
-        add(lblTitulo, BorderLayout.NORTH);
+        lblTitulo.setBorder(new EmptyBorder(15, 0, 25, 0));
+        contentPanel.add(lblTitulo, BorderLayout.NORTH);
 
         // Panel de filtros
         JPanel panelFiltros = createCardPanel("Filtros");
         panelFiltros.setLayout(new BoxLayout(panelFiltros, BoxLayout.X_AXIS));
         panelFiltros.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(BORDER_COLOR, 1, true),
+                createRoundedBorder(BORDER_COLOR, 15),
                 "Filtros",
                 javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                 javax.swing.border.TitledBorder.DEFAULT_POSITION,
-                new Font("Roboto", Font.BOLD, 16),
+                new Font("Roboto", Font.BOLD, 18),
                 PRIMARY_COLOR
             ),
-            new EmptyBorder(10, 10, 10, 10)
+            new EmptyBorder(15, 15, 15, 15)
         ));
 
+        // Campo para filtrar por RU
         JLabel lblRU = new JLabel("RU:");
         lblRU.setFont(new Font("Roboto", Font.PLAIN, 16));
         lblRU.setForeground(TEXT_COLOR);
-        campoRU = new JTextField(10);
+        campoRU = new JTextField(6);
         campoRU.setFont(new Font("Roboto", Font.PLAIN, 16));
-        campoRU.setBorder(new LineBorder(BORDER_COLOR, 1, true));
-        campoRU.setPreferredSize(new Dimension(120, 35));
+        campoRU.setBorder(createRoundedBorder(BORDER_COLOR, 10));
+        campoRU.setPreferredSize(new Dimension(100, 40));
 
+        // Combo para filtrar por estado
         JLabel lblEstado = new JLabel("Estado:");
         lblEstado.setFont(new Font("Roboto", Font.PLAIN, 16));
         lblEstado.setForeground(TEXT_COLOR);
         comboEstado = new JComboBox<>(new String[]{"Todos", "Pendiente", "Aceptado", "Rechazado", "Terminado"});
         styleComboBox(comboEstado);
 
+        // Botón para aplicar filtros
         JButton btnFiltrar = createStyledButton("Filtrar", PRIMARY_COLOR);
         btnFiltrar.addActionListener(e -> filtrarPrestamos());
 
-        panelFiltros.add(Box.createHorizontalStrut(10));
+        // Añadir componentes al panel de filtros
+        panelFiltros.add(Box.createHorizontalStrut(15));
         panelFiltros.add(lblRU);
-        panelFiltros.add(Box.createHorizontalStrut(5));
+        panelFiltros.add(Box.createHorizontalStrut(10));
         panelFiltros.add(campoRU);
-        panelFiltros.add(Box.createHorizontalStrut(15));
+        panelFiltros.add(Box.createHorizontalStrut(20));
         panelFiltros.add(lblEstado);
-        panelFiltros.add(Box.createHorizontalStrut(5));
+        panelFiltros.add(Box.createHorizontalStrut(10));
         panelFiltros.add(comboEstado);
-        panelFiltros.add(Box.createHorizontalStrut(15));
+        panelFiltros.add(Box.createHorizontalStrut(20));
         panelFiltros.add(btnFiltrar);
         panelFiltros.add(Box.createHorizontalGlue());
 
-        // Tabla de préstamos
+        // Configuración de la tabla de préstamos
         String[] columnas = {"ID Préstamo", "RU Usuario", "Nombre Usuario", "Fecha", "Hora", "Estado", "Horario", "Equipamiento", "Insumos"};
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
@@ -135,21 +164,21 @@ public class PanelVisualizarPrestamos extends JPanel {
         tablaPrestamos = createStyledTable(modeloTabla);
         tablaPrestamos.setAutoCreateRowSorter(true);
         JScrollPane scrollTabla = createStyledScrollPane(tablaPrestamos);
-        scrollTabla.setPreferredSize(new Dimension(800, 300));
+        scrollTabla.setPreferredSize(new Dimension(900, 400));
 
         // Panel de detalles y acciones
-        JPanel panelDetallesAcciones = new JPanel(new BorderLayout(10, 10));
+        JPanel panelDetallesAcciones = new JPanel(new BorderLayout(15, 15));
         panelDetallesAcciones.setBackground(BACKGROUND_COLOR);
 
-        // Área de detalles
+        // Área para mostrar detalles del préstamo seleccionado
         JPanel panelDetalles = createCardPanel("Detalles del Préstamo");
         panelDetalles.setLayout(new BorderLayout());
-        areaDetalles = new JTextArea(8, 30);
+        areaDetalles = new JTextArea(10, 30);
         areaDetalles.setFont(new Font("Roboto", Font.PLAIN, 14));
         areaDetalles.setEditable(false);
         areaDetalles.setLineWrap(true);
         areaDetalles.setWrapStyleWord(true);
-        areaDetalles.setBorder(new LineBorder(BORDER_COLOR, 1, true));
+        areaDetalles.setBorder(createRoundedBorder(BORDER_COLOR, 10));
         areaDetalles.setBackground(CARD_COLOR);
         areaDetalles.setForeground(TEXT_COLOR);
         JScrollPane scrollDetalles = createStyledScrollPane(areaDetalles);
@@ -171,9 +200,9 @@ public class PanelVisualizarPrestamos extends JPanel {
 
         panelBotones.add(Box.createHorizontalGlue());
         panelBotones.add(btnAceptar);
-        panelBotones.add(Box.createHorizontalStrut(10));
+        panelBotones.add(Box.createHorizontalStrut(15));
         panelBotones.add(btnRechazar);
-        panelBotones.add(Box.createHorizontalStrut(10));
+        panelBotones.add(Box.createHorizontalStrut(15));
         panelBotones.add(btnTerminar);
         panelBotones.add(Box.createHorizontalGlue());
 
@@ -181,13 +210,13 @@ public class PanelVisualizarPrestamos extends JPanel {
         panelDetallesAcciones.add(panelBotones, BorderLayout.SOUTH);
 
         // Añadir componentes al panel principal
-        JPanel centerPanel = new JPanel(new BorderLayout(10, 10));
+        JPanel centerPanel = new JPanel(new BorderLayout(15, 15));
         centerPanel.setBackground(BACKGROUND_COLOR);
         centerPanel.add(scrollTabla, BorderLayout.CENTER);
         centerPanel.add(panelDetallesAcciones, BorderLayout.SOUTH);
 
-        add(panelFiltros, BorderLayout.NORTH);
-        add(centerPanel, BorderLayout.CENTER);
+        contentPanel.add(panelFiltros, BorderLayout.NORTH);
+        contentPanel.add(centerPanel, BorderLayout.CENTER);
 
         // Listener para mostrar detalles al seleccionar una fila
         tablaPrestamos.getSelectionModel().addListSelectionListener(e -> {
@@ -197,40 +226,52 @@ public class PanelVisualizarPrestamos extends JPanel {
         });
     }
 
-    // Styling Helper Methods
+    /**
+     * Crea un panel con estilo de tarjeta para contener componentes.
+     * @param title Título del panel.
+     * @return JPanel con estilo aplicado.
+     */
     private JPanel createCardPanel(String title) {
         JPanel panel = new JPanel();
         panel.setBackground(CARD_COLOR);
         panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(BORDER_COLOR, 1, true),
-            new EmptyBorder(10, 10, 10, 10)
+            createRoundedBorder(BORDER_COLOR, 15),
+            new EmptyBorder(15, 15, 15, 15)
         ));
         panel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(BORDER_COLOR, 1, true),
+            panel.getBorder(),
             title,
             javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
             javax.swing.border.TitledBorder.DEFAULT_POSITION,
-            new Font("Roboto", Font.BOLD, 16),
+            new Font("Roboto", Font.BOLD, 18),
             PRIMARY_COLOR
         ));
-        // Add subtle shadow
+        // Añadir sombra sutil
         panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 1, new Color(0, 0, 0, 30)),
+            BorderFactory.createMatteBorder(0, 0, 2, 2, new Color(0, 0, 0, 50)),
             panel.getBorder()
         ));
         return panel;
     }
 
+    /**
+     * Crea un botón estilizado con bordes redondeados y efecto hover.
+     * @param text Texto del botón.
+     * @param baseColor Color base del botón.
+     * @return JButton estilizado.
+     */
     private JButton createStyledButton(String text, Color baseColor) {
-        JButton button = new JButton(text);
+        RoundedButton button = new RoundedButton(text, baseColor);
         button.setFont(new Font("Roboto", Font.BOLD, 14));
         button.setForeground(Color.WHITE);
         button.setBackground(baseColor);
-        button.setBorder(new LineBorder(baseColor, 1, true));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setBorder(new EmptyBorder(10, 25, 10, 25));
-        // Add hover effect
+        button.setPreferredSize(new Dimension(120, 40));
+        button.setMaximumSize(new Dimension(120, 40));
+        button.setMinimumSize(new Dimension(120, 40));
+        button.setBorder(new EmptyBorder(10, 20, 10, 20));
+        // Efecto hover
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -245,6 +286,11 @@ public class PanelVisualizarPrestamos extends JPanel {
         return button;
     }
 
+    /**
+     * Crea una tabla estilizada para mostrar los préstamos.
+     * @param model Modelo de datos de la tabla.
+     * @return JTable estilizada.
+     */
     private JTable createStyledTable(DefaultTableModel model) {
         JTable table = new JTable(model) {
             @Override
@@ -252,80 +298,110 @@ public class PanelVisualizarPrestamos extends JPanel {
                 return false;
             }
         };
-        table.setRowHeight(35);
-        table.setFont(new Font("Roboto", Font.PLAIN, 14));
-        table.setSelectionBackground(ACCENT_COLOR);
-        table.setGridColor(BORDER_COLOR);
+        // Estilo de la tabla
+        table.setRowHeight(40);
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        table.setGridColor(new Color(230, 234, 240));
         table.setShowGrid(true);
-        table.getTableHeader().setFont(new Font("Roboto", Font.BOLD, 14));
-        table.getTableHeader().setBackground(PRIMARY_COLOR);
-        table.getTableHeader().setForeground(Color.WHITE);
-        table.getTableHeader().setBorder(new LineBorder(BORDER_COLOR, 1, true));
+        table.setSelectionBackground(new Color(187, 222, 251));
+        table.setSelectionForeground(Color.BLACK);
+        table.setIntercellSpacing(new Dimension(10, 10));
 
-        // Custom renderer for cells
+        // Estilo del encabezado
+        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 15));
+        table.getTableHeader().setBackground(new Color(25, 118, 210));
+        table.getTableHeader().setForeground(Color.WHITE);
+        table.getTableHeader().setReorderingAllowed(false);
+        table.getTableHeader().setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        // Renderizador personalizado para celdas
         table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
-                                                           boolean isSelected, boolean hasFocus,
-                                                           int row, int column) {
+                                                          boolean isSelected, boolean hasFocus,
+                                                          int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 setHorizontalAlignment(JLabel.CENTER);
-                if (model.getColumnName(column).equals("Estado")) {
-                    if ("Pendiente".equals(value)) {
-                        c.setForeground(WARNING_COLOR);
-                    } else if ("Aceptado".equals(value)) {
-                        c.setForeground(SUCCESS_COLOR);
-                    } else if ("Rechazado".equals(value)) {
-                        c.setForeground(ERROR_COLOR);
-                    } else if ("Terminado".equals(value)) {
-                        c.setForeground(new Color(33, 150, 243)); // Blue for completed
-                    } else {
-                        c.setForeground(TEXT_COLOR);
+                setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
+                // Fondo alternado para filas
+                if (!isSelected) {
+                    c.setBackground(row % 2 == 0 ? new Color(250, 251, 255) : Color.WHITE);
+                } else {
+                    c.setBackground(new Color(187, 222, 251));
+                }
+
+                // Estilo para la columna "Estado"
+                if (column == 5 && value != null) {
+                    c.setForeground(new Color(33, 33, 33));
+                    switch (value.toString().toUpperCase()) {
+                        case "PENDIENTE":
+                            c.setBackground(new Color(255, 245, 157));
+                            break;
+                        case "ACEPTADO":
+                            c.setBackground(new Color(165, 214, 167));
+                            break;
+                        case "RECHAZADO":
+                            c.setBackground(new Color(239, 154, 154));
+                            break;
+                        case "TERMINADO":
+                            c.setBackground(new Color(189, 195, 199));
+                            break;
+                        default:
+                            c.setBackground(row % 2 == 0 ? new Color(250, 251, 255) : Color.WHITE);
+                            break;
                     }
                 } else {
-                    c.setForeground(TEXT_COLOR);
+                    c.setForeground(new Color(33, 33, 33));
                 }
-                if (isSelected) {
-                    c.setBackground(ACCENT_COLOR);
-                } else {
-                    c.setBackground(CARD_COLOR);
-                }
+
+                // Bordes suaves para celdas
+                setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
                 return c;
             }
         });
 
-        // Adjust column widths
-        table.getColumnModel().getColumn(0).setPreferredWidth(80);  // ID Préstamo
-        table.getColumnModel().getColumn(1).setPreferredWidth(80);  // RU Usuario
-        table.getColumnModel().getColumn(2).setPreferredWidth(120); // Nombre Usuario
-        table.getColumnModel().getColumn(3).setPreferredWidth(100); // Fecha
-        table.getColumnModel().getColumn(4).setPreferredWidth(60);  // Hora
-        table.getColumnModel().getColumn(5).setPreferredWidth(80);  // Estado
-        table.getColumnModel().getColumn(6).setPreferredWidth(150); // Horario
-        table.getColumnModel().getColumn(7).setPreferredWidth(200); // Equipamiento
-        table.getColumnModel().getColumn(8).setPreferredWidth(200); // Insumos
+        // Ajustar ancho de columnas
+        table.getColumnModel().getColumn(0).setPreferredWidth(90);
+        table.getColumnModel().getColumn(1).setPreferredWidth(90);
+        table.getColumnModel().getColumn(2).setPreferredWidth(140);
+        table.getColumnModel().getColumn(3).setPreferredWidth(110);
+        table.getColumnModel().getColumn(4).setPreferredWidth(70);
+        table.getColumnModel().getColumn(5).setPreferredWidth(90);
+        table.getColumnModel().getColumn(6).setPreferredWidth(170);
+        table.getColumnModel().getColumn(7).setPreferredWidth(220);
+        table.getColumnModel().getColumn(8).setPreferredWidth(220);
 
         return table;
     }
 
+    /**
+     * Crea un JScrollPane estilizado.
+     * @param view Componente a incluir en el JScrollPane.
+     * @return JScrollPane estilizado.
+     */
     private JScrollPane createStyledScrollPane(Component view) {
         JScrollPane scrollPane = new JScrollPane(view);
-        scrollPane.setBorder(new LineBorder(BORDER_COLOR, 1, true));
+        scrollPane.setBorder(createRoundedBorder(BORDER_COLOR, 15));
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         JScrollBar verticalScrollBar = scrollPane.getVerticalScrollBar();
-        verticalScrollBar.setUnitIncrement(15);
+        verticalScrollBar.setUnitIncrement(20);
         JScrollBar horizontalScrollBar = scrollPane.getHorizontalScrollBar();
-        horizontalScrollBar.setUnitIncrement(15);
+        horizontalScrollBar.setUnitIncrement(20);
         return scrollPane;
     }
 
+    /**
+     * Aplica estilo al JComboBox.
+     * @param comboBox JComboBox a estilizar.
+     */
     private void styleComboBox(JComboBox<String> comboBox) {
         comboBox.setFont(new Font("Roboto", Font.PLAIN, 16));
         comboBox.setBackground(CARD_COLOR);
         comboBox.setForeground(TEXT_COLOR);
-        comboBox.setBorder(new LineBorder(BORDER_COLOR, 1, true));
-        comboBox.setPreferredSize(new Dimension(150, 35));
+        comboBox.setBorder(createRoundedBorder(BORDER_COLOR, 10));
+        comboBox.setPreferredSize(new Dimension(160, 40));
         comboBox.setUI(new BasicComboBoxUI() {
             @Override
             protected JButton createArrowButton() {
@@ -333,13 +409,81 @@ public class PanelVisualizarPrestamos extends JPanel {
                 button.setFont(new Font("Roboto", Font.PLAIN, 12));
                 button.setBackground(CARD_COLOR);
                 button.setForeground(PRIMARY_COLOR);
-                button.setBorder(new LineBorder(BORDER_COLOR, 1, true));
+                button.setBorder(createRoundedBorder(BORDER_COLOR, 10));
                 button.setFocusPainted(false);
                 return button;
             }
         });
     }
 
+    /**
+     * Crea un borde redondeado personalizado.
+     * @param color Color del borde.
+     * @param radius Radio de los bordes redondeados.
+     * @return Border personalizado.
+     */
+    private Border createRoundedBorder(Color color, int radius) {
+        return new Border() {
+            @Override
+            public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(color);
+                g2.drawRoundRect(x, y, width - 1, height - 1, radius, radius);
+                g2.dispose();
+            }
+
+            @Override
+            public Insets getBorderInsets(Component c) {
+                return new Insets(4, 8, 4, 8);
+            }
+
+            @Override
+            public boolean isBorderOpaque() {
+                return false;
+            }
+        };
+    }
+
+    /**
+     * Clase interna para botones redondeados personalizados.
+     */
+    private class RoundedButton extends JButton {
+        private Color backgroundColor;
+        private int radius;
+
+        public RoundedButton(String text, Color backgroundColor) {
+            super(text);
+            this.backgroundColor = backgroundColor;
+            this.radius = 30;
+            setContentAreaFilled(false);
+            setFocusPainted(false);
+            setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(backgroundColor);
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
+            super.paintComponent(g2);
+            g2.dispose();
+        }
+
+        @Override
+        protected void paintBorder(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(getForeground());
+            g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, radius, radius);
+            g2.dispose();
+        }
+    }
+
+    /**
+     * Carga todos los préstamos en la tabla.
+     */
     private void cargarPrestamos() {
         try {
             modeloTabla.setRowCount(0);
@@ -367,6 +511,9 @@ public class PanelVisualizarPrestamos extends JPanel {
         }
     }
 
+    /**
+     * Filtra los préstamos según RU y estado seleccionados.
+     */
     private void filtrarPrestamos() {
         String filtroRU = campoRU.getText().trim();
         String filtroEstado = comboEstado.getSelectedItem().toString();
@@ -400,6 +547,12 @@ public class PanelVisualizarPrestamos extends JPanel {
         }
     }
 
+    /**
+     * Obtiene información del horario asociado a un préstamo.
+     * @param idPrestamo ID del préstamo.
+     * @return Cadena con información del horario.
+     * @throws SQLException Si ocurre un error en la base de datos.
+     */
     private String obtenerHorarioPrestamo(int idPrestamo) throws SQLException {
         Integer idHorario = controladorPrestamo.obtenerHorarioPrestamo(idPrestamo);
         if (idHorario == null) {
@@ -414,6 +567,12 @@ public class PanelVisualizarPrestamos extends JPanel {
         return "ID: " + horario.getIdHorario() + " - " + horario.getDia() + " " + horario.getHora() + " (" + horario.getEstado() + ")";
     }
 
+    /**
+     * Obtiene los equipamientos asociados a un préstamo.
+     * @param idPrestamo ID del préstamo.
+     * @return Cadena con información de los equipamientos.
+     * @throws SQLException Si ocurre un error en la base de datos.
+     */
     private String obtenerEquipamientoPrestamo(int idPrestamo) throws SQLException {
         List<Integer> equipamientoIds = controladorPrestamo.obtenerEquipamientosPrestamo(idPrestamo);
         if (equipamientoIds.isEmpty()) {
@@ -430,6 +589,12 @@ public class PanelVisualizarPrestamos extends JPanel {
         return sb.length() > 0 ? sb.toString() : "Ninguno";
     }
 
+    /**
+     * Obtiene los insumos asociados a un préstamo.
+     * @param idPrestamo ID del préstamo.
+     * @return Cadena con información de los insumos.
+     * @throws SQLException Si ocurre un error en la base de datos.
+     */
     private String obtenerInsumosPrestamo(int idPrestamo) throws SQLException {
         List<DetallePrestamoInsumo> detalles = controladorDetalleInsumo.listarPorPrestamo(idPrestamo);
         if (detalles.isEmpty()) {
@@ -453,6 +618,9 @@ public class PanelVisualizarPrestamos extends JPanel {
         return sb.toString();
     }
 
+    /**
+     * Muestra los detalles del préstamo seleccionado en la tabla.
+     */
     private void mostrarDetallesPrestamo() {
         int filaSeleccionada = tablaPrestamos.getSelectedRow();
         if (filaSeleccionada != -1) {
@@ -526,6 +694,9 @@ public class PanelVisualizarPrestamos extends JPanel {
         }
     }
 
+    /**
+     * Acepta un préstamo seleccionado, verificando disponibilidad y actualizando estados.
+     */
     private void aceptarPrestamo() {
         int filaSeleccionada = tablaPrestamos.getSelectedRow();
         if (filaSeleccionada == -1) {
@@ -543,7 +714,7 @@ public class PanelVisualizarPrestamos extends JPanel {
 
         String observaciones = JOptionPane.showInputDialog(this, "Ingrese observaciones (opcional):", "Aceptar Préstamo", JOptionPane.PLAIN_MESSAGE);
         if (observaciones == null) {
-            return; // El usuario canceló
+            return;
         }
 
         try {
@@ -561,7 +732,7 @@ public class PanelVisualizarPrestamos extends JPanel {
                 }
             }
             
-            // Cambiar estado del horario a "Préstamo"
+            // Actualizar estado del horario
             Integer idHorario = controladorPrestamo.obtenerHorarioPrestamo(idPrestamo);
             if (idHorario != null) {
                 Horario horario = controladorHorario.buscarPorId(idHorario);
@@ -571,7 +742,7 @@ public class PanelVisualizarPrestamos extends JPanel {
                 }
             }
             
-            // Cambiar disponibilidad de equipamientos a "Préstamo"
+            // Actualizar disponibilidad de equipamientos
             List<Integer> equipamientoIds = controladorPrestamo.obtenerEquipamientosPrestamo(idPrestamo);
             for (Integer idEquipamiento : equipamientoIds) {
                 Clases.Equipamiento equipo = controladorEquipamiento.buscarPorId(idEquipamiento);
@@ -581,7 +752,7 @@ public class PanelVisualizarPrestamos extends JPanel {
                 }
             }
             
-            // Procesar el préstamo
+            // Procesar aceptación del préstamo
             controladorPrestamo.aceptarPrestamo(idPrestamo, null, ruAdministrador, observaciones);
             JOptionPane.showMessageDialog(this, "Préstamo aceptado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
             cargarPrestamos();
@@ -591,6 +762,9 @@ public class PanelVisualizarPrestamos extends JPanel {
         }
     }
 
+    /**
+     * Rechaza un préstamo seleccionado.
+     */
     private void rechazarPrestamo() {
         int filaSeleccionada = tablaPrestamos.getSelectedRow();
         if (filaSeleccionada == -1) {
@@ -621,6 +795,9 @@ public class PanelVisualizarPrestamos extends JPanel {
         }
     }
 
+    /**
+     * Termina un préstamo seleccionado, solicitando cantidades devueltas de insumos.
+     */
     private void terminarPrestamo() {
         int filaSeleccionada = tablaPrestamos.getSelectedRow();
         if (filaSeleccionada == -1) {
@@ -637,7 +814,7 @@ public class PanelVisualizarPrestamos extends JPanel {
         }
 
         try {
-            // Cambiar estado del horario a "Asignado"
+            // Actualizar estado del horario
             Integer idHorario = controladorPrestamo.obtenerHorarioPrestamo(idPrestamo);
             if (idHorario != null) {
                 Horario horario = controladorHorario.buscarPorId(idHorario);
@@ -647,7 +824,7 @@ public class PanelVisualizarPrestamos extends JPanel {
                 }
             }
             
-            // Cambiar disponibilidad de equipamientos a "Disponible"
+            // Actualizar disponibilidad de equipamientos
             List<Integer> equipamientoIds = controladorPrestamo.obtenerEquipamientosPrestamo(idPrestamo);
             for (Integer idEquipamiento : equipamientoIds) {
                 Clases.Equipamiento equipo = controladorEquipamiento.buscarPorId(idEquipamiento);
@@ -657,10 +834,9 @@ public class PanelVisualizarPrestamos extends JPanel {
                 }
             }
             
-            // Procesar los insumos
+            // Procesar insumos
             List<DetallePrestamoInsumo> detallesInsumo = controladorDetalleInsumo.listarPorPrestamo(idPrestamo);
             if (detallesInsumo.isEmpty()) {
-                // Si no hay insumos, procedemos a terminar el préstamo directamente
                 controladorPrestamo.terminarPrestamo(idPrestamo, new ArrayList<>(), new ArrayList<>());
                 JOptionPane.showMessageDialog(this, "Préstamo terminado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
                 cargarPrestamos();
@@ -681,7 +857,7 @@ public class PanelVisualizarPrestamos extends JPanel {
                     "Cantidad Devuelta", JOptionPane.PLAIN_MESSAGE);
                 
                 if (input == null) {
-                    return; // El usuario canceló
+                    return;
                 }
 
                 int cantidadDevuelta;
@@ -701,7 +877,7 @@ public class PanelVisualizarPrestamos extends JPanel {
                 cantidadesDevueltas.add(cantidadDevuelta);
             }
 
-            // Procesar el préstamo
+            // Procesar terminación del préstamo
             controladorPrestamo.terminarPrestamo(idPrestamo, insumoIds, cantidadesDevueltas);
             JOptionPane.showMessageDialog(this, "Préstamo terminado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
             cargarPrestamos();
