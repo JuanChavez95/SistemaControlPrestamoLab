@@ -63,5 +63,12 @@
             <version>0.4</version>
         </dependency>
         
+        <!-- JFreeChart para gráficos estadísticos -->
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.5.4</version>
+        </dependency>
+        
     </dependencies>
 </project>
