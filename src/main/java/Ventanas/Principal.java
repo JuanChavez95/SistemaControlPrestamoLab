@@ -28,6 +28,9 @@ import PanelSanciones.PanelSancionar;
 import Reportes.PanelReporteEquipos;
 import Reportes.PanelReportePrestamo;
 
+import PanelEstadistica.PanelEstadisticasEquipos;
+import PanelEstadistica.PanelEstadisticasPrestamos;
+
 /**
  * Ventana principal del Sistema de Control y Préstamo de Laboratorios para administradores.
  * Ofrece una interfaz moderna, elegante y fácil de usar para gestionar laboratorios, usuarios, equipos y préstamos.
@@ -156,8 +159,8 @@ public class Principal extends JFrame {
 
         buttonPanel.add(createMenuButton("Laboratorios", new String[]{"Horarios", "Editar Horario", "Editar Laboratorio"}));
         buttonPanel.add(createMenuButton("Usuarios", new String[]{"Docentes", "Estudiantes", "Administradores", "Editar Usuarios"}));
-        buttonPanel.add(createMenuButton("Equipos", new String[]{"Máquinas", "Editar Equipos", "Detalle Equipos", "Generar Reportes Equipos"}));
-        buttonPanel.add(createMenuButton("Préstamos", new String[]{"Visualizar Préstamos", "Generar Reportes"}));
+        buttonPanel.add(createMenuButton("Equipos", new String[]{"Máquinas", "Editar Equipos", "Detalle Equipos", "Generar Reportes Equipos", "Estadística de Equipos"}));
+        buttonPanel.add(createMenuButton("Préstamos", new String[]{"Visualizar Préstamos", "Generar Reportes", "Estadística de Préstamos"}));
         buttonPanel.add(createMenuButton("Materiales", new String[]{"Herramientas", "Insumos", "Editar Herramientas", "Editar Insumos", "Detalle Herramientas"}));
         buttonPanel.add(createMenuButton("Sanciones", new String[]{"Lista de Sanciones", "Sancionar"}));
 
@@ -292,6 +295,8 @@ public class Principal extends JFrame {
                     contenidoEspecifico = crearPanelDetalleEquipos();
                 } else if (subOpcion.equals("Generar Reportes Equipos")) {
                     contenidoEspecifico = crearPanelReportesEquipos();
+                }else if (subOpcion.equals("Estadística de Equipos")) {
+                    contenidoEspecifico = crearPanelEstadisticaEquipos();
                 }
                 break;
             case "Préstamos":
@@ -299,7 +304,10 @@ public class Principal extends JFrame {
                     contenidoEspecifico = crearPanelVisualizarPrestamos();
                 } else if (subOpcion.equals("Generar Reportes")) {
                     contenidoEspecifico = crearPanelGenerarReportePrestamos();
+                }else if (subOpcion.equals("Estadística de Préstamos")) {
+                    contenidoEspecifico = crearPanelEstadisticaPrestamos();
                 }
+
                 break;
             case "Materiales":
                 if (subOpcion.equals("Herramientas")) {
@@ -328,6 +336,15 @@ public class Principal extends JFrame {
         contentPanel.revalidate();
         contentPanel.repaint();
     }
+    
+    private JPanel crearPanelEstadisticaEquipos() {
+        return new PanelEstadisticasEquipos();
+    }
+
+    private JPanel crearPanelEstadisticaPrestamos() {
+        return new PanelEstadisticasPrestamos();
+    }
+
 
     private JPanel crearPanelHorarios() {
         return new PanelVisualizarHorario();
