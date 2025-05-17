@@ -1,24 +1,53 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Panel para gestionar laboratorios.
+ * Autor: Equipo Soldados Caídos (mejorado visualmente)
  */
-
 package Paneles;
 
 import Clases.Laboratorio;
 import Controles.ControladorLaboratorio;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.border.*;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 import java.util.List;
 
-// Clase que representa el panel de gestión de laboratorios en la interfaz gráfica
-public class PanelLaboratorio extends JPanel {
+// Clase para borde redondeado personalizado
+class RoundedBorder implements Border {
+    private int radius;
+    private Color color;
 
+    public RoundedBorder(int radius, Color color) {
+        this.radius = radius;
+        this.color = color;
+    }
+
+    @Override
+    public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setColor(color);
+        g2.drawRoundRect(x, y, width - 1, height - 1, radius, radius);
+    }
+
+    @Override
+    public Insets getBorderInsets(Component c) {
+        return new Insets(radius / 2, radius / 2, radius / 2, radius / 2);
+    }
+
+    @Override
+    public boolean isBorderOpaque() {
+        return false;
+    }
+}
+
+public class PanelLaboratorio extends JPanel {
     // Componentes de la interfaz
     private JComboBox<String> cajaUbicacion;
     private JTextField cajaDescripcion, cajaCapacidad;
@@ -26,88 +55,211 @@ public class PanelLaboratorio extends JPanel {
     private DefaultTableModel modelo;
     private JButton btnAgregar, btnActualizar, btnEliminar, btnLimpiar;
     private int idSeleccionado = -1; // ID del laboratorio seleccionado
-
     private ControladorLaboratorio controlador; // Controlador para manejar operaciones con base de datos
 
     public PanelLaboratorio() {
         controlador = new ControladorLaboratorio(); // Inicializa el controlador
-        setLayout(new BorderLayout()); // Establece el layout del panel principal
-        setBackground(new Color(81, 0, 255)); // Color de fondo del panel
+        setLayout(new BorderLayout(10, 10)); // Layout con espaciado
+        setBackground(Color.WHITE); // Fondo blanco
+        setBorder(new EmptyBorder(10, 10, 10, 10)); // Márgenes reducidos en laterales
 
-        // Panel para el formulario de entrada
-        JPanel panelForm = new JPanel(new GridLayout(4, 2, 10, 10));
-        panelForm.setBorder(BorderFactory.createTitledBorder("GESTOR DE LABORATORIO"));
-        panelForm.setBackground(new Color(81, 0, 255));
+        // Título
+        JLabel lblTitulo = new JLabel("Gestión de Laboratorios", SwingConstants.CENTER);
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        lblTitulo.setForeground(new Color(45, 62, 80));
+        add(lblTitulo, BorderLayout.NORTH);
 
-        // Etiquetas y campos del formulario
+        // Panel superior (formulario y botones)
+        JPanel panelSuperior = new JPanel(new BorderLayout());
+        panelSuperior.setBackground(Color.WHITE);
+
+        // Panel de formulario dividido en dos columnas
+        JPanel panelForm = new JPanel(new GridLayout(1, 2, 5, 0));
+        panelForm.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(new Color(100, 149, 237), 2),
+                "Datos del Laboratorio",
+                TitledBorder.LEFT,
+                TitledBorder.TOP,
+                new Font("Segoe UI", Font.BOLD, 13),
+                new Color(25, 25, 112)));
+        panelForm.setBackground(new Color(250, 250, 255));
+
+        // Panel izquierda
+        JPanel panelIzquierda = new JPanel(new GridBagLayout());
+        panelIzquierda.setBackground(new Color(250, 250, 255));
+        GridBagConstraints gbcIzq = new GridBagConstraints();
+        gbcIzq.insets = new Insets(5, 5, 5, 5);
+        gbcIzq.fill = GridBagConstraints.HORIZONTAL;
+
+        // Panel derecha
+        JPanel panelDerecha = new JPanel(new GridBagLayout());
+        panelDerecha.setBackground(new Color(250, 250, 255));
+        GridBagConstraints gbcDer = new GridBagConstraints();
+        gbcDer.insets = new Insets(5, 5, 5, 5);
+        gbcDer.fill = GridBagConstraints.HORIZONTAL;
+
+        // Creación de etiquetas
         JLabel lblUbicacion = new JLabel("Ubicación:");
-        lblUbicacion.setForeground(Color.WHITE);
-        panelForm.add(lblUbicacion);
-
-        cajaUbicacion = new JComboBox<>(new String[]{"Bloque A", "Bloque B", "Bloque C"}); // ComboBox con ubicaciones predefinidas
-        panelForm.add(cajaUbicacion);
-
         JLabel lblDescripcion = new JLabel("Descripción:");
-        lblDescripcion.setForeground(Color.WHITE);
-        panelForm.add(lblDescripcion);
+        JLabel lblCapacidad = new JLabel("Capacidad:");
+
+        // Estilo para etiquetas
+        for (JLabel label : new JLabel[]{lblUbicacion, lblDescripcion, lblCapacidad}) {
+            label.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+            label.setForeground(new Color(25, 25, 112));
+        }
+
+        // Inicializa campos del formulario
+        cajaUbicacion = new JComboBox<>(new String[]{"Bloque A", "Bloque B", "Bloque C"});
+        cajaUbicacion.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        cajaUbicacion.setBackground(Color.WHITE);
+        cajaUbicacion.setPreferredSize(new Dimension(180, 25));
 
         cajaDescripcion = new JTextField();
-        panelForm.add(cajaDescripcion);
-
-        JLabel lblCapacidad = new JLabel("Capacidad:");
-        lblCapacidad.setForeground(Color.WHITE);
-        panelForm.add(lblCapacidad);
+        cajaDescripcion.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        cajaDescripcion.setPreferredSize(new Dimension(180, 25));
 
         cajaCapacidad = new JTextField();
-        panelForm.add(cajaCapacidad);
+        cajaCapacidad.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        cajaCapacidad.setPreferredSize(new Dimension(180, 25));
 
-        // Panel de botones con acciones
-        JPanel panelBotones = new JPanel(new GridLayout(1, 4, 10, 10));
-        btnAgregar = new JButton("AGREGAR");
-        btnActualizar = new JButton("ACTUALIZAR");
-        btnEliminar = new JButton("ELIMINAR");
-        btnLimpiar = new JButton("LIMPIAR");
+        // Añade componentes al panel izquierdo
+        gbcIzq.gridx = 0; gbcIzq.gridy = 0;
+        panelIzquierda.add(lblUbicacion, gbcIzq);
+        gbcIzq.gridx = 1;
+        panelIzquierda.add(cajaUbicacion, gbcIzq);
 
-        // Colores personalizados para los botones
-        btnAgregar.setBackground(new Color(25, 209, 49));
-        btnAgregar.setForeground(Color.WHITE);
-        btnActualizar.setBackground(new Color(210, 79, 9));
-        btnActualizar.setForeground(Color.WHITE);
-        btnEliminar.setBackground(new Color(220, 20, 60));
-        btnEliminar.setForeground(Color.WHITE);
-        btnLimpiar.setBackground(new Color(0, 63, 135));
-        btnLimpiar.setForeground(Color.WHITE);
+        gbcIzq.gridx = 0; gbcIzq.gridy = 1;
+        panelIzquierda.add(lblDescripcion, gbcIzq);
+        gbcIzq.gridx = 1;
+        panelIzquierda.add(cajaDescripcion, gbcIzq);
 
-        // Agregar los botones al panel
-        panelBotones.add(btnAgregar);
-        panelBotones.add(btnActualizar);
-        panelBotones.add(btnEliminar);
-        panelBotones.add(btnLimpiar);
+        // Añade componentes al panel derecho
+        gbcDer.gridx = 0; gbcDer.gridy = 0;
+        panelDerecha.add(lblCapacidad, gbcDer);
+        gbcDer.gridx = 1;
+        panelDerecha.add(cajaCapacidad, gbcDer);
 
-        // Panel que combina el formulario y los botones
-        JPanel panelSuperior = new JPanel(new BorderLayout());
-        panelSuperior.add(panelForm, BorderLayout.NORTH);
+        // Añade paneles al formulario
+        panelForm.add(panelIzquierda);
+        panelForm.add(panelDerecha);
+
+        // Panel de botones
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 8));
+        panelBotones.setBackground(new Color(250, 250, 255));
+
+        btnAgregar = new JButton("Agregar");
+        btnActualizar = new JButton("Actualizar");
+        btnEliminar = new JButton("Eliminar");
+        btnLimpiar = new JButton("Limpiar");
+
+        // Estilo para botones
+        btnAgregar.setBackground(new Color(60, 179, 113)); // Verde
+        btnActualizar.setBackground(new Color(100, 149, 237)); // Azul
+        btnEliminar.setBackground(new Color(220, 20, 60)); // Rojo
+        btnLimpiar.setBackground(new Color(150, 150, 150)); // Gris
+
+        for (JButton btn : new JButton[]{btnAgregar, btnActualizar, btnEliminar, btnLimpiar}) {
+            btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+            btn.setForeground(Color.WHITE);
+            btn.setPreferredSize(new Dimension(100, 30));
+            btn.setFocusPainted(false);
+            btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            addHoverEffect(btn);
+            panelBotones.add(btn);
+        }
+
+        // Añade formulario y botones al panel superior
+        panelSuperior.add(panelForm, BorderLayout.CENTER);
         panelSuperior.add(panelBotones, BorderLayout.SOUTH);
 
-        // Tabla para mostrar los laboratorios
+        // Tabla para mostrar laboratorios
         modelo = new DefaultTableModel(new String[]{"ID", "Ubicación", "Descripción", "Capacidad"}, 0);
         tablaLaboratorios = new JTable(modelo);
         tablaLaboratorios.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tablaLaboratorios.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        tablaLaboratorios.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        tablaLaboratorios.setRowHeight(25);
+        tablaLaboratorios.setOpaque(false); // Hacer la tabla transparente
+        tablaLaboratorios.setShowGrid(true);
+        tablaLaboratorios.setGridColor(new Color(100, 149, 237));
+
+        // Estilo para la tabla
+        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(220, 220, 220)); // Blanco y plomo claro
+                if (isSelected) {
+                    c.setBackground(new Color(135, 206, 250)); // Azul suave para selección
+                    c.setForeground(Color.WHITE);
+                } else {
+                    c.setForeground(Color.BLACK);
+                }
+                ((JComponent) c).setOpaque(true); // Celdas opacas para colores
+                return c;
+            }
+        };
+        for (int i = 0; i < tablaLaboratorios.getColumnCount(); i++) {
+            tablaLaboratorios.getColumnModel().getColumn(i).setCellRenderer(renderer);
+        }
+
+        // Ajustar anchos de columnas para cubrir el 50% del espacio en blanco adicional
+        tablaLaboratorios.getColumnModel().getColumn(0).setPreferredWidth(50); // ID
+        tablaLaboratorios.getColumnModel().getColumn(1).setPreferredWidth(120); // Ubicación
+        tablaLaboratorios.getColumnModel().getColumn(2).setPreferredWidth(280); // Descripción
+        tablaLaboratorios.getColumnModel().getColumn(3).setPreferredWidth(80); // Capacidad
+
+        // ScrollPane con fondo semitransparente y bordes redondeados
         JScrollPane scroll = new JScrollPane(tablaLaboratorios);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        scroll.setBackground(new Color(100, 149, 237, 50)); // Azul semitransparente
+        scroll.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder(
+                        BorderFactory.createLineBorder(new Color(100, 149, 237), 2),
+                        "Lista de Laboratorios",
+                        TitledBorder.LEFT,
+                        TitledBorder.TOP,
+                        new Font("Segoe UI", Font.BOLD, 13),
+                        new Color(25, 25, 112)),
+                new RoundedBorder(10, new Color(100, 149, 237))));
+
+        // Panel para centrar la tabla
+        JPanel tablaPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        tablaPanel.setBackground(Color.WHITE);
+        tablaPanel.add(scroll);
+
+        // Añade paneles al contenedor principal
+        add(panelSuperior, BorderLayout.NORTH);
+        add(tablaPanel, BorderLayout.CENTER);
 
         // Asignar eventos a los botones y tabla
-        btnAgregar.addActionListener(this::agregarLaboratorio);
-        btnActualizar.addActionListener(this::actualizarLaboratorio);
-        btnEliminar.addActionListener(this::eliminarLaboratorio);
+        btnAgregar.addActionListener(e -> agregarLaboratorio());
+        btnActualizar.addActionListener(e -> actualizarLaboratorio());
+        btnEliminar.addActionListener(e -> eliminarLaboratorio());
         btnLimpiar.addActionListener(e -> limpiarFormulario());
         tablaLaboratorios.getSelectionModel().addListSelectionListener(this::cargarSeleccion);
 
-        // Agregar componentes al panel principal
-        add(panelSuperior, BorderLayout.NORTH);
-        add(scroll, BorderLayout.CENTER);
-
         // Cargar los datos existentes en la tabla
         cargarDatos();
+    }
+
+    // Agrega efecto hover a los botones
+    private void addHoverEffect(JButton button) {
+        Color originalColor = button.getBackground();
+        Color hoverColor = originalColor.brighter();
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(hoverColor);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(originalColor);
+            }
+        });
     }
 
     // Carga los laboratorios desde la base de datos a la tabla
@@ -129,7 +281,7 @@ public class PanelLaboratorio extends JPanel {
     }
 
     // Agrega un nuevo laboratorio a la base de datos
-    private void agregarLaboratorio(ActionEvent e) {
+    private void agregarLaboratorio() {
         try {
             validarCampos(); // Valida que los campos no estén vacíos o inválidos
             Laboratorio lab = new Laboratorio(
@@ -146,7 +298,7 @@ public class PanelLaboratorio extends JPanel {
     }
 
     // Actualiza un laboratorio existente
-    private void actualizarLaboratorio(ActionEvent e) {
+    private void actualizarLaboratorio() {
         try {
             if (idSeleccionado == -1)
                 throw new IllegalArgumentException("Seleccione un laboratorio para actualizar.");
@@ -166,7 +318,7 @@ public class PanelLaboratorio extends JPanel {
     }
 
     // Elimina el laboratorio seleccionado
-    private void eliminarLaboratorio(ActionEvent e) {
+    private void eliminarLaboratorio() {
         try {
             if (idSeleccionado == -1)
                 throw new IllegalArgumentException("Seleccione un laboratorio para eliminar.");
