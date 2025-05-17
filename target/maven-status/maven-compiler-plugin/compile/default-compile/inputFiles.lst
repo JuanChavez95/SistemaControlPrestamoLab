@@ -1,82 +1,82 @@
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/Administrador.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/CategoriaEquipo.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/DetallePrestamoEquipamiento.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/DetallePrestamoInsumo.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/Equipamiento.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/Equipo.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/EquipoPrestamo.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/Equipos.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/HistorialEquipamiento.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/HistorialEquipos.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/HistorialGeneral.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/Horario.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/Insumo.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/Laboratorio.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/Permiso.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/Prestamo.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/Rol.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/Sancion.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/SancionEquipamiento.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/SancionEquipo.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/SancionInsumo.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Clases/Usuario.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Controles/ControlAdministrador.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Controles/ControlUsuario.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Controles/ControladorDetallePrestamoEquipamiento.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Controles/ControladorDetallePrestamoInsumo.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Controles/ControladorEquipamiento.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Controles/ControladorEquipo.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Controles/ControladorHistorialEquipamiento.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Controles/ControladorHistorialEquipos.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Controles/ControladorHistorialGeneral.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Controles/ControladorHorario.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Controles/ControladorInsumo.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Controles/ControladorLaboratorio.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Controles/ControladorPrestamo.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Controles/ControladorSancion.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Controles/ControladorSancionEquipamiento.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Controles/ControladorSancionEquipo.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Controles/ControladorSancionInsumo.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Dao/UsuarioDAOImpl.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/DataBase/ConexionBD.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/PanelEstadistica/PanelEstadisticasEquipos.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/PanelEstadistica/PanelEstadisticasPrestamos.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/PanelSanciones/PanelListaSanciones.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/PanelSanciones/PanelSancionar.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/PanelSanciones/PanelSancionesVigentes.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Paneles/PanelAdministradores.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Paneles/PanelDocentes.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Paneles/PanelEditar.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Paneles/PanelEquipo.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Paneles/PanelEstudiantes.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Paneles/PanelHistorialEquipo.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Paneles/PanelHorario.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Paneles/PanelLaboratorio.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Paneles/PanelVisualizarEquipo.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Paneles/PanelVisualizarHorario.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/PanelesMateriales/PanelDetalleHerramientas.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/PanelesMateriales/PanelEditarHerramientas.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/PanelesMateriales/PanelEditarInsumos.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/PanelesMateriales/PanelHerramientas.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/PanelesMateriales/PanelInsumos.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Prestamos/PanelNotificacion.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Prestamos/PanelSolicitarPrestamo.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Prestamos/PanelVisualizarPrestamos.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Reportes/PanelReporteEquipos.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Reportes/PanelReportePrestamo.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Servicios/EquipoService.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Servicios/HorarioService.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Servicios/LaboratorioService.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Servicios/PrestamoService.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Servicios/RolService.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Servicios/UsuarioService.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Ventanas/NuevoAdministrador.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Ventanas/NuevoUsuario.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Ventanas/Principal.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Ventanas/Principal2.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Ventanas/Principal3.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/Ventanas/login.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/com/mycompany/sistemacontrolprestamolab/SistemaControlPrestamoLab.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/exceptions/CredencialesInvalidas.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/interfaces/GenericDAO.java
-/workspaces/SistemaControlPrestamoLab/src/main/java/interfaces/UsuarioDAO.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\HistorialEquipos.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControladorEquipo.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\PanelEstadistica\PanelEstadisticasPrestamos.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\Equipo.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Paneles\PanelEstudiantes.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\CategoriaEquipo.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Dao\UsuarioDAOImpl.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Ventanas\NuevoAdministrador.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\interfaces\GenericDAO.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Paneles\PanelVisualizarEquipo.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\com\mycompany\sistemacontrolprestamolab\SistemaControlPrestamoLab.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControlUsuario.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\SancionEquipo.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Paneles\PanelAdministradores.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\DataBase\ConexionBD.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Paneles\PanelLaboratorio.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControladorLaboratorio.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Ventanas\Principal2.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Servicios\RolService.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\Sancion.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\SancionEquipamiento.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Ventanas\Principal.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControladorSancionEquipamiento.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Reportes\PanelReportePrestamo.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControladorPrestamo.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\PanelesMateriales\PanelInsumos.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\DetallePrestamoEquipamiento.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\HistorialGeneral.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\PanelesMateriales\PanelDetalleHerramientas.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\PanelesMateriales\PanelEditarInsumos.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControladorSancionEquipo.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Servicios\PrestamoService.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Paneles\PanelHorario.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Paneles\PanelEditar.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControladorHorario.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\HistorialEquipamiento.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\EquipoPrestamo.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Reportes\PanelReporteEquipos.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\SancionInsumo.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\Horario.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\PanelesMateriales\PanelHerramientas.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\Laboratorio.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControladorDetallePrestamoEquipamiento.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\Administrador.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Paneles\PanelVisualizarHorario.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Ventanas\Principal3.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Ventanas\NuevoUsuario.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\interfaces\UsuarioDAO.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Paneles\PanelEquipo.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\Rol.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\exceptions\CredencialesInvalidas.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Prestamos\PanelSolicitarPrestamo.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\Permiso.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControladorInsumo.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Prestamos\PanelVisualizarPrestamos.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\Usuario.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\PanelEstadistica\PanelEstadisticasEquipos.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\PanelSanciones\PanelSancionar.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\PanelSanciones\PanelListaSanciones.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Servicios\UsuarioService.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\Prestamo.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\Equipamiento.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\Insumo.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControlAdministrador.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControladorDetallePrestamoInsumo.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\PanelesMateriales\PanelEditarHerramientas.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Ventanas\login.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControladorSancion.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControladorHistorialEquipamiento.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Prestamos\PanelNotificacion.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Servicios\HorarioService.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControladorSancionInsumo.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControladorEquipamiento.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Paneles\PanelDocentes.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\PanelSanciones\PanelSancionesVigentes.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\Equipos.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Servicios\EquipoService.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Paneles\PanelHistorialEquipo.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControladorHistorialGeneral.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Clases\DetallePrestamoInsumo.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Servicios\LaboratorioService.java
+C:\Users\DOC\Desktop\PROYECTO V\SistemaControlPrestamoLab\src\main\java\Controles\ControladorHistorialEquipos.java

@@ -6,6 +6,7 @@
 package Reportes;
 
 import Clases.Equipos;
+import Clases.HistorialGeneral;
 import Controles.ControladorEquipo;
 import Controles.ControladorHistorialEquipos;
 
@@ -33,6 +34,23 @@ import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+
+//Modificar las importaciones para incluir JFreeChart
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PiePlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DefaultPieDataset;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Panel para generar reportes de equipos en formato PDF.
@@ -108,12 +126,14 @@ private static final com.itextpdf.text.Font FONT_TABLA_CELDA =
         panelOpciones.add(lblTipoReporte, gbc);
 
         gbc.gridx = 1;
-        String[] opciones = {"Reporte por ID de Equipo", "Reporte de Todos los Equipos"};
+        // Añadir la nueva opción "Reporte Estadística de Equipos"
+        String[] opciones = {"Reporte por ID de Equipo", "Reporte de Todos los Equipos", "Reporte Estadística de Equipos"};
         cboTipoReporte = new JComboBox<>(opciones);
         cboTipoReporte.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         cboTipoReporte.setBackground(Color.WHITE);
         cboTipoReporte.setPreferredSize(new Dimension(240, 30));
         panelOpciones.add(cboTipoReporte, gbc);
+
 
         gbc.gridx = 0;
         gbc.gridy = 1;
@@ -192,7 +212,8 @@ private static final com.itextpdf.text.Font FONT_TABLA_CELDA =
 
         // Comportamiento dinámico
         cboTipoReporte.addActionListener(e -> {
-            boolean esReportePorId = cboTipoReporte.getSelectedIndex() == 0;
+            int selectedIndex = cboTipoReporte.getSelectedIndex();
+            boolean esReportePorId = selectedIndex == 0;
             txtIdEquipo.setEnabled(esReportePorId);
             lblIdEquipo.setEnabled(esReportePorId);
         });
@@ -234,34 +255,39 @@ private static final com.itextpdf.text.Font FONT_TABLA_CELDA =
      * Determina qué tipo de reporte generar según la selección del usuario
      */
     private void generarReporte() {
-        try {
-            String fechaStr = txtFecha.getText().trim();
-            if (fechaStr.isEmpty() || !validarFecha(fechaStr)) {
-                JOptionPane.showMessageDialog(this, 
-                    "Por favor ingrese una fecha válida en formato dd/MM/yyyy", 
-                    "Fecha Inválida", JOptionPane.WARNING_MESSAGE);
+    try {
+        String fechaStr = txtFecha.getText().trim();
+        if (fechaStr.isEmpty() || !validarFecha(fechaStr)) {
+            JOptionPane.showMessageDialog(this, 
+                "Por favor ingrese una fecha válida en formato dd/MM/yyyy", 
+                "Fecha Inválida", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        int selectedIndex = cboTipoReporte.getSelectedIndex();
+        
+        if (selectedIndex == 0) {
+            // Reporte por ID
+            String id = txtIdEquipo.getText().trim();
+            if (id.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Por favor ingrese un ID de equipo", 
+                        "ID Requerido", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            
-            if (cboTipoReporte.getSelectedIndex() == 0) {
-                // Reporte por ID
-                String id = txtIdEquipo.getText().trim();
-                if (id.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Por favor ingrese un ID de equipo", 
-                            "ID Requerido", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-                generarReportePorID(id);
-            } else {
-                // Reporte de todos los equipos
-                generarReporteTodos();
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error al generar el reporte: " + ex.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+            generarReportePorID(id);
+        } else if (selectedIndex == 1) {
+            // Reporte de todos los equipos
+            generarReporteTodos();
+        } else if (selectedIndex == 2) {
+            // Nuevo reporte estadístico
+            generarReporteEstadistico();
         }
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Error al generar el reporte: " + ex.getMessage(),
+                "Error", JOptionPane.ERROR_MESSAGE);
     }
+}
 
     /**
      * Genera un reporte para un equipo específico por ID
@@ -590,6 +616,321 @@ private static final com.itextpdf.text.Font FONT_TABLA_CELDA =
         }
     }
     
+    
+    // 4. Añadir el nuevo método para generar el reporte estadístico
+private void generarReporteEstadistico() {
+    try {
+        // Ruta del archivo PDF
+        String nombreArchivo = "Reporte_Estadistico_Equipos.pdf";
+        String rutaCompleta = DIRECTORIO_REPORTES + nombreArchivo;
+        
+        try (FileOutputStream outputStream = new FileOutputStream(rutaCompleta)) {
+            // Crear documento PDF
+            Document document = new Document();
+            PdfWriter writer = PdfWriter.getInstance(document, outputStream);
+            document.open();
+            
+            // Agregar encabezado
+            agregarEncabezadoPDF(document, "REPORTE ESTADÍSTICO DE EQUIPOS");
+            document.add(new Paragraph(" ")); // Espacio
+            
+            // Agregar subtítulo para los gráficos de estado
+            Paragraph subtituloEstado = new Paragraph("ESTADO DE LOS EQUIPOS:", FONT_SUBTITULO);
+            subtituloEstado.setAlignment(Element.ALIGN_CENTER);
+            document.add(subtituloEstado);
+            document.add(new Paragraph(" ")); // Espacio
+            
+            // Crear y agregar gráficos de torta
+            agregarGraficoEstadoEquipos(document);
+            document.add(new Paragraph(" ")); // Espacio
+            
+            agregarGraficoEquiposPorLaboratorio(document);
+            
+            // Nueva página para el historial
+            document.newPage();
+            
+            // Agregar subtítulo para el historial
+            Paragraph subtituloHistorial = new Paragraph("HISTORIAL DE LOS EQUIPOS:", FONT_SUBTITULO);
+            subtituloHistorial.setAlignment(Element.ALIGN_CENTER);
+            document.add(subtituloHistorial);
+            document.add(new Paragraph(" ")); // Espacio
+            
+            // Agregar gráfico de barras para categorías de historial
+            agregarGraficoHistorialCategorias(document);
+            
+            document.close();
+            
+            // Abrir el documento PDF
+            abrirArchivoPDF(rutaCompleta);
+        }
+    } catch (Exception ex) {
+        manejarError("Error al generar el reporte estadístico", ex);
+    }
+}
+
+// 5. Método para crear y agregar el gráfico de estado de equipos
+private void agregarGraficoEstadoEquipos(Document document) throws Exception {
+    // Obtener datos de los equipos por estado
+    Map<String, Integer> estadosEquipos = contarEquiposPorEstado();
+    
+    if (estadosEquipos.isEmpty()) {
+        document.add(new Paragraph("No hay datos de equipos disponibles para generar el gráfico.", FONT_NORMAL));
+        return;
+    }
+    
+    // Crear dataset para el gráfico de torta
+    DefaultPieDataset dataset = new DefaultPieDataset();
+    for (Map.Entry<String, Integer> entry : estadosEquipos.entrySet()) {
+        dataset.setValue(entry.getKey(), entry.getValue());
+    }
+    
+    // Crear gráfico
+    JFreeChart chart = ChartFactory.createPieChart(
+            "Distribución de Equipos por Estado",  // título
+            dataset,                               // datos
+            true,                                  // incluir leyenda
+            true,                                  // usar tooltips
+            false                                  // generar URLs
+    );
+    
+    // Personalizar gráfico
+    PiePlot plot = (PiePlot) chart.getPlot();
+    plot.setLabelFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 12));
+    plot.setNoDataMessage("No hay datos disponibles");
+    plot.setCircular(true);
+    plot.setLabelGap(0.02);
+    
+    // Convertir gráfico a imagen y agregarlo al PDF
+    int width = 500;
+    int height = 300;
+    
+    ByteArrayOutputStream imgBytes = new ByteArrayOutputStream();
+    BufferedImage bufferedImage = chart.createBufferedImage(width, height);
+    ImageIO.write(bufferedImage, "png", imgBytes);
+    
+    com.itextpdf.text.Image image = com.itextpdf.text.Image.getInstance(imgBytes.toByteArray());
+    image.setAlignment(Element.ALIGN_CENTER);
+    
+    document.add(image);
+    document.add(new Paragraph(" ")); // Espacio
+    
+    // Agregar información de los porcentajes
+    PdfPTable tablaInfo = new PdfPTable(2);
+    tablaInfo.setWidthPercentage(70);
+    tablaInfo.setHorizontalAlignment(Element.ALIGN_CENTER);
+    
+    // Encabezados
+    PdfPCell cellEstado = new PdfPCell(new Phrase("Estado", FONT_TABLA_ENCABEZADO));
+    cellEstado.setBackgroundColor(BaseColor.LIGHT_GRAY);
+    tablaInfo.addCell(cellEstado);
+    
+    PdfPCell cellPorcentaje = new PdfPCell(new Phrase("Porcentaje", FONT_TABLA_ENCABEZADO));
+    cellPorcentaje.setBackgroundColor(BaseColor.LIGHT_GRAY);
+    tablaInfo.addCell(cellPorcentaje);
+    
+    // Calcular total
+    int total = 0;
+    for (Integer cantidad : estadosEquipos.values()) {
+        total += cantidad;
+    }
+    
+    // Agregar filas con porcentajes
+    for (Map.Entry<String, Integer> entry : estadosEquipos.entrySet()) {
+        tablaInfo.addCell(new PdfPCell(new Phrase(entry.getKey(), FONT_TABLA_CELDA)));
+        
+        double porcentaje = (double) entry.getValue() / total * 100;
+        tablaInfo.addCell(new PdfPCell(new Phrase(String.format("%.2f%%", porcentaje), FONT_TABLA_CELDA)));
+    }
+    
+    document.add(tablaInfo);
+}
+
+// 6. Método para crear y agregar el gráfico de equipos por laboratorio
+private void agregarGraficoEquiposPorLaboratorio(Document document) throws Exception {
+    // Obtener datos de los equipos por laboratorio
+    Map<Integer, Integer> equiposPorLab = contarEquiposPorLaboratorio();
+    
+    if (equiposPorLab.isEmpty()) {
+        document.add(new Paragraph("No hay datos de equipos por laboratorio disponibles para generar el gráfico.", FONT_NORMAL));
+        return;
+    }
+    
+    // Crear dataset para el gráfico de torta
+    DefaultPieDataset dataset = new DefaultPieDataset();
+    for (Map.Entry<Integer, Integer> entry : equiposPorLab.entrySet()) {
+        dataset.setValue("Laboratorio " + entry.getKey(), entry.getValue());
+    }
+    
+    // Crear gráfico
+    JFreeChart chart = ChartFactory.createPieChart(
+            "Distribución de Equipos por Laboratorio",  // título
+            dataset,                                    // datos
+            true,                                       // incluir leyenda
+            true,                                       // usar tooltips
+            false                                       // generar URLs
+    );
+    
+    // Personalizar gráfico
+    PiePlot plot = (PiePlot) chart.getPlot();
+    plot.setLabelFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 12));
+    plot.setNoDataMessage("No hay datos disponibles");
+    plot.setCircular(true);
+    plot.setLabelGap(0.02);
+    
+    // Convertir gráfico a imagen y agregarlo al PDF
+    int width = 500;
+    int height = 300;
+    
+    ByteArrayOutputStream imgBytes = new ByteArrayOutputStream();
+    BufferedImage bufferedImage = chart.createBufferedImage(width, height);
+    ImageIO.write(bufferedImage, "png", imgBytes);
+    
+    com.itextpdf.text.Image image = com.itextpdf.text.Image.getInstance(imgBytes.toByteArray());
+    image.setAlignment(Element.ALIGN_CENTER);
+    
+    document.add(image);
+    document.add(new Paragraph(" ")); // Espacio
+    
+    // Agregar información de los porcentajes
+    PdfPTable tablaInfo = new PdfPTable(2);
+    tablaInfo.setWidthPercentage(70);
+    tablaInfo.setHorizontalAlignment(Element.ALIGN_CENTER);
+    
+    // Encabezados
+    PdfPCell cellLab = new PdfPCell(new Phrase("Laboratorio", FONT_TABLA_ENCABEZADO));
+    cellLab.setBackgroundColor(BaseColor.LIGHT_GRAY);
+    tablaInfo.addCell(cellLab);
+    
+    PdfPCell cellPorcentaje = new PdfPCell(new Phrase("Porcentaje", FONT_TABLA_ENCABEZADO));
+    cellPorcentaje.setBackgroundColor(BaseColor.LIGHT_GRAY);
+    tablaInfo.addCell(cellPorcentaje);
+    
+    // Calcular total
+    int total = 0;
+    for (Integer cantidad : equiposPorLab.values()) {
+        total += cantidad;
+    }
+    
+    // Agregar filas con porcentajes
+    for (Map.Entry<Integer, Integer> entry : equiposPorLab.entrySet()) {
+        tablaInfo.addCell(new PdfPCell(new Phrase("Laboratorio " + entry.getKey(), FONT_TABLA_CELDA)));
+        
+        double porcentaje = (double) entry.getValue() / total * 100;
+        tablaInfo.addCell(new PdfPCell(new Phrase(String.format("%.2f%%", porcentaje), FONT_TABLA_CELDA)));
+    }
+    
+    document.add(tablaInfo);
+}
+
+// 7. Método para crear y agregar el gráfico de historial por categorías
+private void agregarGraficoHistorialCategorias(Document document) throws Exception {
+    // Obtener datos del historial por categoría
+    Map<String, Integer> historialPorCategoria = contarHistorialPorCategoria();
+    
+    if (historialPorCategoria.isEmpty()) {
+        document.add(new Paragraph("No hay datos de historial disponibles para generar el gráfico.", FONT_NORMAL));
+        return;
+    }
+    
+    // Crear dataset para el gráfico de barras
+    DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+    for (Map.Entry<String, Integer> entry : historialPorCategoria.entrySet()) {
+        dataset.setValue(entry.getValue(), "Cantidad", entry.getKey());
+    }
+    
+    // Crear gráfico
+    JFreeChart chart = ChartFactory.createBarChart(
+            "Eventos por Categoría de Historial",  // título
+            "Categoría",                          // etiqueta eje x
+            "Cantidad",                           // etiqueta eje y
+            dataset,                              // datos
+            PlotOrientation.VERTICAL,             // orientación
+            true,                                 // incluir leyenda
+            true,                                 // usar tooltips
+            false                                 // generar URLs
+    );
+    
+    // Convertir gráfico a imagen y agregarlo al PDF
+    int width = 550;
+    int height = 400;
+    
+    ByteArrayOutputStream imgBytes = new ByteArrayOutputStream();
+    BufferedImage bufferedImage = chart.createBufferedImage(width, height);
+    ImageIO.write(bufferedImage, "png", imgBytes);
+    
+    com.itextpdf.text.Image image = com.itextpdf.text.Image.getInstance(imgBytes.toByteArray());
+    image.setAlignment(Element.ALIGN_CENTER);
+    
+    document.add(image);
+    document.add(new Paragraph(" ")); // Espacio
+    
+    // Agregar tabla con los datos
+    PdfPTable tablaInfo = new PdfPTable(2);
+    tablaInfo.setWidthPercentage(70);
+    tablaInfo.setHorizontalAlignment(Element.ALIGN_CENTER);
+    
+    // Encabezados
+    PdfPCell cellCategoria = new PdfPCell(new Phrase("Categoría", FONT_TABLA_ENCABEZADO));
+    cellCategoria.setBackgroundColor(BaseColor.LIGHT_GRAY);
+    tablaInfo.addCell(cellCategoria);
+    
+    PdfPCell cellCantidad = new PdfPCell(new Phrase("Cantidad", FONT_TABLA_ENCABEZADO));
+    cellCantidad.setBackgroundColor(BaseColor.LIGHT_GRAY);
+    tablaInfo.addCell(cellCantidad);
+    
+    // Agregar filas
+    for (Map.Entry<String, Integer> entry : historialPorCategoria.entrySet()) {
+        tablaInfo.addCell(new PdfPCell(new Phrase(entry.getKey(), FONT_TABLA_CELDA)));
+        tablaInfo.addCell(new PdfPCell(new Phrase(String.valueOf(entry.getValue()), FONT_TABLA_CELDA)));
+    }
+    
+    document.add(tablaInfo);
+}
+
+// 8. Método auxiliar para contar equipos por estado
+private Map<String, Integer> contarEquiposPorEstado() throws SQLException {
+    Map<String, Integer> resultado = new HashMap<>();
+    
+    List<Equipos> listaEquipos = controlEquipo.listar();
+    for (Equipos equipo : listaEquipos) {
+        String estado = equipo.getEstado();
+        if (estado != null && !estado.isEmpty()) {
+            resultado.put(estado, resultado.getOrDefault(estado, 0) + 1);
+        }
+    }
+    
+    return resultado;
+}
+
+// 9. Método auxiliar para contar equipos por laboratorio
+private Map<Integer, Integer> contarEquiposPorLaboratorio() throws SQLException {
+    Map<Integer, Integer> resultado = new HashMap<>();
+    
+    List<Equipos> listaEquipos = controlEquipo.listar();
+    for (Equipos equipo : listaEquipos) {
+        int idLab = equipo.getIdLaboratorio();
+        resultado.put(idLab, resultado.getOrDefault(idLab, 0) + 1);
+    }
+    
+    return resultado;
+}
+
+// 10. Método auxiliar para contar historial por categoría
+private Map<String, Integer> contarHistorialPorCategoria() throws SQLException {
+    Map<String, Integer> resultado = new HashMap<>();
+    
+    // Obtener todos los registros de historial
+    List<HistorialGeneral> listaHistorial = controlHistorial.controlHistorialGeneral.listar();
+    for (HistorialGeneral historial : listaHistorial) {
+        String categoria = historial.getCategoria();
+        if (categoria != null && !categoria.isEmpty()) {
+            resultado.put(categoria, resultado.getOrDefault(categoria, 0) + 1);
+        }
+    }
+    
+    return resultado;
+}
+    
     /**
      * Maneja los errores mostrando un mensaje y registrando la excepción
      * @param mensaje Mensaje de error
@@ -607,14 +948,6 @@ private static final com.itextpdf.text.Font FONT_TABLA_CELDA =
         System.err.println(mensaje);
         ex.printStackTrace();
         
-        // Opcionalmente, se podría implementar un registro en archivo de log
-        // Ejemplo:
-        // try {
-        //     FileWriter fw = new FileWriter("error_log.txt", true);
-        //     fw.write(new Date() + " - " + mensaje + ": " + ex.getMessage() + "\n");
-        //     fw.close();
-        // } catch (IOException e) {
-        //     System.err.println("Error al escribir en el archivo de log: " + e.getMessage());
-        // }
+        
     }
 }
