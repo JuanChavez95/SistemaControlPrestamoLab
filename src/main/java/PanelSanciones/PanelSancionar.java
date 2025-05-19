@@ -1,6 +1,7 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Panel compacto para registrar sanciones a usuarios por problemas con préstamos.
+ * Diseño dividido en dos columnas: izquierda para detalles de la sanción, derecha para elementos afectados.
+ * Optimizado para caber en la ventana sin necesidad de scroll.
  */
 package PanelSanciones;
 
@@ -15,19 +16,26 @@ import Controles.ControladorSancionEquipo;
 import Controles.ControladorEquipamiento;
 import Controles.ControladorInsumo;
 import Controles.ControladorEquipo;
-import DataBase.ConexionBD;
-
 import com.toedter.calendar.JDateChooser;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.*;
 import java.util.Date;
 import javax.swing.*;
-import java.text.SimpleDateFormat;
+import javax.swing.border.*;
 import java.util.Calendar;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+import javax.swing.plaf.basic.BasicComboBoxUI;
 
+/**
+ * Clase que representa un panel compacto para registrar sanciones, dividido en dos columnas.
+ */
 public class PanelSancionar extends JPanel {
 
+    private static final Logger LOGGER = Logger.getLogger(PanelSancionar.class.getName());
+    
+    // Componentes de la interfaz gráfica
     private JTextField txtRuUsuario;
     private JTextField txtIdPrestamo;
     private JComboBox<String> cmbTipoSancion;
@@ -37,21 +45,19 @@ public class PanelSancionar extends JPanel {
     private JDateChooser fechaInicio;
     private JDateChooser fechaFin;
     private JSpinner spinnerDiasSuspension;
-
-    private JPanel panelAfectado;
     private JComboBox<String> cmbTipoAfectado;
     private JTextField txtIdAfectado;
     private JSpinner spinnerCantidadAfectada;
     private JButton btnAgregarAfectado;
     private JButton btnGuardar;
     
-    // Variables para almacenar los IDs de elementos afectados
+    // Variables para almacenar IDs de elementos afectados
     private Integer idEquipamientoAfectado = null;
     private Integer idInsumoAfectado = null;
     private String idEquipoAfectado = null;
     private Integer cantidadInsumoAfectada = 0;
     
-    // Flag para comprobar si se ha agregado un elemento afectado
+    // Bandera para verificar si se agregó un elemento afectado
     private boolean elementoAfectadoAgregado = false;
 
     // Controladores
@@ -63,12 +69,26 @@ public class PanelSancionar extends JPanel {
     private ControladorInsumo controladorInsumo;
     private ControladorEquipo controladorEquipo;
 
+    // Paleta de colores (igual que PanelVisualizarPrestamos)
+    private static final Color PRIMARY_COLOR = new Color(21, 101, 192); // Azul oscuro
+    private static final Color BACKGROUND_COLOR = new Color(238, 238, 238); // Gris claro
+    private static final Color CARD_COLOR = new Color(250, 250, 250); // Blanco suave
+    private static final Color TEXT_COLOR = new Color(33, 33, 33); // Gris oscuro
+    private static final Color BORDER_COLOR = new Color(189, 189, 189); // Gris claro
+    private static final Color SUCCESS_COLOR = new Color(46, 125, 50); // Verde
+
+    /**
+     * Constructor del panel.
+     */
     public PanelSancionar() {
         inicializarControladores();
         inicializarUI();
         configurarEventos();
     }
-    
+
+    /**
+     * Inicializa los controladores para interactuar con la lógica de negocio.
+     */
     private void inicializarControladores() {
         try {
             controladorSancion = new ControladorSancion();
@@ -79,6 +99,7 @@ public class PanelSancionar extends JPanel {
             controladorInsumo = new ControladorInsumo();
             controladorEquipo = new ControladorEquipo();
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error al inicializar controladores", e);
             JOptionPane.showMessageDialog(this, 
                 "Error al inicializar controladores: " + e.getMessage(), 
                 "Error", 
@@ -86,127 +107,195 @@ public class PanelSancionar extends JPanel {
         }
     }
 
+    /**
+     * Inicializa los componentes gráficos del panel en un diseño compacto.
+     */
     private void inicializarUI() {
         setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        setBackground(Color.WHITE);
+        setBackground(BACKGROUND_COLOR);
+        setBorder(new EmptyBorder(15, 15, 15, 15));
 
         // Título
-        JLabel titleLabel = new JLabel("Sancionar Usuarios");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JLabel titleLabel = new JLabel("Sancionar Usuarios", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Roboto", Font.BOLD, 24));
+        titleLabel.setForeground(PRIMARY_COLOR);
+        titleLabel.setBorder(new EmptyBorder(10, 0, 15, 0));
         add(titleLabel, BorderLayout.NORTH);
 
-        // Panel principal
-        JPanel panelPrincipal = new JPanel(new GridBagLayout());
-        panelPrincipal.setBackground(Color.WHITE);
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 5, 5, 5);
+        // Panel central con dos columnas
+        JPanel panelCentral = new JPanel(new GridLayout(1, 2, 10, 0));
+        panelCentral.setBackground(BACKGROUND_COLOR);
 
-        int y = 0;
+        // Panel izquierdo: Detalles de la sanción
+        JPanel panelIzquierdo = createCardPanel("Datos de la Sanción");
+        panelIzquierdo.setLayout(new GridBagLayout());
+        GridBagConstraints gbcIzq = new GridBagConstraints();
+        gbcIzq.fill = GridBagConstraints.HORIZONTAL;
+        gbcIzq.insets = new Insets(5, 5, 5, 5);
+        int yIzq = 0;
 
         // RU Usuario
-        gbc.gridx = 0; gbc.gridy = y; panelPrincipal.add(new JLabel("RU del Usuario:"), gbc);
-        gbc.gridx = 1; txtRuUsuario = new JTextField(10); panelPrincipal.add(txtRuUsuario, gbc); y++;
+        gbcIzq.gridx = 0; gbcIzq.gridy = yIzq; 
+        panelIzquierdo.add(createStyledLabel("RU:"), gbcIzq);
+        gbcIzq.gridx = 1; 
+        txtRuUsuario = new JTextField(8);
+        txtRuUsuario.setFont(new Font("Roboto", Font.PLAIN, 14));
+        txtRuUsuario.setBorder(createRoundedBorder(BORDER_COLOR, 8));
+        panelIzquierdo.add(txtRuUsuario, gbcIzq); 
+        yIzq++;
 
         // ID Préstamo
-        gbc.gridx = 0; gbc.gridy = y; panelPrincipal.add(new JLabel("ID Préstamo (opcional):"), gbc);
-        gbc.gridx = 1; txtIdPrestamo = new JTextField(10); panelPrincipal.add(txtIdPrestamo, gbc); y++;
+        gbcIzq.gridx = 0; gbcIzq.gridy = yIzq; 
+        panelIzquierdo.add(createStyledLabel("ID Préstamo:"), gbcIzq);
+        gbcIzq.gridx = 1; 
+        txtIdPrestamo = new JTextField(8);
+        txtIdPrestamo.setFont(new Font("Roboto", Font.PLAIN, 14));
+        txtIdPrestamo.setBorder(createRoundedBorder(BORDER_COLOR, 8));
+        panelIzquierdo.add(txtIdPrestamo, gbcIzq); 
+        yIzq++;
 
         // Tipo Sanción
-        gbc.gridx = 0; gbc.gridy = y; panelPrincipal.add(new JLabel("Tipo de Sanción:"), gbc);
-        gbc.gridx = 1; cmbTipoSancion = new JComboBox<>(new String[]{"Retraso", "Daños", "Exceso de insumos", "Pérdida", "Otro"});
-        panelPrincipal.add(cmbTipoSancion, gbc); y++;
+        gbcIzq.gridx = 0; gbcIzq.gridy = yIzq; 
+        panelIzquierdo.add(createStyledLabel("Tipo:"), gbcIzq);
+        gbcIzq.gridx = 1; 
+        cmbTipoSancion = new JComboBox<>(new String[]{"Retraso", "Daños", "Exceso", "Pérdida", "Otro"});
+        styleComboBox(cmbTipoSancion);
+        panelIzquierdo.add(cmbTipoSancion, gbcIzq); 
+        yIzq++;
 
         // Descripción
-        gbc.gridx = 0; gbc.gridy = y; panelPrincipal.add(new JLabel("Descripción:"), gbc);
-        gbc.gridx = 1;
-        txtDescripcion = new JTextArea(4, 20);
+        gbcIzq.gridx = 0; gbcIzq.gridy = yIzq; 
+        panelIzquierdo.add(createStyledLabel("Descripción:"), gbcIzq);
+        gbcIzq.gridx = 1; 
+        txtDescripcion = new JTextArea(3, 15);
+        txtDescripcion.setFont(new Font("Roboto", Font.PLAIN, 12));
         txtDescripcion.setLineWrap(true);
         txtDescripcion.setWrapStyleWord(true);
-        JScrollPane scrollDescripcion = new JScrollPane(txtDescripcion);
-        panelPrincipal.add(scrollDescripcion, gbc); y++;
+        txtDescripcion.setBorder(createRoundedBorder(BORDER_COLOR, 8));
+        txtDescripcion.setBackground(CARD_COLOR);
+        panelIzquierdo.add(txtDescripcion, gbcIzq); 
+        yIzq++;
 
         // Fecha Sanción
-        gbc.gridx = 0; gbc.gridy = y; panelPrincipal.add(new JLabel("Fecha de la Falta:"), gbc);
-        gbc.gridx = 1; fechaSancion = new JDateChooser(); fechaSancion.setDate(new Date()); panelPrincipal.add(fechaSancion, gbc); y++;
+        gbcIzq.gridx = 0; gbcIzq.gridy = yIzq; 
+        panelIzquierdo.add(createStyledLabel("Falta:"), gbcIzq);
+        gbcIzq.gridx = 1; 
+        fechaSancion = new JDateChooser();
+        fechaSancion.setDate(new Date());
+        fechaSancion.setFont(new Font("Roboto", Font.PLAIN, 14));
+        panelIzquierdo.add(fechaSancion, gbcIzq); 
+        yIzq++;
 
         // Estado Sanción
-        gbc.gridx = 0; gbc.gridy = y; panelPrincipal.add(new JLabel("Estado de Sanción:"), gbc);
-        gbc.gridx = 1; cmbEstadoSancion = new JComboBox<>(new String[]{"ACTIVA", "CUMPLIDA", "NO ACTIVA"});
-        panelPrincipal.add(cmbEstadoSancion, gbc); y++;
+        gbcIzq.gridx = 0; gbcIzq.gridy = yIzq; 
+        panelIzquierdo.add(createStyledLabel("Estado:"), gbcIzq);
+        gbcIzq.gridx = 1; 
+        cmbEstadoSancion = new JComboBox<>(new String[]{"ACTIVA", "CUMPLIDA", "NO ACTIVA"});
+        styleComboBox(cmbEstadoSancion);
+        panelIzquierdo.add(cmbEstadoSancion, gbcIzq); 
+        yIzq++;
 
         // Fecha Inicio
-        gbc.gridx = 0; gbc.gridy = y; panelPrincipal.add(new JLabel("Fecha de Inicio:"), gbc);
-        gbc.gridx = 1; fechaInicio = new JDateChooser(); fechaInicio.setDate(new Date()); panelPrincipal.add(fechaInicio, gbc); y++;
+        gbcIzq.gridx = 0; gbcIzq.gridy = yIzq; 
+        panelIzquierdo.add(createStyledLabel("Inicio:"), gbcIzq);
+        gbcIzq.gridx = 1; 
+        fechaInicio = new JDateChooser();
+        fechaInicio.setDate(new Date());
+        fechaInicio.setFont(new Font("Roboto", Font.PLAIN, 14));
+        panelIzquierdo.add(fechaInicio, gbcIzq); 
+        yIzq++;
 
         // Fecha Fin
-        gbc.gridx = 0; gbc.gridy = y; panelPrincipal.add(new JLabel("Fecha de Fin:"), gbc);
-        gbc.gridx = 1; fechaFin = new JDateChooser(); panelPrincipal.add(fechaFin, gbc); y++;
+        gbcIzq.gridx = 0; gbcIzq.gridy = yIzq; 
+        panelIzquierdo.add(createStyledLabel("Fin:"), gbcIzq);
+        gbcIzq.gridx = 1; 
+        fechaFin = new JDateChooser();
+        fechaFin.setFont(new Font("Roboto", Font.PLAIN, 14));
+        panelIzquierdo.add(fechaFin, gbcIzq); 
+        yIzq++;
 
         // Días Suspensión
-        gbc.gridx = 0; gbc.gridy = y; panelPrincipal.add(new JLabel("Días de Suspensión:"), gbc);
-        gbc.gridx = 1; spinnerDiasSuspension = new JSpinner(new SpinnerNumberModel(0, 0, 365, 1));
-        panelPrincipal.add(spinnerDiasSuspension, gbc); y++;
+        gbcIzq.gridx = 0; gbcIzq.gridy = yIzq; 
+        panelIzquierdo.add(createStyledLabel("Días:"), gbcIzq);
+        gbcIzq.gridx = 1; 
+        spinnerDiasSuspension = new JSpinner(new SpinnerNumberModel(0, 0, 365, 1));
+        spinnerDiasSuspension.setFont(new Font("Roboto", Font.PLAIN, 14));
+        panelIzquierdo.add(spinnerDiasSuspension, gbcIzq); 
+        yIzq++;
 
-        // Panel elementos afectados
-        gbc.gridx = 0; gbc.gridy = y; gbc.gridwidth = 2; gbc.fill = GridBagConstraints.BOTH;
-        crearPanelElementosAfectados();
-        panelPrincipal.add(panelAfectado, gbc); y++;
+        // Panel derecho: Elementos afectados
+        JPanel panelDerecho = createCardPanel("Elementos Afectados");
+        panelDerecho.setLayout(new GridBagLayout());
+        GridBagConstraints gbcDer = new GridBagConstraints();
+        gbcDer.fill = GridBagConstraints.HORIZONTAL;
+        gbcDer.insets = new Insets(5, 5, 5, 5);
+        int yDer = 0;
 
-        // Botón guardar
-        gbc.gridx = 0; gbc.gridy = y; gbc.gridwidth = 2; gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.CENTER;
-        btnGuardar = new JButton("Guardar Sanción");
-        panelPrincipal.add(btnGuardar, gbc);
-
-        JScrollPane scrollPane = new JScrollPane(panelPrincipal);
-        add(scrollPane, BorderLayout.CENTER);
-        
-        // Calcular fecha fin automáticamente
-        spinnerDiasSuspension.addChangeListener(e -> calcularFechaFin());
-    }
-
-    private void crearPanelElementosAfectados() {
-        panelAfectado = new JPanel(new GridBagLayout());
-        panelAfectado.setBorder(BorderFactory.createTitledBorder("Elementos Afectados"));
-        panelAfectado.setBackground(Color.WHITE);
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 5, 5, 5);
-
-        gbc.gridx = 0; gbc.gridy = 0; panelAfectado.add(new JLabel("Tipo:"), gbc);
-        gbc.gridx = 1;
+        // Tipo de elemento afectado
+        gbcDer.gridx = 0; gbcDer.gridy = yDer; 
+        panelDerecho.add(createStyledLabel("Tipo:"), gbcDer);
+        gbcDer.gridx = 1; 
         cmbTipoAfectado = new JComboBox<>(new String[]{"Equipo", "Equipamiento", "Insumo"});
-        panelAfectado.add(cmbTipoAfectado, gbc);
+        styleComboBox(cmbTipoAfectado);
+        panelDerecho.add(cmbTipoAfectado, gbcDer);
+        yDer++;
 
-        gbc.gridx = 0; gbc.gridy = 1; panelAfectado.add(new JLabel("ID:"), gbc);
-        gbc.gridx = 1; txtIdAfectado = new JTextField(10); panelAfectado.add(txtIdAfectado, gbc);
+        // ID del elemento afectado
+        gbcDer.gridx = 0; gbcDer.gridy = yDer; 
+        panelDerecho.add(createStyledLabel("ID:"), gbcDer);
+        gbcDer.gridx = 1; 
+        txtIdAfectado = new JTextField(8);
+        txtIdAfectado.setFont(new Font("Roboto", Font.PLAIN, 14));
+        txtIdAfectado.setBorder(createRoundedBorder(BORDER_COLOR, 8));
+        panelDerecho.add(txtIdAfectado, gbcDer);
+        yDer++;
 
-        gbc.gridx = 0; gbc.gridy = 2; panelAfectado.add(new JLabel("Cantidad:"), gbc);
-        gbc.gridx = 1; spinnerCantidadAfectada = new JSpinner(new SpinnerNumberModel(1, 1, 1000, 1));
-        spinnerCantidadAfectada.setEnabled(false); panelAfectado.add(spinnerCantidadAfectada, gbc);
+        // Cantidad afectada
+        gbcDer.gridx = 0; gbcDer.gridy = yDer; 
+        panelDerecho.add(createStyledLabel("Cantidad:"), gbcDer);
+        gbcDer.gridx = 1; 
+        spinnerCantidadAfectada = new JSpinner(new SpinnerNumberModel(1, 1, 1000, 1));
+        spinnerCantidadAfectada.setFont(new Font("Roboto", Font.PLAIN, 14));
+        spinnerCantidadAfectada.setEnabled(false);
+        panelDerecho.add(spinnerCantidadAfectada, gbcDer);
+        yDer++;
 
-        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 2; gbc.anchor = GridBagConstraints.CENTER;
-        btnAgregarAfectado = new JButton("Agregar a la Sanción");
-        panelAfectado.add(btnAgregarAfectado, gbc);
+        // Botón para agregar elemento afectado
+        gbcDer.gridx = 0; gbcDer.gridy = yDer; gbcDer.gridwidth = 2; gbcDer.anchor = GridBagConstraints.CENTER;
+        btnAgregarAfectado = createStyledButton("Agregar", PRIMARY_COLOR);
+        panelDerecho.add(btnAgregarAfectado, gbcDer);
+        yDer++;
+
+        // Añadir paneles al panel central
+        panelCentral.add(panelIzquierdo);
+        panelCentral.add(panelDerecho);
+
+        // Panel inferior para el botón Guardar
+        JPanel panelBoton = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        panelBoton.setBackground(BACKGROUND_COLOR);
+        btnGuardar = createStyledButton("Guardar Sanción", SUCCESS_COLOR);
+        panelBoton.add(btnGuardar);
+
+        // Añadir componentes al panel principal
+        add(panelCentral, BorderLayout.CENTER);
+        add(panelBoton, BorderLayout.SOUTH);
     }
-    
+
+    /**
+     * Configura los eventos de los componentes.
+     */
     private void configurarEventos() {
-        // Activar/desactivar spinner cantidad según tipo afectado
         cmbTipoAfectado.addActionListener(e -> 
             spinnerCantidadAfectada.setEnabled(cmbTipoAfectado.getSelectedItem().equals("Insumo"))
         );
-        
-        // Evento para agregar elemento afectado
         btnAgregarAfectado.addActionListener(e -> agregarElementoAfectado());
-        
-        // Evento para guardar la sanción
         btnGuardar.addActionListener(e -> guardarSancion());
+        spinnerDiasSuspension.addChangeListener(e -> calcularFechaFin());
     }
-    
+
+    /**
+     * Calcula la fecha de fin según los días de suspensión.
+     */
     private void calcularFechaFin() {
         int dias = (int) spinnerDiasSuspension.getValue();
         if (dias > 0 && fechaInicio.getDate() != null) {
@@ -216,13 +305,16 @@ public class PanelSancionar extends JPanel {
             fechaFin.setDate(cal.getTime());
         }
     }
-    
+
+    /**
+     * Agrega un elemento afectado a la sanción.
+     */
     private void agregarElementoAfectado() {
         String tipoSeleccionado = (String) cmbTipoAfectado.getSelectedItem();
         String idIngresado = txtIdAfectado.getText().trim();
         
         if (idIngresado.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Debe ingresar un ID para el elemento afectado", 
+            JOptionPane.showMessageDialog(this, "Debe ingresar un ID", 
                     "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -236,11 +328,11 @@ public class PanelSancionar extends JPanel {
                         idInsumoAfectado = null;
                         idEquipoAfectado = null;
                         elementoAfectadoAgregado = true;
-                        JOptionPane.showMessageDialog(this, "Equipamiento agregado correctamente", 
+                        JOptionPane.showMessageDialog(this, "Equipamiento agregado", 
                                 "Éxito", JOptionPane.INFORMATION_MESSAGE);
                         btnAgregarAfectado.setEnabled(false);
                     } else {
-                        JOptionPane.showMessageDialog(this, "El ID de equipamiento no existe", 
+                        JOptionPane.showMessageDialog(this, "ID de equipamiento no existe", 
                                 "Error", JOptionPane.ERROR_MESSAGE);
                     }
                     break;
@@ -253,11 +345,11 @@ public class PanelSancionar extends JPanel {
                         idEquipoAfectado = null;
                         cantidadInsumoAfectada = (int) spinnerCantidadAfectada.getValue();
                         elementoAfectadoAgregado = true;
-                        JOptionPane.showMessageDialog(this, "Insumo agregado correctamente", 
+                        JOptionPane.showMessageDialog(this, "Insumo agregado", 
                                 "Éxito", JOptionPane.INFORMATION_MESSAGE);
                         btnAgregarAfectado.setEnabled(false);
                     } else {
-                        JOptionPane.showMessageDialog(this, "El ID de insumo no existe", 
+                        JOptionPane.showMessageDialog(this, "ID de insumo no existe", 
                                 "Error", JOptionPane.ERROR_MESSAGE);
                     }
                     break;
@@ -268,77 +360,87 @@ public class PanelSancionar extends JPanel {
                         idEquipamientoAfectado = null;
                         idInsumoAfectado = null;
                         elementoAfectadoAgregado = true;
-                        JOptionPane.showMessageDialog(this, "Equipo agregado correctamente", 
+                        JOptionPane.showMessageDialog(this, "Equipo agregado", 
                                 "Éxito", JOptionPane.INFORMATION_MESSAGE);
                         btnAgregarAfectado.setEnabled(false);
                     } else {
-                        JOptionPane.showMessageDialog(this, "El ID de equipo no existe", 
+                        JOptionPane.showMessageDialog(this, "ID de equipo no existe", 
                                 "Error", JOptionPane.ERROR_MESSAGE);
                     }
                     break;
             }
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "El ID debe ser un número válido para equipamiento e insumo", 
+            JOptionPane.showMessageDialog(this, "ID debe ser numérico para equipamiento e insumo", 
                     "Error", JOptionPane.ERROR_MESSAGE);
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error al verificar elemento: " + ex.getMessage(), 
+            LOGGER.log(Level.SEVERE, "Error al verificar elemento", ex);
+            JOptionPane.showMessageDialog(this, "Error al verificar: " + ex.getMessage(), 
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
+    /**
+     * Verifica si un equipamiento existe.
+     */
     private boolean verificarExistenciaEquipamiento(int idEquipamiento) throws SQLException {
         return controladorEquipamiento.buscarPorId(idEquipamiento) != null;
     }
-    
+
+    /**
+     * Verifica si un insumo existe.
+     */
     private boolean verificarExistenciaInsumo(int idInsumo) throws SQLException {
         return controladorInsumo.buscarPorId(idInsumo) != null;
     }
-    
+
+    /**
+     * Verifica si un equipo existe.
+     */
     private boolean verificarExistenciaEquipo(String idEquipo) throws SQLException {
         return controladorEquipo.buscarPorId(idEquipo) != null;
     }
-    
+
+    /**
+     * Guarda la sanción y los elementos afectados.
+     */
     private void guardarSancion() {
-        // Validar datos básicos
         if (!validarDatosBasicos()) {
             return;
         }
         
         try {
-            // Crear objeto sanción
             Sancion sancion = crearObjetoSancion();
-            
-            // Insertar la sanción principal y obtener el ID generado
             int idSancionGenerado = controladorSancion.insertar(sancion);
             
             if (idSancionGenerado > 0) {
-                // Si hay elementos afectados, registrarlos
                 if (elementoAfectadoAgregado) {
                     registrarElementosAfectados(idSancionGenerado);
                 }
                 
-                JOptionPane.showMessageDialog(this, "Sanción registrada correctamente con ID: " + idSancionGenerado, 
+                JOptionPane.showMessageDialog(this, "Sanción registrada con ID: " + idSancionGenerado, 
                         "Éxito", JOptionPane.INFORMATION_MESSAGE);
                 limpiarFormulario();
             } else {
-                JOptionPane.showMessageDialog(this, "Error al registrar la sanción", 
+                JOptionPane.showMessageDialog(this, "Error al registrar sanción", 
                         "Error", JOptionPane.ERROR_MESSAGE);
             }
         } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Error en la base de datos", ex);
             JOptionPane.showMessageDialog(this, "Error en la base de datos: " + ex.getMessage(), 
                     "Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
         } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Error inesperado", ex);
             JOptionPane.showMessageDialog(this, "Error inesperado: " + ex.getMessage(), 
                     "Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
         }
     }
-    
+
+    /**
+     * Valida los datos básicos del formulario.
+     */
     private boolean validarDatosBasicos() {
-        // Validar RU Usuario
         if (txtRuUsuario.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Debe ingresar el RU del usuario", 
+            JOptionPane.showMessageDialog(this, "Ingrese el RU del usuario", 
                     "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
@@ -346,50 +448,47 @@ public class PanelSancionar extends JPanel {
         try {
             Integer.parseInt(txtRuUsuario.getText().trim());
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "El RU del usuario debe ser un número", 
+            JOptionPane.showMessageDialog(this, "RU debe ser un número", 
                     "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
         
-        // Validar ID Préstamo si se ingresa
         if (!txtIdPrestamo.getText().trim().isEmpty()) {
             try {
                 Integer.parseInt(txtIdPrestamo.getText().trim());
             } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "El ID de préstamo debe ser un número", 
+                JOptionPane.showMessageDialog(this, "ID de préstamo debe ser un número", 
                         "Error", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
         }
         
-        // Validar descripción
         if (txtDescripcion.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Debe ingresar una descripción", 
+            JOptionPane.showMessageDialog(this, "Ingrese una descripción", 
                     "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
         
-        // Validar fechas
         if (fechaSancion.getDate() == null || fechaInicio.getDate() == null) {
-            JOptionPane.showMessageDialog(this, "Debe seleccionar las fechas requeridas", 
+            JOptionPane.showMessageDialog(this, "Seleccione las fechas requeridas", 
                     "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
         
-        // Si el tipo de sanción es "Daños" y no hay elementos afectados
         if (cmbTipoSancion.getSelectedItem().equals("Daños") && !elementoAfectadoAgregado) {
-            JOptionPane.showMessageDialog(this, "Para sanciones por daños debe agregar un elemento afectado", 
+            JOptionPane.showMessageDialog(this, "Agregue un elemento afectado para daños", 
                     "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
         
         return true;
     }
-    
+
+    /**
+     * Crea un objeto Sancion con los datos del formulario.
+     */
     private Sancion crearObjetoSancion() {
-        // Crear objeto sanción con los datos del formulario
         int ruUsuario = Integer.parseInt(txtRuUsuario.getText().trim());
-        
         Integer idPrestamo = null;
         if (!txtIdPrestamo.getText().trim().isEmpty()) {
             idPrestamo = Integer.parseInt(txtIdPrestamo.getText().trim());
@@ -403,79 +502,69 @@ public class PanelSancionar extends JPanel {
         Date fechaFinDate = fechaFin.getDate();
         int diasSuspension = (int) spinnerDiasSuspension.getValue();
         
-        // Crear el objeto con ID 0 (será asignado por la BD)
         return new Sancion(
-            0, // ID temporal, será asignado por la base de datos
-            ruUsuario,
-            idPrestamo,
-            tipoSancion,
-            descripcion,
-            fechaSancionDate,
-            estadoSancion,
-            fechaInicioDate,
-            fechaFinDate,
-            diasSuspension
+            0, ruUsuario, idPrestamo, tipoSancion, descripcion,
+            fechaSancionDate, estadoSancion, fechaInicioDate, fechaFinDate, diasSuspension
         );
     }
-    
+
+    /**
+     * Registra los elementos afectados asociados a la sanción.
+     */
     private void registrarElementosAfectados(int idSancion) throws SQLException {
-        // Registrar elementos afectados según tipo
         if (idEquipamientoAfectado != null) {
-            // Registrar sanción de equipamiento
             SancionEquipamiento sancionEquip = new SancionEquipamiento(idSancion, idEquipamientoAfectado);
             controladorSancionEquipamiento.insertar(sancionEquip);
-            
-            // Actualizar disponibilidad del equipamiento a "No Disponible"
             actualizarDisponibilidadEquipamiento(idEquipamientoAfectado);
         }
         else if (idInsumoAfectado != null) {
-            // Registrar sanción de insumo
             SancionInsumo sancionInsumo = new SancionInsumo(idSancion, idInsumoAfectado, cantidadInsumoAfectada);
             controladorSancionInsumo.insertar(sancionInsumo);
-            
-            // Actualizar cantidad de insumo
             actualizarCantidadInsumo(idInsumoAfectado, cantidadInsumoAfectada);
         }
         else if (idEquipoAfectado != null) {
-            // Registrar sanción de equipo
             SancionEquipo sancionEquipo = new SancionEquipo(idSancion, idEquipoAfectado);
             controladorSancionEquipo.insertar(sancionEquipo);
-            
-            // Actualizar estado del equipo a "No Disponible"
             actualizarEstadoEquipo(idEquipoAfectado);
         }
     }
-    
+
+    /**
+     * Actualiza la disponibilidad de un equipamiento.
+     */
     private void actualizarDisponibilidadEquipamiento(int idEquipamiento) throws SQLException {
         controladorEquipamiento.actualizarDisponibilidad(idEquipamiento, "No Disponible");
     }
-    
+
+    /**
+     * Actualiza la cantidad de un insumo.
+     */
     private void actualizarCantidadInsumo(int idInsumo, int cantidadAfectada) throws SQLException {
-        // Obtener insumo actual
         Clases.Insumo insumo = controladorInsumo.buscarPorId(idInsumo);
         if (insumo != null) {
-            // Calcular nueva cantidad (restar la cantidad afectada)
             int nuevaCantidad = Math.max(0, insumo.getCantidad() - cantidadAfectada);
             controladorInsumo.actualizarCantidad(idInsumo, nuevaCantidad);
-            
-            // Si la cantidad llega a 0, marcar como no disponible
             if (nuevaCantidad == 0) {
                 controladorInsumo.actualizarDisponibilidad(idInsumo, "No Disponible");
             }
         }
     }
-    
+
+    /**
+     * Actualiza el estado de un equipo.
+     */
     private void actualizarEstadoEquipo(String idEquipo) throws SQLException {
-        // Obtener equipo actual
         Clases.Equipos equipo = controladorEquipo.buscarPorId(idEquipo);
         if (equipo != null) {
             equipo.setEstado("No Disponible");
             controladorEquipo.actualizar(equipo);
         }
     }
-    
+
+    /**
+     * Limpia el formulario tras guardar una sanción.
+     */
     private void limpiarFormulario() {
-        // Limpiar campos después de guardar
         txtRuUsuario.setText("");
         txtIdPrestamo.setText("");
         cmbTipoSancion.setSelectedIndex(0);
@@ -485,19 +574,159 @@ public class PanelSancionar extends JPanel {
         fechaInicio.setDate(new Date());
         fechaFin.setDate(null);
         spinnerDiasSuspension.setValue(0);
-        
-        // Limpiar elementos afectados
         cmbTipoAfectado.setSelectedIndex(0);
         txtIdAfectado.setText("");
         spinnerCantidadAfectada.setValue(1);
         spinnerCantidadAfectada.setEnabled(false);
         btnAgregarAfectado.setEnabled(true);
-        
-        // Reiniciar variables
         idEquipamientoAfectado = null;
         idInsumoAfectado = null;
         idEquipoAfectado = null;
         cantidadInsumoAfectada = 0;
         elementoAfectadoAgregado = false;
+    }
+
+    // Métodos de estilo
+
+    /**
+     * Crea un panel con estilo de tarjeta compacto.
+     */
+    private JPanel createCardPanel(String title) {
+        JPanel panel = new JPanel();
+        panel.setBackground(CARD_COLOR);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            createRoundedBorder(BORDER_COLOR, 10),
+            new EmptyBorder(10, 10, 10, 10)
+        ));
+        panel.setBorder(BorderFactory.createTitledBorder(
+            panel.getBorder(), title,
+            javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+            javax.swing.border.TitledBorder.DEFAULT_POSITION,
+            new Font("Roboto", Font.BOLD, 14),
+            PRIMARY_COLOR
+        ));
+        return panel;
+    }
+
+    /**
+     * Crea un botón estilizado compacto.
+     */
+    private JButton createStyledButton(String text, Color baseColor) {
+        RoundedButton button = new RoundedButton(text, baseColor);
+        button.setFont(new Font("Roboto", Font.BOLD, 12));
+        button.setForeground(Color.WHITE);
+        button.setBackground(baseColor);
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setPreferredSize(new Dimension(120, 30));
+        button.setMaximumSize(new Dimension(120, 30));
+        button.setMinimumSize(new Dimension(120, 30));
+        button.setBorder(new EmptyBorder(5, 10, 5, 10));
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(baseColor.brighter());
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(baseColor);
+            }
+        });
+        return button;
+    }
+
+    /**
+     * Crea un JLabel estilizado compacto.
+     */
+    private JLabel createStyledLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(new Font("Roboto", Font.PLAIN, 14));
+        label.setForeground(TEXT_COLOR);
+        return label;
+    }
+
+    /**
+     * Aplica estilo a un JComboBox compacto.
+     */
+    private void styleComboBox(JComboBox<String> comboBox) {
+        comboBox.setFont(new Font("Roboto", Font.PLAIN, 14));
+        comboBox.setBackground(CARD_COLOR);
+        comboBox.setForeground(TEXT_COLOR);
+        comboBox.setBorder(createRoundedBorder(BORDER_COLOR, 8));
+        comboBox.setPreferredSize(new Dimension(120, 30));
+        comboBox.setUI(new BasicComboBoxUI() {
+            @Override
+            protected JButton createArrowButton() {
+                JButton button = new JButton("▼");
+                button.setFont(new Font("Roboto", Font.PLAIN, 10));
+                button.setBackground(CARD_COLOR);
+                button.setForeground(PRIMARY_COLOR);
+                button.setBorder(createRoundedBorder(BORDER_COLOR, 8));
+                button.setFocusPainted(false);
+                return button;
+            }
+        });
+    }
+
+    /**
+     * Crea un borde redondeado compacto.
+     */
+    private Border createRoundedBorder(Color color, int radius) {
+        return new Border() {
+            @Override
+            public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(color);
+                g2.drawRoundRect(x, y, width - 1, height - 1, radius, radius);
+                g2.dispose();
+            }
+
+            @Override
+            public Insets getBorderInsets(Component c) {
+                return new Insets(2, 4, 2, 4);
+            }
+
+            @Override
+            public boolean isBorderOpaque() {
+                return false;
+            }
+        };
+    }
+
+    /**
+     * Clase interna para botones redondeados compactos.
+     */
+    private class RoundedButton extends JButton {
+        private Color backgroundColor;
+        private int radius;
+
+        public RoundedButton(String text, Color backgroundColor) {
+            super(text);
+            this.backgroundColor = backgroundColor;
+            this.radius = 20;
+            setContentAreaFilled(false);
+            setFocusPainted(false);
+            setBorder(BorderFactory.createEmptyBorder(3, 10, 3, 10));
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(backgroundColor);
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
+            super.paintComponent(g2);
+            g2.dispose();
+        }
+
+        @Override
+        protected void paintBorder(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(getForeground());
+            g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, radius, radius);
+            g2.dispose();
+        }
     }
 }
