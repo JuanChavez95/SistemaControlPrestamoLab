@@ -39,7 +39,18 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import java.awt.Desktop;
 
-// Para la sección de equipamiento e insumos
+// Para gráficos estadísticos
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PiePlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DefaultPieDataset;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.io.ByteArrayOutputStream;
+
+// Para equipamiento e insumos
 import Clases.Equipamiento;
 import Controles.ControladorEquipamiento;
 import Controles.ControladorDetallePrestamoEquipamiento;
@@ -58,7 +69,7 @@ public class PanelReportePrestamo extends JPanel {
     private ControladorHorario controladorHorario;
     private static final String DIRECTORIO_REPORTES = "./reportes/";
 
-    // Definición de fuentes para PDF (consistentes con PanelReporteEquipos)
+    // Definición de fuentes para PDF
     private static final com.itextpdf.text.Font FONT_TITULO =
         new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 16, com.itextpdf.text.Font.BOLD);
     private static final com.itextpdf.text.Font FONT_SUBTITULO =
@@ -115,7 +126,11 @@ public class PanelReportePrestamo extends JPanel {
         panelOpciones.add(lblTipoReporte, gbc);
 
         gbc.gridx = 1;
-        String[] opciones = {"Reporte de Préstamos por Laboratorio", "Reporte General de Préstamos"};
+        String[] opciones = {
+            "Reporte de Préstamos por Laboratorio",
+            "Reporte General de Préstamos",
+            "Reporte Estadístico de Préstamos"
+        };
         comboTipoReporte = new JComboBox<>(opciones);
         comboTipoReporte.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         comboTipoReporte.setBackground(Color.WHITE);
@@ -211,7 +226,7 @@ public class PanelReportePrestamo extends JPanel {
 
         JTextArea txtInstrucciones = new JTextArea(
                 "✔ Seleccione el tipo de reporte a generar.\n" +
-                "✔ Seleccione un laboratorio.\n" +
+                "✔ Seleccione un laboratorio (excepto para reporte estadístico).\n" +
                 "✔ Ingrese las fechas inicial y final.\n" +
                 "✔ Presione 'Generar Reporte PDF' para continuar.");
         txtInstrucciones.setEditable(false);
@@ -224,7 +239,10 @@ public class PanelReportePrestamo extends JPanel {
 
         // Comportamiento dinámico
         comboTipoReporte.addActionListener(e -> {
-            // No deshabilitamos el comboLaboratorio para mantener consistencia
+            int selectedIndex = comboTipoReporte.getSelectedIndex();
+            boolean esReporteEstadistico = selectedIndex == 2;
+            comboLaboratorio.setEnabled(!esReporteEstadistico);
+            lblLaboratorio.setEnabled(!esReporteEstadistico);
         });
 
         btnGenerarPDF.addActionListener(e -> generarReporte());
@@ -300,15 +318,6 @@ public class PanelReportePrestamo extends JPanel {
             return;
         }
 
-        // Verificar que se haya seleccionado un laboratorio
-        if (comboLaboratorio.getSelectedIndex() == -1) {
-            JOptionPane.showMessageDialog(this,
-                "Debe seleccionar un laboratorio para generar el reporte",
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
         try {
             // Convertir las fechas de String a java.sql.Date
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -318,27 +327,41 @@ public class PanelReportePrestamo extends JPanel {
             java.sql.Date fechaInicial = new java.sql.Date(parsedDateInicial.getTime());
             java.sql.Date fechaFinal = new java.sql.Date(parsedDateFinal.getTime());
 
-            // Obtener el ID del laboratorio seleccionado
-            String selectedLab = (String) comboLaboratorio.getSelectedItem();
-            int idLaboratorio = Integer.parseInt(selectedLab.split(" - ")[0]);
-
-            // Manejar el tipo de reporte seleccionado
-            if (comboTipoReporte.getSelectedIndex() == 0) {
-                // Generar reporte de préstamos por laboratorio
-                List<ReportePrestamo> prestamos = obtenerPrestamosLaboratorio(idLaboratorio, fechaInicial, fechaFinal);
-
-                if (prestamos.isEmpty()) {
+            int selectedIndex = comboTipoReporte.getSelectedIndex();
+            if (selectedIndex == 2) {
+                // Reporte estadístico no requiere laboratorio
+                generarReporteEstadistico(fechaInicial, fechaFinal);
+            } else {
+                // Verificar que se haya seleccionado un laboratorio
+                if (comboLaboratorio.getSelectedIndex() == -1) {
                     JOptionPane.showMessageDialog(this,
-                        "No se encontraron préstamos para el laboratorio seleccionado en el rango de fechas indicado",
-                        "Información",
-                        JOptionPane.INFORMATION_MESSAGE);
+                        "Debe seleccionar un laboratorio para generar el reporte",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                generarDocumentoPDF(prestamos, idLaboratorio, fechaInicial, fechaFinal);
-            } else {
-                // Generar reporte general de préstamos
-                generarReporteGeneralPrestamosPDF(idLaboratorio, fechaInicial, fechaFinal);
+                // Obtener el ID del laboratorio seleccionado
+                String selectedLab = (String) comboLaboratorio.getSelectedItem();
+                int idLaboratorio = Integer.parseInt(selectedLab.split(" - ")[0]);
+
+                if (selectedIndex == 0) {
+                    // Generar reporte de préstamos por laboratorio
+                    List<ReportePrestamo> prestamos = obtenerPrestamosLaboratorio(idLaboratorio, fechaInicial, fechaFinal);
+
+                    if (prestamos.isEmpty()) {
+                        JOptionPane.showMessageDialog(this,
+                            "No se encontraron préstamos para el laboratorio seleccionado en el rango de fechas indicado",
+                            "Información",
+                            JOptionPane.INFORMATION_MESSAGE);
+                        return;
+                    }
+
+                    generarDocumentoPDF(prestamos, idLaboratorio, fechaInicial, fechaFinal);
+                } else {
+                    // Generar reporte general de préstamos
+                    generarReporteGeneralPrestamosPDF(idLaboratorio, fechaInicial, fechaFinal);
+                }
             }
         } catch (ParseException e) {
             JOptionPane.showMessageDialog(this,
@@ -358,7 +381,6 @@ public class PanelReportePrestamo extends JPanel {
         private Integer ruAdministrador;
         private Integer idHorario;
         private String observaciones;
-
         public ReportePrestamo(java.sql.Date fecha, String hora, int ruUsuario, Integer ruAdministrador, Integer idHorario, String observaciones) {
             this.fecha = fecha;
             this.hora = hora;
@@ -391,6 +413,327 @@ public class PanelReportePrestamo extends JPanel {
         public String getObservaciones() {
             return observaciones;
         }
+    }
+
+    /**
+     * Genera un reporte estadístico de préstamos
+     */
+    private void generarReporteEstadistico(java.sql.Date fechaInicial, java.sql.Date fechaFinal) {
+        try {
+            String nombreArchivo = DIRECTORIO_REPORTES + "Reporte_Estadistico_Prestamos_" + new SimpleDateFormat("yyyyMMdd").format(new Date()) + ".pdf";
+
+            try (FileOutputStream outputStream = new FileOutputStream(nombreArchivo)) {
+                Document document = new Document(PageSize.A4);
+                PdfWriter.getInstance(document, outputStream);
+                document.open();
+
+                // Agregar encabezado
+                agregarEncabezadoPDF(document, "REPORTE ESTADÍSTICO DE PRÉSTAMOS", fechaInicial, fechaFinal);
+                document.add(new Paragraph(" "));
+
+                // Gráfico de estado de préstamos
+                Paragraph subtituloEstado = new Paragraph("ESTADO DE LOS PRÉSTAMOS:", FONT_SUBTITULO);
+                subtituloEstado.setAlignment(Element.ALIGN_CENTER);
+                document.add(subtituloEstado);
+                document.add(new Paragraph(" "));
+                agregarGraficoEstadoPrestamos(document, fechaInicial, fechaFinal);
+                document.add(new Paragraph(" "));
+
+                // Gráfico de préstamos por laboratorio
+                Paragraph subtituloLaboratorio = new Paragraph("PRÉSTAMOS POR LABORATORIO:", FONT_SUBTITULO);
+                subtituloLaboratorio.setAlignment(Element.ALIGN_CENTER);
+                document.add(subtituloLaboratorio);
+                document.add(new Paragraph(" "));
+                agregarGraficoPrestamosPorLaboratorio(document, fechaInicial, fechaFinal);
+
+                // Nueva página para gráfico de barras
+                document.newPage();
+
+                // Gráfico de préstamos por mes
+                Paragraph subtituloMes = new Paragraph("PRÉSTAMOS POR MES:", FONT_SUBTITULO);
+                subtituloMes.setAlignment(Element.ALIGN_CENTER);
+                document.add(subtituloMes);
+                document.add(new Paragraph(" "));
+                agregarGraficoPrestamosPorMes(document, fechaInicial, fechaFinal);
+
+                document.close();
+                abrirArchivoPDF(nombreArchivo);
+            }
+        } catch (Exception e) {
+            manejarError("Error al generar el reporte estadístico", e);
+        }
+    }
+
+    /**
+     * Agrega un gráfico de torta para estados de préstamos
+     */
+    private void agregarGraficoEstadoPrestamos(Document document, java.sql.Date fechaInicial, java.sql.Date fechaFinal) throws Exception {
+        Map<String, Integer> estadosPrestamos = contarPrestamosPorEstado(fechaInicial, fechaFinal);
+
+        if (estadosPrestamos.isEmpty()) {
+            document.add(new Paragraph("No hay datos de préstamos disponibles para generar el gráfico.", FONT_NORMAL));
+            return;
+        }
+
+        // Crear dataset
+        DefaultPieDataset dataset = new DefaultPieDataset();
+        for (Map.Entry<String, Integer> entry : estadosPrestamos.entrySet()) {
+            dataset.setValue(entry.getKey(), entry.getValue());
+        }
+
+        // Crear gráfico
+        JFreeChart chart = ChartFactory.createPieChart(
+            "Distribución de Préstamos por Estado",
+            dataset,
+            true,
+            true,
+            false
+        );
+
+        // Personalizar gráfico
+        PiePlot plot = (PiePlot) chart.getPlot();
+        plot.setLabelFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 12));
+        plot.setNoDataMessage("No hay datos disponibles");
+        plot.setCircular(true);
+        plot.setLabelGap(0.02);
+
+        // Convertir a imagen
+        int width = 500;
+        int height = 300;
+        ByteArrayOutputStream imgBytes = new ByteArrayOutputStream();
+        BufferedImage bufferedImage = chart.createBufferedImage(width, height);
+        ImageIO.write(bufferedImage, "png", imgBytes);
+
+        com.itextpdf.text.Image image = com.itextpdf.text.Image.getInstance(imgBytes.toByteArray());
+        image.setAlignment(Element.ALIGN_CENTER);
+        document.add(image);
+        document.add(new Paragraph(" "));
+
+        // Tabla de porcentajes
+        PdfPTable tablaInfo = new PdfPTable(2);
+        tablaInfo.setWidthPercentage(70);
+        tablaInfo.setHorizontalAlignment(Element.ALIGN_CENTER);
+
+        PdfPCell cellEstado = new PdfPCell(new Phrase("Estado", FONT_TABLA_ENCABEZADO));
+        cellEstado.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        tablaInfo.addCell(cellEstado);
+
+        PdfPCell cellPorcentaje = new PdfPCell(new Phrase("Porcentaje", FONT_TABLA_ENCABEZADO));
+        cellPorcentaje.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        tablaInfo.addCell(cellPorcentaje);
+
+        int total = 0;
+        for (Integer cantidad : estadosPrestamos.values()) {
+            total += cantidad;
+        }
+
+        for (Map.Entry<String, Integer> entry : estadosPrestamos.entrySet()) {
+            tablaInfo.addCell(new PdfPCell(new Phrase(entry.getKey(), FONT_TABLA_CELDA)));
+            double porcentaje = (double) entry.getValue() / total * 100;
+            tablaInfo.addCell(new PdfPCell(new Phrase(String.format("%.2f%%", porcentaje), FONT_TABLA_CELDA)));
+        }
+
+        document.add(tablaInfo);
+    }
+
+    /**
+     * Agrega un gráfico de torta para préstamos por laboratorio
+     */
+    private void agregarGraficoPrestamosPorLaboratorio(Document document, java.sql.Date fechaInicial, java.sql.Date fechaFinal) throws Exception {
+        Map<Integer, Integer> prestamosPorLab = contarPrestamosPorLaboratorio(fechaInicial, fechaFinal);
+
+        if (prestamosPorLab.isEmpty()) {
+            document.add(new Paragraph("No hay datos de préstamos por laboratorio disponibles para generar el gráfico.", FONT_NORMAL));
+            return;
+        }
+
+        // Crear dataset
+        DefaultPieDataset dataset = new DefaultPieDataset();
+        for (Map.Entry<Integer, Integer> entry : prestamosPorLab.entrySet()) {
+            dataset.setValue("Laboratorio " + entry.getKey(), entry.getValue());
+        }
+
+        // Crear gráfico
+        JFreeChart chart = ChartFactory.createPieChart(
+            "Distribución de Préstamos por Laboratorio",
+            dataset,
+            true,
+            true,
+            false
+        );
+
+        // Personalizar gráfico
+        PiePlot plot = (PiePlot) chart.getPlot();
+        plot.setLabelFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 12));
+        plot.setNoDataMessage("No hay datos disponibles");
+        plot.setCircular(true);
+        plot.setLabelGap(0.02);
+
+        // Convertir a imagen
+        int width = 500;
+        int height = 300;
+        ByteArrayOutputStream imgBytes = new ByteArrayOutputStream();
+        BufferedImage bufferedImage = chart.createBufferedImage(width, height);
+        ImageIO.write(bufferedImage, "png", imgBytes);
+
+        com.itextpdf.text.Image image = com.itextpdf.text.Image.getInstance(imgBytes.toByteArray());
+        image.setAlignment(Element.ALIGN_CENTER);
+        document.add(image);
+        document.add(new Paragraph(" "));
+
+        // Tabla de porcentajes
+        PdfPTable tablaInfo = new PdfPTable(2);
+        tablaInfo.setWidthPercentage(70);
+        tablaInfo.setHorizontalAlignment(Element.ALIGN_CENTER);
+
+        PdfPCell cellLab = new PdfPCell(new Phrase("Laboratorio", FONT_TABLA_ENCABEZADO));
+        cellLab.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        tablaInfo.addCell(cellLab);
+
+        PdfPCell cellPorcentaje = new PdfPCell(new Phrase("Porcentaje", FONT_TABLA_ENCABEZADO));
+        cellPorcentaje.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        tablaInfo.addCell(cellPorcentaje);
+
+        int total = 0;
+        for (Integer cantidad : prestamosPorLab.values()) {
+            total += cantidad;
+        }
+
+        for (Map.Entry<Integer, Integer> entry : prestamosPorLab.entrySet()) {
+            tablaInfo.addCell(new PdfPCell(new Phrase("Laboratorio " + entry.getKey(), FONT_TABLA_CELDA)));
+            double porcentaje = (double) entry.getValue() / total * 100;
+            tablaInfo.addCell(new PdfPCell(new Phrase(String.format("%.2f%%", porcentaje), FONT_TABLA_CELDA)));
+        }
+
+        document.add(tablaInfo);
+    }
+
+    /**
+     * Agrega un gráfico de barras para préstamos por mes
+     */
+    private void agregarGraficoPrestamosPorMes(Document document, java.sql.Date fechaInicial, java.sql.Date fechaFinal) throws Exception {
+        Map<String, Integer> prestamosPorMes = contarPrestamosPorMes(fechaInicial, fechaFinal);
+
+        if (prestamosPorMes.isEmpty()) {
+            document.add(new Paragraph("No hay datos de préstamos por mes disponibles para generar el gráfico.", FONT_NORMAL));
+            return;
+        }
+
+        // Crear dataset
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        for (Map.Entry<String, Integer> entry : prestamosPorMes.entrySet()) {
+            dataset.setValue(entry.getValue(), "Cantidad", entry.getKey());
+        }
+
+        // Crear gráfico
+        JFreeChart chart = ChartFactory.createBarChart(
+            "Préstamos por Mes",
+            "Mes",
+            "Cantidad",
+            dataset,
+            PlotOrientation.VERTICAL,
+            true,
+            true,
+            false
+        );
+
+        // Convertir a imagen
+        int width = 550;
+        int height = 400;
+        ByteArrayOutputStream imgBytes = new ByteArrayOutputStream();
+        BufferedImage bufferedImage = chart.createBufferedImage(width, height);
+        ImageIO.write(bufferedImage, "png", imgBytes);
+
+        com.itextpdf.text.Image image = com.itextpdf.text.Image.getInstance(imgBytes.toByteArray());
+        image.setAlignment(Element.ALIGN_CENTER);
+        document.add(image);
+        document.add(new Paragraph(" "));
+
+        // Tabla de datos
+        PdfPTable tablaInfo = new PdfPTable(2);
+        tablaInfo.setWidthPercentage(70);
+        tablaInfo.setHorizontalAlignment(Element.ALIGN_CENTER);
+
+        PdfPCell cellMes = new PdfPCell(new Phrase("Mes", FONT_TABLA_ENCABEZADO));
+        cellMes.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        tablaInfo.addCell(cellMes);
+
+        PdfPCell cellCantidad = new PdfPCell(new Phrase("Cantidad", FONT_TABLA_ENCABEZADO));
+        cellCantidad.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        tablaInfo.addCell(cellCantidad);
+
+        for (Map.Entry<String, Integer> entry : prestamosPorMes.entrySet()) {
+            tablaInfo.addCell(new PdfPCell(new Phrase(entry.getKey(), FONT_TABLA_CELDA)));
+            tablaInfo.addCell(new PdfPCell(new Phrase(String.valueOf(entry.getValue()), FONT_TABLA_CELDA)));
+        }
+
+        document.add(tablaInfo);
+    }
+
+    /**
+     * Conta préstamos por estado
+     */
+    private Map<String, Integer> contarPrestamosPorEstado(java.sql.Date fechaInicial, java.sql.Date fechaFinal) throws SQLException {
+        Map<String, Integer> resultado = new HashMap<>();
+        List<Prestamo> listaPrestamos = controladorPrestamo.listar();
+
+        for (Prestamo prestamo : listaPrestamos) {
+            java.sql.Date fechaPrestamo = prestamo.getFechaPrestamo();
+            if (fechaPrestamo != null && !fechaPrestamo.before(fechaInicial) && !fechaPrestamo.after(fechaFinal)) {
+                String estado = prestamo.getEstadoPrestamo();
+                if (estado != null && !estado.isEmpty()) {
+                    resultado.put(estado, resultado.getOrDefault(estado, 0) + 1);
+                }
+            }
+        }
+
+        return resultado;
+    }
+
+    /**
+     * Conta préstamos por laboratorio
+     */
+    private Map<Integer, Integer> contarPrestamosPorLaboratorio(java.sql.Date fechaInicial, java.sql.Date fechaFinal) throws SQLException {
+        Map<Integer, Integer> resultado = new HashMap<>();
+
+        try (Connection conn = ConexionBD.conectar()) {
+            String sql = "SELECT h.id_laboratorio " +
+                        "FROM prestamo p " +
+                        "JOIN horario h ON p.id_horario = h.id_horario " +
+                        "WHERE p.fecha_prestamo BETWEEN ? AND ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setDate(1, fechaInicial);
+                stmt.setDate(2, fechaFinal);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        int idLab = rs.getInt("id_laboratorio");
+                        resultado.put(idLab, resultado.getOrDefault(idLab, 0) + 1);
+                    }
+                }
+            }
+        }
+
+        return resultado;
+    }
+
+    /**
+     * Conta préstamos por mes
+     */
+    private Map<String, Integer> contarPrestamosPorMes(java.sql.Date fechaInicial, java.sql.Date fechaFinal) throws SQLException {
+        Map<String, Integer> resultado = new HashMap<>();
+        SimpleDateFormat monthFormat = new SimpleDateFormat("MMM yyyy");
+        List<Prestamo> listaPrestamos = controladorPrestamo.listar();
+
+        for (Prestamo prestamo : listaPrestamos) {
+            java.sql.Date fechaPrestamo = prestamo.getFechaPrestamo();
+            if (fechaPrestamo != null && !fechaPrestamo.before(fechaInicial) && !fechaPrestamo.after(fechaFinal)) {
+                String mes = monthFormat.format(fechaPrestamo);
+                resultado.put(mes, resultado.getOrDefault(mes, 0) + 1);
+            }
+        }
+
+        return resultado;
     }
 
     /**
@@ -850,7 +1193,6 @@ public class PanelReportePrestamo extends JPanel {
                         Paragraph tituloEquipamiento = new Paragraph("EQUIPAMIENTO", FONT_SUBTITULO);
                         documento.add(tituloEquipamiento);
                         documento.add(new Paragraph(" "));
-
                         PdfPTable tablaEquipamiento = new PdfPTable(3);
                         tablaEquipamiento.setWidthPercentage(100);
                         float[] anchosEquipamiento = {1f, 2f, 1f};
