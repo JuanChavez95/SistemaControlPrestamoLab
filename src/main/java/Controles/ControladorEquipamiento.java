@@ -164,4 +164,48 @@ public class ControladorEquipamiento {
         }
     }
     
+    /**
+    * Cuenta el número de equipamientos con un determinado estado.
+    * 
+    * @param estado Estado de los equipamientos a contar
+    * @return Número de equipamientos con el estado especificado
+    * @throws SQLException Si ocurre un error al ejecutar la consulta
+    */
+    public int contarEquipamientosPorDisponibilidad(String disponibilidad) throws SQLException {
+    String sql = "SELECT COUNT(*) FROM equipamiento WHERE disponibilidad = ?";
+    try (Connection conn = ConexionBD.conectar();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setString(1, disponibilidad);
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+    }
+    return 0;
+    }
+
+
+   /**
+    * Cuenta el número de equipamientos asignados a un laboratorio específico.
+    * 
+    * @param idLaboratorio ID del laboratorio
+    * @return Número de equipamientos en el laboratorio especificado
+    * @throws SQLException Si ocurre un error al ejecutar la consulta
+    */
+    public int contarEquipamientosPorLaboratorio(int idLaboratorio) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM equipamiento WHERE id_laboratorio = ?";
+        try (Connection conn = ConexionBD.conectar();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idLaboratorio);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                   return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
+
+    
 }

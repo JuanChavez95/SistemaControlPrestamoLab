@@ -31,6 +31,21 @@ import Reportes.PanelReportePrestamo;
 import PanelEstadistica.PanelEstadisticasEquipos;
 import PanelEstadistica.PanelEstadisticasPrestamos;
 
+// IMPORTACIONES ADICIONALES PARA JFREECHART
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DefaultPieDataset;
+
+// IMPORTACIONES DE CONTROLADORES
+import Controles.ControladorEquipo;
+import Controles.ControladorEquipamiento;
+import Controles.ControladorInsumo;
+import Controles.ControladorPrestamo;
+import Controles.ControladorLaboratorio;
+
 /**
  * Ventana principal del Sistema de Control y Préstamo de Laboratorios para administradores.
  * Ofrece una interfaz moderna, elegante y fácil de usar para gestionar laboratorios, usuarios, equipos y préstamos.
@@ -141,32 +156,31 @@ public class Principal extends JFrame {
     }
 
     private JPanel createMenuPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setOpaque(false);
-        panel.setBorder(new EmptyBorder(20, 20, 20, 20));
+    	JPanel panel = new JPanel(new BorderLayout());
+    	panel.setOpaque(false);
+    	panel.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
-        buttonPanel.setOpaque(false);
+    	JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
+    	buttonPanel.setOpaque(false);
 
-        contentPanel = new JPanel(new BorderLayout());
-        contentPanel.setBackground(Color.WHITE);
-        contentPanel.setBorder(new RoundedBorder(10));
+    	contentPanel = new JPanel(new BorderLayout());
+    	contentPanel.setBackground(Color.WHITE);
+    	contentPanel.setBorder(new RoundedBorder(10));
 
-        JLabel welcomeLabel = new JLabel("Bienvenido al Sistema de Control y Préstamo de Laboratorios", SwingConstants.CENTER);
-        welcomeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
-        welcomeLabel.setForeground(new Color(44, 62, 80));
-        contentPanel.add(welcomeLabel, BorderLayout.CENTER);
+    	// Crear panel principal con gráficos estadísticos
+    	JPanel mainContentPanel = createDashboardPanel();
+    	contentPanel.add(mainContentPanel, BorderLayout.CENTER);
 
-        buttonPanel.add(createMenuButton("Laboratorios", new String[]{"Horarios", "Editar Horario", "Editar Laboratorio"}));
-        buttonPanel.add(createMenuButton("Usuarios", new String[]{"Docentes", "Estudiantes", "Administradores", "Editar Usuarios"}));
-        buttonPanel.add(createMenuButton("Equipos", new String[]{"Máquinas", "Editar Equipos", "Detalle Equipos", "Generar Reportes Equipos", "Estadística de Equipos"}));
-        buttonPanel.add(createMenuButton("Préstamos", new String[]{"Visualizar Préstamos", "Generar Reportes", "Estadística de Préstamos"}));
-        buttonPanel.add(createMenuButton("Materiales", new String[]{"Herramientas", "Insumos", "Editar Herramientas", "Editar Insumos", "Detalle Herramientas"}));
-        buttonPanel.add(createMenuButton("Sanciones", new String[]{"Lista de Sanciones", "Sancionar"}));
+    	buttonPanel.add(createMenuButton("Laboratorios", new String[]{"Horarios", "Editar Horario", "Editar Laboratorio"}));
+    	buttonPanel.add(createMenuButton("Usuarios", new String[]{"Docentes", "Estudiantes", "Administradores", "Editar Usuarios"}));
+    	buttonPanel.add(createMenuButton("Equipos", new String[]{"Máquinas", "Editar Equipos", "Detalle Equipos", "Generar Reportes Equipos", "Estadística de Equipos"}));
+    	buttonPanel.add(createMenuButton("Préstamos", new String[]{"Visualizar Préstamos", "Generar Reportes", "Estadística de Préstamos"}));
+    	buttonPanel.add(createMenuButton("Materiales", new String[]{"Herramientas", "Insumos", "Editar Herramientas", "Editar Insumos", "Detalle Herramientas"}));
+    	buttonPanel.add(createMenuButton("Sanciones", new String[]{"Lista de Sanciones", "Sancionar"}));
 
-        panel.add(buttonPanel, BorderLayout.NORTH);
-        panel.add(contentPanel, BorderLayout.CENTER);
-        return panel;
+    	panel.add(buttonPanel, BorderLayout.NORTH);
+    	panel.add(contentPanel, BorderLayout.CENTER);
+    	return panel;
     }
 
     private JButton createMenuButton(String title, String[] subOptions) {
@@ -452,4 +466,299 @@ public class Principal extends JFrame {
             return false;
         }
     }
+
+    // AGREGAR ESTOS MÉTODOS NUEVOS A LA CLASE Principal:
+ 
+    private JPanel createDashboardPanel() {
+        JPanel dashboardPanel = new JPanel(new BorderLayout());
+        dashboardPanel.setBackground(Color.WHITE);
+        dashboardPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+
+        // Título principal
+        JLabel titleLabel = new JLabel("Panel de Control - Estadísticas del Sistema", SwingConstants.CENTER);
+    	titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+    	titleLabel.setForeground(new Color(44, 62, 80));
+    	titleLabel.setBorder(new EmptyBorder(0, 0, 20, 0));
+    	dashboardPanel.add(titleLabel, BorderLayout.NORTH);
+
+    	// Panel principal con scroll
+    	JScrollPane scrollPane = new JScrollPane();
+    	scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+    	scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    	scrollPane.setBorder(null);
+
+    	JPanel chartsContainer = new JPanel();
+    	chartsContainer.setLayout(new BoxLayout(chartsContainer, BoxLayout.Y_AXIS));
+    	chartsContainer.setBackground(Color.WHITE);
+
+    	// Agregar secciones de gráficos
+    	chartsContainer.add(createEquiposSection());
+    	chartsContainer.add(Box.createVerticalStrut(20));
+    	chartsContainer.add(createEquipamientosSection());
+    	chartsContainer.add(Box.createVerticalStrut(20));
+    	chartsContainer.add(createInsumosSection());
+    	chartsContainer.add(Box.createVerticalStrut(20));
+    	chartsContainer.add(createPrestamosSection());
+
+    	scrollPane.setViewportView(chartsContainer);
+    	dashboardPanel.add(scrollPane, BorderLayout.CENTER);
+
+    	return dashboardPanel;
+    }
+
+    private JPanel createEquiposSection() {
+    	JPanel section = new JPanel(new BorderLayout());
+        section.setBackground(Color.WHITE);
+        section.setBorder(BorderFactory.createTitledBorder(
+        BorderFactory.createLineBorder(PRIMARY_COLOR, 2),
+        "GRÁFICO DE EQUIPOS",
+        0, 0, new Font("Segoe UI", Font.BOLD, 16), PRIMARY_COLOR
+    ));
+
+    JPanel chartsPanel = new JPanel(new GridLayout(1, 2, 10, 10));
+    chartsPanel.setBackground(Color.WHITE);
+    chartsPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+    // Gráfico de estados de equipos
+    try {
+        DefaultPieDataset datasetEstados = new DefaultPieDataset();
+        ControladorEquipo controladorEquipo = new ControladorEquipo();
+        
+        // Obtener datos reales de los controladores
+        int disponibles = controladorEquipo.contarEquiposPorEstado("Disponible");
+        int noDisponibles = controladorEquipo.contarEquiposPorEstado("No Disponible");
+        int deBaja = controladorEquipo.contarEquiposPorEstado("De Baja");
+
+        datasetEstados.setValue("Disponible", disponibles);
+        datasetEstados.setValue("No Disponible", noDisponibles);
+        datasetEstados.setValue("De Baja", deBaja);
+
+        JFreeChart chartEstados = ChartFactory.createPieChart(
+            "Estados de Equipos",
+            datasetEstados,
+            true, true, false
+        );
+
+        ChartPanel chartPanelEstados = new ChartPanel(chartEstados);
+        chartPanelEstados.setPreferredSize(new Dimension(400, 300));
+        chartsPanel.add(chartPanelEstados);
+
+    } catch (Exception e) {
+        JLabel errorLabel = new JLabel("Error al cargar datos de equipos", SwingConstants.CENTER);
+        errorLabel.setPreferredSize(new Dimension(400, 300));
+        chartsPanel.add(errorLabel);
+    }
+
+    // Gráfico de distribución por laboratorios
+    try {
+        DefaultCategoryDataset datasetLaboratorios = new DefaultCategoryDataset();
+        ControladorEquipo controladorEquipo = new ControladorEquipo();
+        ControladorLaboratorio controladorLaboratorio = new ControladorLaboratorio();
+        
+        // Obtener lista de laboratorios y contar equipos por cada uno
+        var laboratorios = controladorLaboratorio.listar();
+        for (var laboratorio : laboratorios) {
+            int cantidad = controladorEquipo.contarEquiposPorLaboratorio(laboratorio.getIdLaboratorio());
+            datasetLaboratorios.addValue(cantidad, "Equipamientos", String.valueOf(laboratorio.getIdLaboratorio()));
+
+        }
+
+        JFreeChart chartLaboratorios = ChartFactory.createBarChart(
+            "Distribución de Equipos por Laboratorio",
+            "Laboratorio",
+            "Cantidad de Equipos",
+            datasetLaboratorios,
+            PlotOrientation.VERTICAL,
+            true, true, false
+        );
+
+        ChartPanel chartPanelLaboratorios = new ChartPanel(chartLaboratorios);
+        chartPanelLaboratorios.setPreferredSize(new Dimension(400, 300));
+        chartsPanel.add(chartPanelLaboratorios);
+
+    } catch (Exception e) {
+        JLabel errorLabel = new JLabel("Error al cargar distribución por laboratorios", SwingConstants.CENTER);
+        errorLabel.setPreferredSize(new Dimension(400, 300));
+        chartsPanel.add(errorLabel);
+    }
+
+    section.add(chartsPanel, BorderLayout.CENTER);
+    return section;
+}
+
+private JPanel createEquipamientosSection() {
+    JPanel section = new JPanel(new BorderLayout());
+    section.setBackground(Color.WHITE);
+    section.setBorder(BorderFactory.createTitledBorder(
+        BorderFactory.createLineBorder(PRIMARY_COLOR, 2),
+        "GRÁFICO DE EQUIPAMIENTOS",
+        0, 0, new Font("Segoe UI", Font.BOLD, 16), PRIMARY_COLOR
+    ));
+
+    JPanel chartsPanel = new JPanel(new GridLayout(1, 2, 10, 10));
+    chartsPanel.setBackground(Color.WHITE);
+    chartsPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+    // Gráfico de disponibilidad de equipamientos
+    try {
+        DefaultPieDataset datasetDisponibilidad = new DefaultPieDataset();
+        ControladorEquipamiento controladorEquipamiento = new ControladorEquipamiento();
+        
+        int disponibles = controladorEquipamiento.contarEquipamientosPorDisponibilidad("Disponible");
+        int enUso = controladorEquipamiento.contarEquipamientosPorDisponibilidad("En Uso");
+        int enMantenimiento = controladorEquipamiento.contarEquipamientosPorDisponibilidad("En Mantenimiento");
+        int noDisponibles = controladorEquipamiento.contarEquipamientosPorDisponibilidad("No Disponible");
+
+        datasetDisponibilidad.setValue("Disponible", disponibles);
+        datasetDisponibilidad.setValue("En Uso", enUso);
+        datasetDisponibilidad.setValue("En Mantenimiento", enMantenimiento);
+        datasetDisponibilidad.setValue("No Disponible", noDisponibles);
+
+        JFreeChart chartDisponibilidad = ChartFactory.createPieChart(
+            "Disponibilidad de Equipamientos",
+            datasetDisponibilidad,
+            true, true, false
+        );
+
+        ChartPanel chartPanelDisponibilidad = new ChartPanel(chartDisponibilidad);
+        chartPanelDisponibilidad.setPreferredSize(new Dimension(400, 300));
+        chartsPanel.add(chartPanelDisponibilidad);
+
+    } catch (Exception e) {
+        JLabel errorLabel = new JLabel("Error al cargar datos de equipamientos", SwingConstants.CENTER);
+        errorLabel.setPreferredSize(new Dimension(400, 300));
+        chartsPanel.add(errorLabel);
+    }
+
+    // Gráfico de distribución de equipamientos por laboratorios
+    try {
+        DefaultCategoryDataset datasetLaboratorios = new DefaultCategoryDataset();
+        ControladorEquipamiento controladorEquipamiento = new ControladorEquipamiento();
+        ControladorLaboratorio controladorLaboratorio = new ControladorLaboratorio();
+        
+        var laboratorios = controladorLaboratorio.listar();
+        for (var laboratorio : laboratorios) {
+            int cantidad = controladorEquipamiento.contarEquipamientosPorLaboratorio(laboratorio.getIdLaboratorio());
+            datasetLaboratorios.addValue(cantidad, "Equipamientos", String.valueOf(laboratorio.getIdLaboratorio()));
+
+        }
+
+        JFreeChart chartLaboratorios = ChartFactory.createBarChart(
+            "Distribución de Equipamientos por Laboratorio",
+            "Laboratorio",
+            "Cantidad de Equipamientos",
+            datasetLaboratorios,
+            PlotOrientation.VERTICAL,
+            true, true, false
+        );
+
+        ChartPanel chartPanelLaboratorios = new ChartPanel(chartLaboratorios);
+        chartPanelLaboratorios.setPreferredSize(new Dimension(400, 300));
+        chartsPanel.add(chartPanelLaboratorios);
+
+    } catch (Exception e) {
+        JLabel errorLabel = new JLabel("Error al cargar distribución de equipamientos", SwingConstants.CENTER);
+        errorLabel.setPreferredSize(new Dimension(400, 300));
+        chartsPanel.add(errorLabel);
+    }
+
+    section.add(chartsPanel, BorderLayout.CENTER);
+    return section;
+}
+
+private JPanel createInsumosSection() {
+    JPanel section = new JPanel(new BorderLayout());
+    section.setBackground(Color.WHITE);
+    section.setBorder(BorderFactory.createTitledBorder(
+        BorderFactory.createLineBorder(PRIMARY_COLOR, 2),
+        "GRÁFICO DE INSUMOS",
+        0, 0, new Font("Segoe UI", Font.BOLD, 16), PRIMARY_COLOR
+    ));
+
+    JPanel chartPanel = new JPanel(new BorderLayout());
+    chartPanel.setBackground(Color.WHITE);
+    chartPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+    try {
+        DefaultPieDataset datasetInsumos = new DefaultPieDataset();
+        ControladorInsumo controladorInsumos = new ControladorInsumo();
+        
+        // Obtener insumos agrupados por cantidad
+        var insumosRangos = controladorInsumos.obtenerInsumosPorRangoCantidad();
+        
+        // Ejemplo de rangos de cantidad
+        int bajo = controladorInsumos.contarInsumosPorRango(0, 10);      // 0-10
+        int medio = controladorInsumos.contarInsumosPorRango(11, 50);    // 11-50
+        int alto = controladorInsumos.contarInsumosPorRango(51, Integer.MAX_VALUE); // 51+
+
+        datasetInsumos.setValue("Cantidad Baja (0-10)", bajo);
+        datasetInsumos.setValue("Cantidad Media (11-50)", medio);
+        datasetInsumos.setValue("Cantidad Alta (51+)", alto);
+
+        JFreeChart chartInsumos = ChartFactory.createPieChart(
+            "Distribución de Insumos por Cantidad",
+            datasetInsumos,
+            true, true, false
+        );
+
+        ChartPanel chartPanelInsumos = new ChartPanel(chartInsumos);
+        chartPanelInsumos.setPreferredSize(new Dimension(600, 400));
+        chartPanel.add(chartPanelInsumos, BorderLayout.CENTER);
+
+    } catch (Exception e) {
+        JLabel errorLabel = new JLabel("Error al cargar datos de insumos", SwingConstants.CENTER);
+        errorLabel.setPreferredSize(new Dimension(600, 400));
+        chartPanel.add(errorLabel, BorderLayout.CENTER);
+    }
+
+    section.add(chartPanel, BorderLayout.CENTER);
+    return section;
+}
+
+private JPanel createPrestamosSection() {
+    JPanel section = new JPanel(new BorderLayout());
+    section.setBackground(Color.WHITE);
+    section.setBorder(BorderFactory.createTitledBorder(
+        BorderFactory.createLineBorder(PRIMARY_COLOR, 2),
+        "GRÁFICO DE PRÉSTAMOS",
+        0, 0, new Font("Segoe UI", Font.BOLD, 16), PRIMARY_COLOR
+    ));
+
+    JPanel chartPanel = new JPanel(new BorderLayout());
+    chartPanel.setBackground(Color.WHITE);
+    chartPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+    try {
+        DefaultPieDataset datasetPrestamos = new DefaultPieDataset();
+        ControladorPrestamo controladorPrestamo = new ControladorPrestamo();
+        
+        int pendientes = controladorPrestamo.contarPrestamosPorEstado("Pendiente");
+        int aceptados = controladorPrestamo.contarPrestamosPorEstado("Aceptado");
+        int rechazados = controladorPrestamo.contarPrestamosPorEstado("Rechazado");
+        int terminados = controladorPrestamo.contarPrestamosPorEstado("Terminado");
+
+        datasetPrestamos.setValue("Pendiente", pendientes);
+        datasetPrestamos.setValue("Aceptado", aceptados);
+        datasetPrestamos.setValue("Rechazado", rechazados);
+        datasetPrestamos.setValue("Terminado", terminados);
+
+        JFreeChart chartPrestamos = ChartFactory.createPieChart(
+            "Estado de Préstamos",
+            datasetPrestamos,
+            true, true, false
+        );
+
+        ChartPanel chartPanelPrestamos = new ChartPanel(chartPrestamos);
+        chartPanelPrestamos.setPreferredSize(new Dimension(600, 400));
+        chartPanel.add(chartPanelPrestamos, BorderLayout.CENTER);
+
+    } catch (Exception e) {
+        JLabel errorLabel = new JLabel("Error al cargar datos de préstamos", SwingConstants.CENTER);
+        errorLabel.setPreferredSize(new Dimension(600, 400));
+        chartPanel.add(errorLabel, BorderLayout.CENTER);
+    }
+
+    section.add(chartPanel, BorderLayout.CENTER);
+    return section;
+}
 }

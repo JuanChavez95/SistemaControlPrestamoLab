@@ -12,7 +12,9 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controlador para operaciones CRUD sobre la tabla insumos.
@@ -179,6 +181,64 @@ public class ControladorInsumo {
     return "Desconocido";   
     }
     
+    /**
+    * Obtiene un mapa que contiene la cantidad de insumos agrupados por rangos.
+    * Los rangos son: "0-10", "11-50", "51-100", "101+"
+    * 
+    * @return Mapa con los rangos como claves y la cantidad de insumos en ese rango como valores
+    * @throws SQLException Si ocurre un error al ejecutar la consulta
+    */
+    public Map<String, Integer> obtenerInsumosPorRangoCantidad() throws SQLException {
+        Map<String, Integer> mapaRangos = new HashMap<>();
+
+        // Inicializar los rangos
+        mapaRangos.put("0-10", 0);
+        mapaRangos.put("11-50", 0);
+        mapaRangos.put("51-100", 0);
+        mapaRangos.put("101+", 0);
+
+        // Contar insumos por rango
+        mapaRangos.put("0-10", contarInsumosPorRango(0, 10));
+        mapaRangos.put("11-50", contarInsumosPorRango(11, 50));
+        mapaRangos.put("51-100", contarInsumosPorRango(51, 100));
+
+        // Para el rango "101+" usamos un valor máximo grande
+        String sql = "SELECT COUNT(*) FROM insumos WHERE cantidad > 100";
+        try (Connection conn = ConexionBD.conectar();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+               mapaRangos.put("101+", rs.getInt(1));
+            }
+        }
+
+        return mapaRangos;
+    }
+
+   /**
+    * Cuenta la cantidad de insumos que tienen una cantidad entre el mínimo y máximo especificados.
+    * 
+    * @param min Valor mínimo del rango
+    * @param max Valor máximo del rango
+    * @return Número de insumos que tienen una cantidad dentro del rango especificado
+    * @throws SQLException Si ocurre un error al ejecutar la consulta
+    */
+    public int contarInsumosPorRango(int min, int max) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM insumos WHERE cantidad BETWEEN ? AND ?";
+        try (Connection conn = ConexionBD.conectar();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, min);
+            stmt.setInt(2, max);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                   return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
+
+
     
 
 }

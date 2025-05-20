@@ -435,4 +435,26 @@ public class ControladorPrestamo {
         }
         return null;
     }
+    
+    
+    /**
+    * Cuenta el número de préstamos con un determinado estado.
+    * 
+    * @param estado Estado de los préstamos a contar
+    * @return Número de préstamos con el estado especificado
+    * @throws SQLException Si ocurre un error al ejecutar la consulta
+    */
+    public int contarPrestamosPorEstado(String estado) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM prestamo WHERE estado_prestamo = ?";
+        try (Connection conn = ConexionBD.conectar();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, estado);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
 }

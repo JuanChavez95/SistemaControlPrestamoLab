@@ -110,4 +110,47 @@ public class ControladorEquipo {
             stmt.executeUpdate();
         }
     }
+    
+    /**
+    * Cuenta el número de equipos con un determinado estado.
+    * 
+    * @param estado Estado de los equipos a contar
+    * @return Número de equipos con el estado especificado
+    * @throws SQLException Si ocurre un error al ejecutar la consulta
+    */
+    public int contarEquiposPorEstado(String estado) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM equipos WHERE estado = ?";
+        try (Connection conn = ConexionBD.conectar();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, estado);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                   return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
+
+   /**
+    * Cuenta el número de equipos asignados a un laboratorio específico.
+    * 
+    * @param idLaboratorio ID del laboratorio
+    * @return Número de equipos en el laboratorio especificado
+    * @throws SQLException Si ocurre un error al ejecutar la consulta
+    */
+    public int contarEquiposPorLaboratorio(int idLaboratorio) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM equipos WHERE id_laboratorio = ?";
+        try (Connection conn = ConexionBD.conectar();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idLaboratorio);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                   return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
+
 }
