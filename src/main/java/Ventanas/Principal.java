@@ -7,6 +7,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
+import java.awt.Paint;
 
 // Importaciones de todos los paneles necesarios
 import Paneles.PanelDocentes;
@@ -47,6 +48,7 @@ import Controles.ControladorEquipamiento;
 import Controles.ControladorInsumo;
 import Controles.ControladorPrestamo;
 import Controles.ControladorLaboratorio;
+import java.util.ArrayList;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.renderer.category.StandardBarPainter;
@@ -57,6 +59,9 @@ import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.CategoryLabelPositions;
+import org.jfree.chart.plot.PiePlot;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+
 
 
 /**
@@ -519,10 +524,10 @@ public class Principal extends JFrame {
     	return dashboardPanel;
     }
 
-    private JPanel createEquiposSection() {
-    	JPanel section = new JPanel(new BorderLayout());
-        section.setBackground(Color.WHITE);
-        section.setBorder(BorderFactory.createTitledBorder(
+   private JPanel createEquiposSection() {
+    JPanel section = new JPanel(new BorderLayout());
+    section.setBackground(Color.WHITE);
+    section.setBorder(BorderFactory.createTitledBorder(
         BorderFactory.createLineBorder(PRIMARY_COLOR, 2),
         "GRÁFICO DE EQUIPOS",
         0, 0, new Font("Segoe UI", Font.BOLD, 16), PRIMARY_COLOR
@@ -532,15 +537,22 @@ public class Principal extends JFrame {
     chartsPanel.setBackground(Color.WHITE);
     chartsPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
+    // Variables para almacenar totales para la descripción
+    int totalEquipos = 0;
+    int disponibles = 0;
+    int noDisponibles = 0;
+    int deBaja = 0;
+
     // Gráfico de estados de equipos
     try {
         DefaultPieDataset datasetEstados = new DefaultPieDataset();
         ControladorEquipo controladorEquipo = new ControladorEquipo();
         
         // Obtener datos reales de los controladores
-        int disponibles = controladorEquipo.contarEquiposPorEstado("Disponible");
-        int noDisponibles = controladorEquipo.contarEquiposPorEstado("No Disponible");
-        int deBaja = controladorEquipo.contarEquiposPorEstado("De Baja");
+        disponibles = controladorEquipo.contarEquiposPorEstado("Disponible");
+        noDisponibles = controladorEquipo.contarEquiposPorEstado("No Disponible");
+        deBaja = controladorEquipo.contarEquiposPorEstado("De Baja");
+        totalEquipos = disponibles + noDisponibles + deBaja;
 
         datasetEstados.setValue("Disponible", disponibles);
         datasetEstados.setValue("No Disponible", noDisponibles);
@@ -551,6 +563,12 @@ public class Principal extends JFrame {
             datasetEstados,
             true, true, false
         );
+        
+        // Personalización del gráfico de pie
+        PiePlot plot = (PiePlot) chartEstados.getPlot();
+        plot.setSectionPaint("Disponible", new Color(76, 175, 80));  // Verde
+        plot.setSectionPaint("No Disponible", new Color(255, 152, 0));  // Naranja
+        plot.setSectionPaint("De Baja", new Color(244, 67, 54));  // Rojo
 
         ChartPanel chartPanelEstados = new ChartPanel(chartEstados);
         chartPanelEstados.setPreferredSize(new Dimension(400, 300));
@@ -570,10 +588,20 @@ public class Principal extends JFrame {
         
         // Obtener lista de laboratorios y contar equipos por cada uno
         var laboratorios = controladorLaboratorio.listar();
+        
+        // Crear una lista de colores aleatorios para las barras
+        final List<Color> colorList = new ArrayList<>();
+        for (int i = 0; i < laboratorios.size(); i++) {
+            colorList.add(new Color(
+                20 + (int)(Math.random() * 220), 
+                20 + (int)(Math.random() * 220), 
+                20 + (int)(Math.random() * 220)
+            ));
+        }
+        
         for (var laboratorio : laboratorios) {
             int cantidad = controladorEquipo.contarEquiposPorLaboratorio(laboratorio.getIdLaboratorio());
             datasetLaboratorios.addValue(cantidad, "Equipamientos", String.valueOf(laboratorio.getIdLaboratorio()));
-
         }
 
         JFreeChart chartLaboratorios = ChartFactory.createBarChart(
@@ -584,6 +612,30 @@ public class Principal extends JFrame {
             PlotOrientation.VERTICAL,
             true, true, false
         );
+        
+        // Personalizar gráfico
+        CategoryPlot plot = chartLaboratorios.getCategoryPlot();
+        
+        // Crear un renderer personalizado que asigne un color diferente a cada barra
+        BarRenderer renderer = new BarRenderer() {
+            @Override
+            public Paint getItemPaint(int row, int column) {
+                // Usar el índice de columna para seleccionar un color específico
+                return colorList.get(column % colorList.size());
+            }
+        };
+        
+        // Establecer el renderer personalizado
+        plot.setRenderer(renderer);
+        
+        // Configuración adicional del renderer
+        renderer.setDrawBarOutline(true);
+        renderer.setShadowVisible(false);
+        renderer.setBarPainter(new StandardBarPainter()); // Barras sólidas sin gradiente
+        
+        // Ajustar fuentes y etiquetas
+        CategoryAxis domainAxis = plot.getDomainAxis();
+        domainAxis.setCategoryLabelPositions(CategoryLabelPositions.createUpRotationLabelPositions(Math.PI / 6.0));
 
         ChartPanel chartPanelLaboratorios = new ChartPanel(chartLaboratorios);
         chartPanelLaboratorios.setPreferredSize(new Dimension(400, 300));
@@ -596,6 +648,47 @@ public class Principal extends JFrame {
     }
 
     section.add(chartsPanel, BorderLayout.CENTER);
+    
+    // Añadir panel de descripción en la parte inferior
+    JPanel descripcionPanel = new JPanel();
+    descripcionPanel.setLayout(new BoxLayout(descripcionPanel, BoxLayout.Y_AXIS));
+    descripcionPanel.setBackground(Color.WHITE);
+    descripcionPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    
+    JLabel lblTotalEquipos = new JLabel("Total de Equipos: " + totalEquipos, SwingConstants.CENTER);
+    JLabel lblEquiposDisponibles = new JLabel("Equipos Disponibles: " + disponibles + 
+            " (" + calcularPorcentaje(disponibles, totalEquipos) + "%)", SwingConstants.CENTER);
+    JLabel lblEquiposNoDisponibles = new JLabel("Equipos No Disponibles: " + noDisponibles + 
+            " (" + calcularPorcentaje(noDisponibles, totalEquipos) + "%)", SwingConstants.CENTER);
+    JLabel lblEquiposBaja = new JLabel("Equipos de Baja: " + deBaja + 
+            " (" + calcularPorcentaje(deBaja, totalEquipos) + "%)", SwingConstants.CENTER);
+    
+    // Usar fuente en negrita y colores para las etiquetas
+    Font boldFont = new Font("Segoe UI", Font.BOLD, 14);
+    lblTotalEquipos.setFont(boldFont);
+    lblEquiposDisponibles.setFont(boldFont);
+    lblEquiposDisponibles.setForeground(new Color(76, 175, 80)); // Verde
+    lblEquiposNoDisponibles.setFont(boldFont);
+    lblEquiposNoDisponibles.setForeground(new Color(255, 152, 0)); // Naranja
+    lblEquiposBaja.setFont(boldFont);
+    lblEquiposBaja.setForeground(new Color(244, 67, 54)); // Rojo
+    
+    // Asegurar que los JLabel estén centrados
+    lblTotalEquipos.setAlignmentX(Component.CENTER_ALIGNMENT);
+    lblEquiposDisponibles.setAlignmentX(Component.CENTER_ALIGNMENT);
+    lblEquiposNoDisponibles.setAlignmentX(Component.CENTER_ALIGNMENT);
+    lblEquiposBaja.setAlignmentX(Component.CENTER_ALIGNMENT);
+    
+    descripcionPanel.add(lblTotalEquipos);
+    descripcionPanel.add(Box.createRigidArea(new Dimension(0, 8)));
+    descripcionPanel.add(lblEquiposDisponibles);
+    descripcionPanel.add(Box.createRigidArea(new Dimension(0, 8)));
+    descripcionPanel.add(lblEquiposNoDisponibles);
+    descripcionPanel.add(Box.createRigidArea(new Dimension(0, 8)));
+    descripcionPanel.add(lblEquiposBaja);
+    
+    section.add(descripcionPanel, BorderLayout.SOUTH);
+    
     return section;
 }
 
@@ -611,16 +704,24 @@ private JPanel createEquipamientosSection() {
     JPanel chartsPanel = new JPanel(new GridLayout(1, 2, 10, 10));
     chartsPanel.setBackground(Color.WHITE);
     chartsPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+    
+    // Variables para almacenar totales para la descripción
+    int totalEquipamientos = 0;
+    int disponibles = 0;
+    int enUso = 0;
+    int enMantenimiento = 0;
+    int noDisponibles = 0;
 
     // Gráfico de disponibilidad de equipamientos
     try {
         DefaultPieDataset datasetDisponibilidad = new DefaultPieDataset();
         ControladorEquipamiento controladorEquipamiento = new ControladorEquipamiento();
         
-        int disponibles = controladorEquipamiento.contarEquipamientosPorDisponibilidad("Disponible");
-        int enUso = controladorEquipamiento.contarEquipamientosPorDisponibilidad("En Uso");
-        int enMantenimiento = controladorEquipamiento.contarEquipamientosPorDisponibilidad("En Mantenimiento");
-        int noDisponibles = controladorEquipamiento.contarEquipamientosPorDisponibilidad("No Disponible");
+        disponibles = controladorEquipamiento.contarEquipamientosPorDisponibilidad("Disponible");
+        enUso = controladorEquipamiento.contarEquipamientosPorDisponibilidad("En Uso");
+        enMantenimiento = controladorEquipamiento.contarEquipamientosPorDisponibilidad("En Mantenimiento");
+        noDisponibles = controladorEquipamiento.contarEquipamientosPorDisponibilidad("No Disponible");
+        totalEquipamientos = disponibles + enUso + enMantenimiento + noDisponibles;
 
         datasetDisponibilidad.setValue("Disponible", disponibles);
         datasetDisponibilidad.setValue("En Uso", enUso);
@@ -632,6 +733,13 @@ private JPanel createEquipamientosSection() {
             datasetDisponibilidad,
             true, true, false
         );
+        
+        // Personalización del gráfico de pie
+        PiePlot plot = (PiePlot) chartDisponibilidad.getPlot();
+        plot.setSectionPaint("Disponible", new Color(76, 175, 80));  // Verde
+        plot.setSectionPaint("En Uso", new Color(33, 150, 243));  // Azul
+        plot.setSectionPaint("En Mantenimiento", new Color(255, 152, 0));  // Naranja
+        plot.setSectionPaint("No Disponible", new Color(244, 67, 54));  // Rojo
 
         ChartPanel chartPanelDisponibilidad = new ChartPanel(chartDisponibilidad);
         chartPanelDisponibilidad.setPreferredSize(new Dimension(400, 300));
@@ -650,10 +758,20 @@ private JPanel createEquipamientosSection() {
         ControladorLaboratorio controladorLaboratorio = new ControladorLaboratorio();
         
         var laboratorios = controladorLaboratorio.listar();
+        
+        // Crear una lista de colores aleatorios para las barras
+        final List<Color> colorList = new ArrayList<>();
+        for (int i = 0; i < laboratorios.size(); i++) {
+            colorList.add(new Color(
+                20 + (int)(Math.random() * 220), 
+                20 + (int)(Math.random() * 220), 
+                20 + (int)(Math.random() * 220)
+            ));
+        }
+        
         for (var laboratorio : laboratorios) {
             int cantidad = controladorEquipamiento.contarEquipamientosPorLaboratorio(laboratorio.getIdLaboratorio());
             datasetLaboratorios.addValue(cantidad, "Equipamientos", String.valueOf(laboratorio.getIdLaboratorio()));
-
         }
 
         JFreeChart chartLaboratorios = ChartFactory.createBarChart(
@@ -664,6 +782,30 @@ private JPanel createEquipamientosSection() {
             PlotOrientation.VERTICAL,
             true, true, false
         );
+        
+        // Personalizar gráfico
+        CategoryPlot plot = chartLaboratorios.getCategoryPlot();
+        
+        // Crear un renderer personalizado que asigne un color diferente a cada barra
+        BarRenderer renderer = new BarRenderer() {
+            @Override
+            public Paint getItemPaint(int row, int column) {
+                // Usar el índice de columna para seleccionar un color específico
+                return colorList.get(column % colorList.size());
+            }
+        };
+        
+        // Establecer el renderer personalizado
+        plot.setRenderer(renderer);
+        
+        // Configuración adicional del renderer
+        renderer.setDrawBarOutline(true);
+        renderer.setShadowVisible(false);
+        renderer.setBarPainter(new StandardBarPainter()); // Barras sólidas sin gradiente
+        
+        // Ajustar fuentes y etiquetas
+        CategoryAxis domainAxis = plot.getDomainAxis();
+        domainAxis.setCategoryLabelPositions(CategoryLabelPositions.createUpRotationLabelPositions(Math.PI / 6.0));
 
         ChartPanel chartPanelLaboratorios = new ChartPanel(chartLaboratorios);
         chartPanelLaboratorios.setPreferredSize(new Dimension(400, 300));
@@ -676,7 +818,61 @@ private JPanel createEquipamientosSection() {
     }
 
     section.add(chartsPanel, BorderLayout.CENTER);
+    
+    // Añadir panel de descripción en la parte inferior
+    JPanel descripcionPanel = new JPanel();
+    descripcionPanel.setLayout(new BoxLayout(descripcionPanel, BoxLayout.Y_AXIS));
+    descripcionPanel.setBackground(Color.WHITE);
+    descripcionPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    
+    JLabel lblTotalEquipamientos = new JLabel("Total de Equipamientos: " + totalEquipamientos, SwingConstants.CENTER);
+    JLabel lblEquipDisponibles = new JLabel("Equipamientos Disponibles: " + disponibles + 
+            " (" + calcularPorcentaje(disponibles, totalEquipamientos) + "%)", SwingConstants.CENTER);
+    JLabel lblEquipEnUso = new JLabel("Equipamientos En Uso: " + enUso + 
+            " (" + calcularPorcentaje(enUso, totalEquipamientos) + "%)", SwingConstants.CENTER);
+    JLabel lblEquipMantenimiento = new JLabel("Equipamientos En Mantenimiento: " + enMantenimiento + 
+            " (" + calcularPorcentaje(enMantenimiento, totalEquipamientos) + "%)", SwingConstants.CENTER);
+    JLabel lblEquipNoDisponibles = new JLabel("Equipamientos No Disponibles: " + noDisponibles + 
+            " (" + calcularPorcentaje(noDisponibles, totalEquipamientos) + "%)", SwingConstants.CENTER);
+    
+    // Usar fuente en negrita y colores para las etiquetas
+    Font boldFont = new Font("Segoe UI", Font.BOLD, 14);
+    lblTotalEquipamientos.setFont(boldFont);
+    lblEquipDisponibles.setFont(boldFont);
+    lblEquipDisponibles.setForeground(new Color(76, 175, 80)); // Verde
+    lblEquipEnUso.setFont(boldFont);
+    lblEquipEnUso.setForeground(new Color(33, 150, 243)); // Azul
+    lblEquipMantenimiento.setFont(boldFont);
+    lblEquipMantenimiento.setForeground(new Color(255, 152, 0)); // Naranja
+    lblEquipNoDisponibles.setFont(boldFont);
+    lblEquipNoDisponibles.setForeground(new Color(244, 67, 54)); // Rojo
+    
+    // Asegurar que las etiquetas se alineen correctamente en un layout BoxLayout
+    lblTotalEquipamientos.setAlignmentX(Component.CENTER_ALIGNMENT);
+    lblEquipDisponibles.setAlignmentX(Component.CENTER_ALIGNMENT);
+    lblEquipEnUso.setAlignmentX(Component.CENTER_ALIGNMENT);
+    lblEquipMantenimiento.setAlignmentX(Component.CENTER_ALIGNMENT);
+    lblEquipNoDisponibles.setAlignmentX(Component.CENTER_ALIGNMENT);
+    
+    descripcionPanel.add(lblTotalEquipamientos);
+    descripcionPanel.add(Box.createRigidArea(new Dimension(0, 8)));
+    descripcionPanel.add(lblEquipDisponibles);
+    descripcionPanel.add(Box.createRigidArea(new Dimension(0, 8)));
+    descripcionPanel.add(lblEquipEnUso);
+    descripcionPanel.add(Box.createRigidArea(new Dimension(0, 8)));
+    descripcionPanel.add(lblEquipMantenimiento);
+    descripcionPanel.add(Box.createRigidArea(new Dimension(0, 8)));
+    descripcionPanel.add(lblEquipNoDisponibles);
+    
+    section.add(descripcionPanel, BorderLayout.SOUTH);
+    
     return section;
+}
+
+// Función auxiliar para calcular porcentajes
+private int calcularPorcentaje(int valor, int total) {
+    if (total == 0) return 0;
+    return (int) Math.round((double) valor / total * 100);
 }
 
 private JPanel createInsumosSection() {
@@ -687,11 +883,9 @@ private JPanel createInsumosSection() {
         "GRÁFICO DE INSUMOS",
         0, 0, new Font("Segoe UI", Font.BOLD, 16), PRIMARY_COLOR
     ));
-
     JPanel chartPanel = new JPanel(new BorderLayout());
     chartPanel.setBackground(Color.WHITE);
     chartPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
-
     try {
         // Crear dataset para gráfico de barras
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
@@ -699,6 +893,16 @@ private JPanel createInsumosSection() {
          // Obtener lista de todos los insumos
         ControladorInsumo controladorInsumos = new ControladorInsumo();
         List<Insumo> listaInsumos = controladorInsumos.listar();
+        
+        // Crear una lista de colores aleatorios para las barras
+        final List<Color> colorList = new ArrayList<>();
+        for (int i = 0; i < listaInsumos.size(); i++) {
+            colorList.add(new Color(
+                20 + (int)(Math.random() * 220), 
+                20 + (int)(Math.random() * 220), 
+                20 + (int)(Math.random() * 220)
+            ));
+        }
         
         // Agregar cada insumo al dataset con su cantidad correspondiente
         for (Insumo insumo : listaInsumos) {
@@ -719,20 +923,20 @@ private JPanel createInsumosSection() {
         
         // Personalizar gráfico
         CategoryPlot plot = chart.getCategoryPlot();
-        BarRenderer renderer = (BarRenderer) plot.getRenderer();
         
-        // Asignar diferentes colores a las barras
-        for (int i = 0; i < listaInsumos.size(); i++) {
-            // Crear colores aleatorios pero visualmente agradables
-            Color color = new Color(
-                20 + (int)(Math.random() * 220), 
-                20 + (int)(Math.random() * 220), 
-                20 + (int)(Math.random() * 220)
-            );
-            renderer.setSeriesPaint(i, color);
-        }
+        // Crear un renderer personalizado que asigne un color diferente a cada barra
+        BarRenderer renderer = new BarRenderer() {
+            @Override
+            public Paint getItemPaint(int row, int column) {
+                // Usar el índice de columna para seleccionar un color específico
+                return colorList.get(column % colorList.size());
+            }
+        };
         
-        // Configuración adicional del gráfico
+        // Establecer el renderer personalizado
+        plot.setRenderer(renderer);
+        
+        // Configuración adicional del renderer
         renderer.setDrawBarOutline(true);
         renderer.setShadowVisible(false);
         renderer.setBarPainter(new StandardBarPainter()); // Barras sólidas sin gradiente
@@ -750,13 +954,11 @@ private JPanel createInsumosSection() {
         ChartPanel chartPanelInsumos = new ChartPanel(chart);
         chartPanelInsumos.setPreferredSize(new Dimension(600, 400));
         chartPanel.add(chartPanelInsumos, BorderLayout.CENTER);
-
     } catch (Exception e) {
         JLabel errorLabel = new JLabel("Error al cargar datos de insumos: " + e.getMessage(), SwingConstants.CENTER);
         errorLabel.setPreferredSize(new Dimension(600, 400));
         chartPanel.add(errorLabel, BorderLayout.CENTER);
     }
-
     section.add(chartPanel, BorderLayout.CENTER);
     return section;
 }
