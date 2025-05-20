@@ -1,10 +1,12 @@
 package Ventanas;
 
+import Clases.Insumo;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.List;
 
 // Importaciones de todos los paneles necesarios
 import Paneles.PanelDocentes;
@@ -45,6 +47,17 @@ import Controles.ControladorEquipamiento;
 import Controles.ControladorInsumo;
 import Controles.ControladorPrestamo;
 import Controles.ControladorLaboratorio;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.CategoryLabelPositions;
+import org.jfree.chart.renderer.category.StandardBarPainter;
+
+
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.renderer.category.StandardBarPainter;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.CategoryLabelPositions;
+
 
 /**
  * Ventana principal del Sistema de Control y Préstamo de Laboratorios para administradores.
@@ -680,33 +693,66 @@ private JPanel createInsumosSection() {
     chartPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
     try {
-        DefaultPieDataset datasetInsumos = new DefaultPieDataset();
+        // Crear dataset para gráfico de barras
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        
+         // Obtener lista de todos los insumos
         ControladorInsumo controladorInsumos = new ControladorInsumo();
+        List<Insumo> listaInsumos = controladorInsumos.listar();
         
-        // Obtener insumos agrupados por cantidad
-        var insumosRangos = controladorInsumos.obtenerInsumosPorRangoCantidad();
+        // Agregar cada insumo al dataset con su cantidad correspondiente
+        for (Insumo insumo : listaInsumos) {
+            dataset.addValue(insumo.getCantidad(), "Cantidad", insumo.getNombreInsumo());
+        }
         
-        // Ejemplo de rangos de cantidad
-        int bajo = controladorInsumos.contarInsumosPorRango(0, 10);      // 0-10
-        int medio = controladorInsumos.contarInsumosPorRango(11, 50);    // 11-50
-        int alto = controladorInsumos.contarInsumosPorRango(51, Integer.MAX_VALUE); // 51+
-
-        datasetInsumos.setValue("Cantidad Baja (0-10)", bajo);
-        datasetInsumos.setValue("Cantidad Media (11-50)", medio);
-        datasetInsumos.setValue("Cantidad Alta (51+)", alto);
-
-        JFreeChart chartInsumos = ChartFactory.createPieChart(
-            "Distribución de Insumos por Cantidad",
-            datasetInsumos,
-            true, true, false
+        // Crear gráfico de barras
+        JFreeChart chart = ChartFactory.createBarChart(
+            "Cantidades de Insumos",     // título del gráfico
+            "Insumos",                   // etiqueta del eje X
+            "Cantidad",                  // etiqueta del eje Y
+            dataset,                     // dataset
+            PlotOrientation.VERTICAL,    // orientación
+            true,                        // incluir leyenda
+            true,                        // tooltips
+            false                        // URLs
         );
-
-        ChartPanel chartPanelInsumos = new ChartPanel(chartInsumos);
+        
+        // Personalizar gráfico
+        CategoryPlot plot = chart.getCategoryPlot();
+        BarRenderer renderer = (BarRenderer) plot.getRenderer();
+        
+        // Asignar diferentes colores a las barras
+        for (int i = 0; i < listaInsumos.size(); i++) {
+            // Crear colores aleatorios pero visualmente agradables
+            Color color = new Color(
+                20 + (int)(Math.random() * 220), 
+                20 + (int)(Math.random() * 220), 
+                20 + (int)(Math.random() * 220)
+            );
+            renderer.setSeriesPaint(i, color);
+        }
+        
+        // Configuración adicional del gráfico
+        renderer.setDrawBarOutline(true);
+        renderer.setShadowVisible(false);
+        renderer.setBarPainter(new StandardBarPainter()); // Barras sólidas sin gradiente
+        
+        // Ajustar fuentes y etiquetas
+        CategoryAxis domainAxis = plot.getDomainAxis();
+        domainAxis.setCategoryLabelPositions(CategoryLabelPositions.createUpRotationLabelPositions(Math.PI / 6.0));
+        
+        // Si hay muchos insumos, ajustar para mejor visualización
+        if (listaInsumos.size() > 10) {
+            domainAxis.setMaximumCategoryLabelLines(2);
+            domainAxis.setMaximumCategoryLabelWidthRatio(0.5f);
+        }
+        
+        ChartPanel chartPanelInsumos = new ChartPanel(chart);
         chartPanelInsumos.setPreferredSize(new Dimension(600, 400));
         chartPanel.add(chartPanelInsumos, BorderLayout.CENTER);
 
     } catch (Exception e) {
-        JLabel errorLabel = new JLabel("Error al cargar datos de insumos", SwingConstants.CENTER);
+        JLabel errorLabel = new JLabel("Error al cargar datos de insumos: " + e.getMessage(), SwingConstants.CENTER);
         errorLabel.setPreferredSize(new Dimension(600, 400));
         chartPanel.add(errorLabel, BorderLayout.CENTER);
     }
