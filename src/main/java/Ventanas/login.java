@@ -8,7 +8,11 @@ import DataBase.ConexionBD;
 import exceptions.CredencialesInvalidas;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -327,6 +331,20 @@ public class login extends JFrame {
                 if (!validarEnBD(ru, password)) {
                     throw new CredencialesInvalidas("Usuario o contraseña incorrectos");
                 }
+           
+               
+            // Registrar el inicio de sesión en un archivo de log
+            try (FileWriter writer = new FileWriter("login_logs.txt", true)) {
+                 String timestamp = java.time.LocalDateTime.now()
+                 .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                 writer.write("[" + timestamp + "] " + rol.toUpperCase() + ": " + nombreCompleto + " inició sesión\n");
+                 } catch (IOException ex) {
+                    ex.printStackTrace();
+            }
+
+
+
+
 
                 // Redireccionar según el rol, pasando ruUsuario
                 if (rol.equals("Administrador")) {
@@ -380,45 +398,48 @@ public class login extends JFrame {
             mostrarMensajeError("Error al abrir el formulario: " + ex.getMessage());
         }
     }
+    private String nombreCompleto; // Añade esto en tu clase como atributo
 
     private boolean validarEnBD(int ru, String password) throws SQLException {
-        String sql = "SELECT ru, contra, rol FROM usuario WHERE ru = ? AND BINARY contra = ?";
-        System.out.println("Validando en BD: RU = " + ru + ", Contraseña = [oculta]");
+            String sql = "SELECT ru, contra, rol, nombre, apellido_paterno, apellido_materno FROM usuario WHERE ru = ?";
+            System.out.println("Validando en BD: RU = " + ru + ", Contraseña = [oculta]");
 
-        try (Connection conn = ConexionBD.conectar();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setInt(1, ru);
-            stmt.setString(2, password);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    String storedHash = rs.getString("contra");
-                    try {
-                        // Intentar validar con BCrypt
-                        if (BCrypt.checkpw(password, storedHash)) {
-                            rol = rs.getString("rol");
-                            System.out.println("Usuario encontrado: RU = " + ru + ", Rol = " + rol);
-                            return true;
-                        }
-                    } catch (IllegalArgumentException e) {
-                        System.err.println("Invalid BCrypt hash for RU = " + ru + ". Falling back to legacy check.");
-                        // Fallback para contraseñas legacy (plain text)
-                        if (password.equals(storedHash)) {
-                            rol = rs.getString("rol");
-                            System.out.println("Usuario legacy encontrado: RU = " + ru + ", Rol = " + rol);
-                            // Opcional: Actualizar a hash para próxima vez
-                            // String newHash = BCrypt.hashpw(password, BCrypt.gensalt());
-                            // updatePasswordInDB(ru, newHash);
-                            return true;
-                        }
+         try (Connection conn = ConexionBD.conectar();
+              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+               stmt.setInt(1, ru);
+
+         try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                String storedHash = rs.getString("contra");
+                String nombre = rs.getString("nombre");
+                String apellidoP = rs.getString("apellido_paterno");
+                String apellidoM = rs.getString("apellido_materno");
+
+                // Guardamos el nombre completo desde la BD
+                nombreCompleto = nombre + " " + apellidoP + " " + apellidoM;
+
+                try {
+                    // Validación con BCrypt
+                    if (BCrypt.checkpw(password, storedHash)) {
+                        rol = rs.getString("rol");
+                        System.out.println("Usuario encontrado: RU = " + ru + ", Rol = " + rol);
+                        return true;
+                    }
+                } catch (IllegalArgumentException e) {
+                    System.err.println("Invalid BCrypt hash para RU = " + ru + ". Fallback a verificación legacy.");
+                    if (password.equals(storedHash)) {
+                        rol = rs.getString("rol");
+                        System.out.println("Usuario legacy encontrado: RU = " + ru + ", Rol = " + rol);
+                        return true;
                     }
                 }
-                System.out.println("No se encontró usuario con RU = " + ru + " o la contraseña no coincide.");
-                return false;
             }
+            System.out.println("No se encontró usuario con RU = " + ru + " o la contraseña no coincide.");
+            return false;
         }
     }
+}
 
     private boolean isPasswordStrong(String password) {
         // Requisitos: al menos 8 caracteres, 1 mayúscula, 1 minúscula, 1 número, 1 carácter especial
