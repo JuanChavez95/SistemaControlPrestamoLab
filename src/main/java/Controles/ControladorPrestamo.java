@@ -457,4 +457,29 @@ public class ControladorPrestamo {
         }
         return 0;
     }
+    
+    /**
+    * Obtiene el email del usuario por su RU.
+    * @param ruUsuario RU del usuario
+    * @return Email del usuario o null si no se encuentra
+    * @throws SQLException Si ocurre un error en la base de datos
+    */
+    public String obtenerEmailUsuario(int ruUsuario) throws SQLException {
+        String sql = "SELECT email FROM usuario WHERE ru = ?";
+
+        // Aquí se obtiene una conexión desde ConexionBD
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, ruUsuario);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("email");
+                }
+            }
+        }
+        return null;
+    }
+
 }

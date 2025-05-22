@@ -28,6 +28,8 @@ import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
+import Utilidades.ServicioCorreo;
+
 /**
  * Clase que representa un panel para visualizar y gestionar préstamos.
  * @author 
@@ -79,6 +81,7 @@ public class PanelVisualizarPrestamos extends JPanel {
         this.controladorHorario = new ControladorHorario();
         initComponents();
         cargarPrestamos();
+        verificarConfiguracionCorreo();
     }
 
     /**
@@ -698,102 +701,152 @@ public class PanelVisualizarPrestamos extends JPanel {
      * Acepta un préstamo seleccionado, verificando disponibilidad y actualizando estados.
      */
     private void aceptarPrestamo() {
-        int filaSeleccionada = tablaPrestamos.getSelectedRow();
-        if (filaSeleccionada == -1) {
-            JOptionPane.showMessageDialog(this, "Por favor, seleccione un préstamo.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        int idPrestamo = (int) modeloTabla.getValueAt(filaSeleccionada, 0);
-        String estado = (String) modeloTabla.getValueAt(filaSeleccionada, 5);
-
-        if (!estado.equals("Pendiente")) {
-            JOptionPane.showMessageDialog(this, "Solo se pueden aceptar préstamos en estado Pendiente.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        String observaciones = JOptionPane.showInputDialog(this, "Ingrese observaciones (opcional):", "Aceptar Préstamo", JOptionPane.PLAIN_MESSAGE);
-        if (observaciones == null) {
-            return;
-        }
-
-        try {
-            // Verificar disponibilidad de insumos
-            List<DetallePrestamoInsumo> detallesInsumo = controladorDetalleInsumo.listarPorPrestamo(idPrestamo);
-            for (DetallePrestamoInsumo detalle : detallesInsumo) {
-                boolean disponible = controladorDetalleInsumo.verificarDisponibilidadInsumo(
-                    detalle.getIdInsumo(), detalle.getCantidadInicial());
-                
-                if (!disponible) {
-                    JOptionPane.showMessageDialog(this,
-                        "No hay suficiente cantidad disponible del insumo ID " + detalle.getIdInsumo(),
-                        "Error de disponibilidad", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-            }
-            
-            // Actualizar estado del horario
-            Integer idHorario = controladorPrestamo.obtenerHorarioPrestamo(idPrestamo);
-            if (idHorario != null) {
-                Horario horario = controladorHorario.buscarPorId(idHorario);
-                if (horario != null) {
-                    horario.setEstado("Préstamo");
-                    controladorHorario.actualizar(horario);
-                }
-            }
-            
-            // Actualizar disponibilidad de equipamientos
-            List<Integer> equipamientoIds = controladorPrestamo.obtenerEquipamientosPrestamo(idPrestamo);
-            for (Integer idEquipamiento : equipamientoIds) {
-                Clases.Equipamiento equipo = controladorEquipamiento.buscarPorId(idEquipamiento);
-                if (equipo != null) {
-                    equipo.setDisponibilidad("Préstamo");
-                    controladorEquipamiento.actualizar(equipo);
-                }
-            }
-            
-            // Procesar aceptación del préstamo
-            controladorPrestamo.aceptarPrestamo(idPrestamo, null, ruAdministrador, observaciones);
-            JOptionPane.showMessageDialog(this, "Préstamo aceptado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            cargarPrestamos();
-        } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "Error al aceptar préstamo ID " + idPrestamo, ex);
-            JOptionPane.showMessageDialog(this, "Error al aceptar préstamo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
+    int filaSeleccionada = tablaPrestamos.getSelectedRow();
+    if (filaSeleccionada == -1) {
+        JOptionPane.showMessageDialog(this, "Por favor, seleccione un préstamo.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        return;
     }
 
+    int idPrestamo = (int) modeloTabla.getValueAt(filaSeleccionada, 0);
+    String estado = (String) modeloTabla.getValueAt(filaSeleccionada, 5);
+    int ruUsuario = (int) modeloTabla.getValueAt(filaSeleccionada, 1);
+
+    if (!estado.equals("Pendiente")) {
+        JOptionPane.showMessageDialog(this, "Solo se pueden aceptar préstamos en estado Pendiente.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    String observaciones = JOptionPane.showInputDialog(this, "Ingrese observaciones (opcional):", "Aceptar Préstamo", JOptionPane.PLAIN_MESSAGE);
+    if (observaciones == null) {
+        return;
+    }
+
+    try {
+        // Verificar disponibilidad de insumos
+        List<DetallePrestamoInsumo> detallesInsumo = controladorDetalleInsumo.listarPorPrestamo(idPrestamo);
+        for (DetallePrestamoInsumo detalle : detallesInsumo) {
+            boolean disponible = controladorDetalleInsumo.verificarDisponibilidadInsumo(
+                detalle.getIdInsumo(), detalle.getCantidadInicial());
+            
+            if (!disponible) {
+                JOptionPane.showMessageDialog(this,
+                    "No hay suficiente cantidad disponible del insumo ID " + detalle.getIdInsumo(),
+                    "Error de disponibilidad", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+        
+        // Actualizar estado del horario
+        Integer idHorario = controladorPrestamo.obtenerHorarioPrestamo(idPrestamo);
+        if (idHorario != null) {
+            Horario horario = controladorHorario.buscarPorId(idHorario);
+            if (horario != null) {
+                horario.setEstado("Préstamo");
+                controladorHorario.actualizar(horario);
+            }
+        }
+        
+        // Actualizar disponibilidad de equipamientos
+        List<Integer> equipamientoIds = controladorPrestamo.obtenerEquipamientosPrestamo(idPrestamo);
+        for (Integer idEquipamiento : equipamientoIds) {
+            Clases.Equipamiento equipo = controladorEquipamiento.buscarPorId(idEquipamiento);
+            if (equipo != null) {
+                equipo.setDisponibilidad("Préstamo");
+                controladorEquipamiento.actualizar(equipo);
+            }
+        }
+        
+        // Procesar aceptación del préstamo
+        controladorPrestamo.aceptarPrestamo(idPrestamo, null, ruAdministrador, observaciones);
+        
+        // NUEVO: Enviar correo de notificación
+        try {
+            String emailUsuario = controladorPrestamo.obtenerEmailUsuario(ruUsuario);
+            if (emailUsuario != null && !emailUsuario.isEmpty()) {
+                boolean correoEnviado = ServicioCorreo.enviarNotificacionPrestamo(emailUsuario, ruUsuario, true);
+                if (correoEnviado) {
+                    LOGGER.info("Correo de aceptación enviado exitosamente al usuario RU: " + ruUsuario);
+                } else {
+                    LOGGER.warning("No se pudo enviar el correo de aceptación al usuario RU: " + ruUsuario);
+                }
+            } else {
+                LOGGER.warning("No se encontró email para el usuario RU: " + ruUsuario);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error al enviar correo de aceptación para usuario RU: " + ruUsuario, e);
+        }
+        
+        JOptionPane.showMessageDialog(this, "Préstamo aceptado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        cargarPrestamos();
+    } catch (SQLException ex) {
+        LOGGER.log(Level.SEVERE, "Error al aceptar préstamo ID " + idPrestamo, ex);
+        JOptionPane.showMessageDialog(this, "Error al aceptar préstamo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
+}
     /**
      * Rechaza un préstamo seleccionado.
      */
     private void rechazarPrestamo() {
-        int filaSeleccionada = tablaPrestamos.getSelectedRow();
-        if (filaSeleccionada == -1) {
-            JOptionPane.showMessageDialog(this, "Por favor, seleccione un préstamo.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        int idPrestamo = (int) modeloTabla.getValueAt(filaSeleccionada, 0);
-        String estado = (String) modeloTabla.getValueAt(filaSeleccionada, 5);
-
-        if (!estado.equals("Pendiente")) {
-            JOptionPane.showMessageDialog(this, "Solo se pueden rechazar préstamos en estado Pendiente.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro de que desea rechazar este préstamo?", "Confirmar Rechazo", JOptionPane.YES_NO_OPTION);
-        if (confirm != JOptionPane.YES_OPTION) {
-            return;
-        }
-
-        try {
-            controladorPrestamo.rechazarPrestamo(idPrestamo);
-            JOptionPane.showMessageDialog(this, "Préstamo rechazado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            cargarPrestamos();
-        } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "Error al rechazar préstamo ID " + idPrestamo, ex);
-            JOptionPane.showMessageDialog(this, "Error al rechazar préstamo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
+    int filaSeleccionada = tablaPrestamos.getSelectedRow();
+    if (filaSeleccionada == -1) {
+        JOptionPane.showMessageDialog(this, "Por favor, seleccione un préstamo.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        return;
     }
+
+    int idPrestamo = (int) modeloTabla.getValueAt(filaSeleccionada, 0);
+    String estado = (String) modeloTabla.getValueAt(filaSeleccionada, 5);
+    int ruUsuario = (int) modeloTabla.getValueAt(filaSeleccionada, 1);
+
+    if (!estado.equals("Pendiente")) {
+        JOptionPane.showMessageDialog(this, "Solo se pueden rechazar préstamos en estado Pendiente.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro de que desea rechazar este préstamo?", "Confirmar Rechazo", JOptionPane.YES_NO_OPTION);
+    if (confirm != JOptionPane.YES_OPTION) {
+        return;
+    }
+
+    try {
+        controladorPrestamo.rechazarPrestamo(idPrestamo);
+        
+        // NUEVO: Enviar correo de notificación
+        try {
+            String emailUsuario = controladorPrestamo.obtenerEmailUsuario(ruUsuario);
+            if (emailUsuario != null && !emailUsuario.isEmpty()) {
+                boolean correoEnviado = ServicioCorreo.enviarNotificacionPrestamo(emailUsuario, ruUsuario, false);
+                if (correoEnviado) {
+                    LOGGER.info("Correo de rechazo enviado exitosamente al usuario RU: " + ruUsuario);
+                } else {
+                    LOGGER.warning("No se pudo enviar el correo de rechazo al usuario RU: " + ruUsuario);
+                }
+            } else {
+                LOGGER.warning("No se encontró email para el usuario RU: " + ruUsuario);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error al enviar correo de rechazo para usuario RU: " + ruUsuario, e);
+        }
+        
+        JOptionPane.showMessageDialog(this, "Préstamo rechazado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        cargarPrestamos();
+    } catch (SQLException ex) {
+        LOGGER.log(Level.SEVERE, "Error al rechazar préstamo ID " + idPrestamo, ex);
+        JOptionPane.showMessageDialog(this, "Error al rechazar préstamo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
+}
+    
+    /**
+ * Verifica si la configuración de correo está establecida correctamente.
+ */
+private void verificarConfiguracionCorreo() {
+    if (!ServicioCorreo.verificarConfiguracion()) {
+        JOptionPane.showMessageDialog(this, 
+            "Advertencia: La configuración de correo no está establecida.\n" +
+            "Las notificaciones por correo no funcionarán hasta que se configure correctamente.", 
+            "Configuración de Correo", 
+            JOptionPane.WARNING_MESSAGE);
+    }
+}
 
     /**
      * Termina un préstamo seleccionado, solicitando cantidades devueltas de insumos.

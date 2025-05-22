@@ -373,31 +373,39 @@ public class login extends JFrame {
     }
 
     private void abrirFormularioRegistro() {
-        try {
-            String ruText = cajaNombre.getText().trim();
-            String password = new String(cajaPassword.getPassword());
-            
-            // Verifica si se están usando credenciales de administrador
-            if (!ruText.isEmpty() && !ruText.equals("Ingrese su RU") && 
-                !password.isEmpty() && !password.equals("••••••••")) {
-                try {
-                    int ru = Integer.parseInt(ruText);
-                    // Usar BCrypt para verificar la contraseña de administrador
-                    if (ru == 100 && BCrypt.checkpw(password, "$2a$10$YOUR_HASH_HERE")) { // Reemplazar con el hash real de "alfha phils"
-                        new NuevoAdministrador().setVisible(true);
-                        return;
-                    }
-                } catch (NumberFormatException ex) {
-                    // Si no es un número, simplemente continuamos al registro normal
+    try {
+        String ruText = cajaNombre.getText().trim();
+        String password = new String(cajaPassword.getPassword());
+        
+        // Verifica si se están usando credenciales de administrador
+        if (!ruText.isEmpty() && !ruText.equals("Ingrese su RU") && 
+            !password.isEmpty() && !password.equals("••••••••")) {
+            try {
+                int ru = Integer.parseInt(ruText);
+                // OPCIÓN 1: Generar el hash correcto para "Alfha phils"
+                String hashCorrecto = BCrypt.hashpw("Alfha phils", BCrypt.gensalt());
+                
+                // OPCIÓN 2: O usar el hash pre-generado (reemplaza la línea de arriba con esta)
+                // String hashCorrecto = "$2a$10$XYZ123..."; // Aquí va el hash real
+                
+                // OPCIÓN 3: O verificación directa (más simple pero menos segura)
+                if (ru == 100 && password.equals("alfha phils")) {
+                    new NuevoAdministrador().setVisible(true);
+                    return;
                 }
+                
+            } catch (NumberFormatException ex) {
+                // Si no es un número, simplemente continuamos al registro normal
             }
-            
-            // Si no son credenciales de admin o hay error, abre registro normal
-            new NuevoUsuario().setVisible(true);
-        } catch (Exception ex) {
-            mostrarMensajeError("Error al abrir el formulario: " + ex.getMessage());
         }
+        
+        // Si no son credenciales de admin o hay error, abre registro normal
+        new NuevoUsuario().setVisible(true);
+    } catch (Exception ex) {
+        mostrarMensajeError("Error al abrir el formulario: " + ex.getMessage());
+        ex.printStackTrace(); // Para debug
     }
+}
     private String nombreCompleto; // Añade esto en tu clase como atributo
 
     private boolean validarEnBD(int ru, String password) throws SQLException {
