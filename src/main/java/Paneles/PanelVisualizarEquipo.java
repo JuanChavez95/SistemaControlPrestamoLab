@@ -46,10 +46,7 @@ public class PanelVisualizarEquipo extends JPanel {
         // Panel central (búsqueda e información)
         JPanel contentPanel = new JPanel(new GridBagLayout());
         contentPanel.setBackground(new Color(255, 255, 255));
-        contentPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
-            BorderFactory.createEmptyBorder(6, 6, 6, 6)
-        ));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(3, 3, 3, 3);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -82,8 +79,8 @@ public class PanelVisualizarEquipo extends JPanel {
         gbc.anchor = GridBagConstraints.CENTER;
         contentPanel.add(panelBusqueda, gbc);
 
-        // Información del equipo
-        JPanel panelInfo = new JPanel(new GridLayout(9, 2, 5, 5));
+        // Información del equipo (dos columnas)
+        JPanel panelInfo = new JPanel(new GridBagLayout());
         panelInfo.setBorder(BorderFactory.createTitledBorder(
             BorderFactory.createLineBorder(new Color(150, 160, 170), 1, true),
             "Información del Equipo",
@@ -98,47 +95,70 @@ public class PanelVisualizarEquipo extends JPanel {
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
 
-        JLabel[] labels = new JLabel[]{
+        GridBagConstraints gbcInfo = new GridBagConstraints();
+        gbcInfo.insets = new Insets(2, 3, 2, 3);
+        gbcInfo.fill = GridBagConstraints.HORIZONTAL;
+
+        // Spacer izquierdo
+        JPanel leftSpacer = new JPanel();
+        leftSpacer.setBackground(new Color(255, 255, 255));
+        leftSpacer.setPreferredSize(new Dimension(10, 1));
+        gbcInfo.gridx = 0; gbcInfo.gridy = 0; gbcInfo.weightx = 0.0;
+        panelInfo.add(leftSpacer, gbcInfo);
+
+        // Columna izquierda
+        JPanel leftPanel = new JPanel(new GridLayout(5, 2, 5, 3));
+        leftPanel.setBackground(new Color(255, 255, 255));
+        JLabel[] leftLabels = new JLabel[]{
             new JLabel("ID:"), new JLabel("Procesador:"), new JLabel("RAM:"),
-            new JLabel("Dispositivo:"), new JLabel("Monitor:"), new JLabel("Teclado:"),
-            new JLabel("Mouse:"), new JLabel("Estado:"), new JLabel("Laboratorio:")
+            new JLabel("Dispositivo:"), new JLabel("Estado:")
         };
-        for (JLabel label : labels) {
+        for (JLabel label : leftLabels) {
             label.setFont(new Font("Segoe UI", Font.PLAIN, 11));
             label.setForeground(new Color(44, 62, 80));
         }
+        lblId = createValueLabel();
+        lblProcesador = createValueLabel();
+        lblRam = createValueLabel();
+        lblDispositivo = createValueLabel();
+        lblEstado = createValueLabel();
+        leftPanel.add(leftLabels[0]); leftPanel.add(lblId);
+        leftPanel.add(leftLabels[1]); leftPanel.add(lblProcesador);
+        leftPanel.add(leftLabels[2]); leftPanel.add(lblRam);
+        leftPanel.add(leftLabels[3]); leftPanel.add(lblDispositivo);
+        leftPanel.add(leftLabels[4]); leftPanel.add(lblEstado);
+        gbcInfo.gridx = 1; gbcInfo.gridy = 0; gbcInfo.weightx = 0.5;
+        panelInfo.add(leftPanel, gbcInfo);
 
-        lblId = new JLabel("");
-        lblProcesador = new JLabel("");
-        lblRam = new JLabel("");
-        lblDispositivo = new JLabel("");
-        lblMonitor = new JLabel("");
-        lblTeclado = new JLabel("");
-        lblMouse = new JLabel("");
-        lblEstado = new JLabel("");
-        lblLaboratorio = new JLabel("");
-
-        JLabel[] valueLabels = new JLabel[]{lblId, lblProcesador, lblRam, lblDispositivo, lblMonitor, lblTeclado, lblMouse, lblEstado, lblLaboratorio};
-        for (JLabel label : valueLabels) {
+        // Columna derecha
+        JPanel rightPanel = new JPanel(new GridLayout(4, 2, 5, 3));
+        rightPanel.setBackground(new Color(255, 255, 255));
+        JLabel[] rightLabels = new JLabel[]{
+            new JLabel("Monitor:"), new JLabel("Teclado:"),
+            new JLabel("Mouse:"), new JLabel("Laboratorio:")
+        };
+        for (JLabel label : rightLabels) {
             label.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-            label.setForeground(new Color(93, 109, 126)); // Azul grisáceo
-            label.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(230, 232, 235), 1, true),
-                BorderFactory.createEmptyBorder(2, 4, 2, 4)
-            ));
-            label.setBackground(new Color(250, 251, 252));
-            label.setOpaque(true);
+            label.setForeground(new Color(44, 62, 80));
         }
+        lblMonitor = createValueLabel();
+        lblTeclado = createValueLabel();
+        lblMouse = createValueLabel();
+        lblLaboratorio = createValueLabel();
+        rightPanel.add(rightLabels[0]); rightPanel.add(lblMonitor);
+        rightPanel.add(rightLabels[1]); rightPanel.add(lblTeclado);
+        rightPanel.add(rightLabels[2]); rightPanel.add(lblMouse);
+        rightPanel.add(rightLabels[3]); rightPanel.add(lblLaboratorio);
+        gbcInfo.gridx = 2; gbcInfo.gridy = 0; gbcInfo.weightx = 0.5;
+        panelInfo.add(rightPanel, gbcInfo);
 
-        panelInfo.add(labels[0]); panelInfo.add(lblId);
-        panelInfo.add(labels[1]); panelInfo.add(lblProcesador);
-        panelInfo.add(labels[2]); panelInfo.add(lblRam);
-        panelInfo.add(labels[3]); panelInfo.add(lblDispositivo);
-        panelInfo.add(labels[4]); panelInfo.add(lblMonitor);
-        panelInfo.add(labels[5]); panelInfo.add(lblTeclado);
-        panelInfo.add(labels[6]); panelInfo.add(lblMouse);
-        panelInfo.add(labels[7]); panelInfo.add(lblEstado);
-        panelInfo.add(labels[8]); panelInfo.add(lblLaboratorio);
+        // Spacer derecho
+        JPanel rightSpacer = new JPanel();
+        rightSpacer.setBackground(new Color(255, 255, 255));
+        rightSpacer.setPreferredSize(new Dimension(10, 1));
+        gbcInfo.gridx = 3; gbcInfo.gridy = 0; gbcInfo.weightx = 0.0;
+        panelInfo.add(rightSpacer, gbcInfo);
+
         gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
@@ -185,6 +205,19 @@ public class PanelVisualizarEquipo extends JPanel {
             System.out.println("Botón Buscar clickeado, ID ingresado: " + txtIdEquipo.getText());
             buscarEquipo();
         });
+    }
+
+    private JLabel createValueLabel() {
+        JLabel label = new JLabel("");
+        label.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        label.setForeground(new Color(93, 109, 126)); // Azul grisáceo
+        label.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(230, 232, 235), 1, true),
+            BorderFactory.createEmptyBorder(2, 4, 2, 4)
+        ));
+        label.setBackground(new Color(250, 251, 252));
+        label.setOpaque(true);
+        return label;
     }
 
     private void buscarEquipo() {
