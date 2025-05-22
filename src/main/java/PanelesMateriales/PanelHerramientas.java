@@ -4,15 +4,38 @@
  */
 package PanelesMateriales;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.RenderingHints;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.border.Border;
+import javax.swing.table.DefaultTableModel;
+
 import Clases.Equipamiento;
 import Controles.ControladorEquipamiento;
 import Controles.ControladorHistorialEquipamiento;
-import javax.swing.*;
-import javax.swing.border.Border;
-import java.awt.*;
-import java.sql.SQLException;
-import java.util.List;
-import javax.swing.table.DefaultTableModel;
 
 public class PanelHerramientas extends JPanel {
     private JTextField txtIdEquipamiento;
@@ -46,10 +69,7 @@ public class PanelHerramientas extends JPanel {
         // Panel central (búsqueda e información)
         JPanel contentPanel = new JPanel(new GridBagLayout());
         contentPanel.setBackground(new Color(255, 255, 255));
-        contentPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
-            BorderFactory.createEmptyBorder(6, 6, 6, 6)
-        ));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(3, 3, 3, 3);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -82,8 +102,8 @@ public class PanelHerramientas extends JPanel {
         gbc.anchor = GridBagConstraints.CENTER;
         contentPanel.add(panelBusqueda, gbc);
 
-        // Información del equipamiento
-        JPanel panelInfo = new JPanel(new GridLayout(8, 2, 5, 5));
+        // Información del equipamiento (dos columnas)
+        JPanel panelInfo = new JPanel(new GridBagLayout());
         panelInfo.setBorder(BorderFactory.createTitledBorder(
             BorderFactory.createLineBorder(new Color(150, 160, 170), 1, true),
             "Información del Equipamiento",
@@ -98,45 +118,67 @@ public class PanelHerramientas extends JPanel {
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
 
-        JLabel[] labels = new JLabel[]{
-            new JLabel("ID:"), new JLabel("Nombre:"), new JLabel("Marca:"),
-            new JLabel("Modelo:"), new JLabel("Número de Serie:"), new JLabel("Estado:"),
-            new JLabel("Laboratorio:"), new JLabel("Disponibilidad:")
+        GridBagConstraints gbcInfo = new GridBagConstraints();
+        gbcInfo.insets = new Insets(2, 3, 2, 3);
+        gbcInfo.fill = GridBagConstraints.HORIZONTAL;
+
+        // Spacer izquierdo
+        JPanel leftSpacer = new JPanel();
+        leftSpacer.setBackground(new Color(255, 255, 255));
+        leftSpacer.setPreferredSize(new Dimension(10, 1));
+        gbcInfo.gridx = 0; gbcInfo.gridy = 0; gbcInfo.weightx = 0.0;
+        panelInfo.add(leftSpacer, gbcInfo);
+
+        // Columna izquierda
+        JPanel leftPanel = new JPanel(new GridLayout(4, 2, 5, 3));
+        leftPanel.setBackground(new Color(255, 255, 255));
+        JLabel[] leftLabels = new JLabel[]{
+            new JLabel("ID:"), new JLabel("Nombre:"), new JLabel("Marca:"), new JLabel("Modelo:")
         };
-        for (JLabel label : labels) {
+        for (JLabel label : leftLabels) {
             label.setFont(new Font("Segoe UI", Font.PLAIN, 11));
             label.setForeground(new Color(44, 62, 80));
         }
+        lblId = createValueLabel();
+        lblNombre = createValueLabel();
+        lblMarca = createValueLabel();
+        lblModelo = createValueLabel();
+        leftPanel.add(leftLabels[0]); leftPanel.add(lblId);
+        leftPanel.add(leftLabels[1]); leftPanel.add(lblNombre);
+        leftPanel.add(leftLabels[2]); leftPanel.add(lblMarca);
+        leftPanel.add(leftLabels[3]); leftPanel.add(lblModelo);
+        gbcInfo.gridx = 1; gbcInfo.gridy = 0; gbcInfo.weightx = 0.5;
+        panelInfo.add(leftPanel, gbcInfo);
 
-        lblId = new JLabel("");
-        lblNombre = new JLabel("");
-        lblMarca = new JLabel("");
-        lblModelo = new JLabel("");
-        lblNumeroSerie = new JLabel("");
-        lblEstado = new JLabel("");
-        lblLaboratorio = new JLabel("");
-        lblDisponibilidad = new JLabel("");
-
-        JLabel[] valueLabels = new JLabel[]{lblId, lblNombre, lblMarca, lblModelo, lblNumeroSerie, lblEstado, lblLaboratorio, lblDisponibilidad};
-        for (JLabel label : valueLabels) {
+        // Columna derecha
+        JPanel rightPanel = new JPanel(new GridLayout(4, 2, 5, 3));
+        rightPanel.setBackground(new Color(255, 255, 255));
+        JLabel[] rightLabels = new JLabel[]{
+            new JLabel("Número de Serie:"), new JLabel("Estado:"),
+            new JLabel("Laboratorio:"), new JLabel("Disponibilidad:")
+        };
+        for (JLabel label : rightLabels) {
             label.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-            label.setForeground(new Color(93, 109, 126)); // Azul grisáceo
-            label.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(230, 232, 235), 1, true),
-                BorderFactory.createEmptyBorder(2, 4, 2, 4)
-            ));
-            label.setBackground(new Color(250, 251, 252));
-            label.setOpaque(true);
+            label.setForeground(new Color(44, 62, 80));
         }
+        lblNumeroSerie = createValueLabel();
+        lblEstado = createValueLabel();
+        lblLaboratorio = createValueLabel();
+        lblDisponibilidad = createValueLabel();
+        rightPanel.add(rightLabels[0]); rightPanel.add(lblNumeroSerie);
+        rightPanel.add(rightLabels[1]); rightPanel.add(lblEstado);
+        rightPanel.add(rightLabels[2]); rightPanel.add(lblLaboratorio);
+        rightPanel.add(rightLabels[3]); rightPanel.add(lblDisponibilidad);
+        gbcInfo.gridx = 2; gbcInfo.gridy = 0; gbcInfo.weightx = 0.5;
+        panelInfo.add(rightPanel, gbcInfo);
 
-        panelInfo.add(labels[0]); panelInfo.add(lblId);
-        panelInfo.add(labels[1]); panelInfo.add(lblNombre);
-        panelInfo.add(labels[2]); panelInfo.add(lblMarca);
-        panelInfo.add(labels[3]); panelInfo.add(lblModelo);
-        panelInfo.add(labels[4]); panelInfo.add(lblNumeroSerie);
-        panelInfo.add(labels[5]); panelInfo.add(lblEstado);
-        panelInfo.add(labels[6]); panelInfo.add(lblLaboratorio);
-        panelInfo.add(labels[7]); panelInfo.add(lblDisponibilidad);
+        // Spacer derecho
+        JPanel rightSpacer = new JPanel();
+        rightSpacer.setBackground(new Color(255, 255, 255));
+        rightSpacer.setPreferredSize(new Dimension(10, 1));
+        gbcInfo.gridx = 3; gbcInfo.gridy = 0; gbcInfo.weightx = 0.0;
+        panelInfo.add(rightSpacer, gbcInfo);
+
         gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
@@ -183,6 +225,19 @@ public class PanelHerramientas extends JPanel {
             System.out.println("Botón Buscar clickeado, ID ingresado: " + txtIdEquipamiento.getText());
             buscarEquipamiento();
         });
+    }
+
+    private JLabel createValueLabel() {
+        JLabel label = new JLabel("");
+        label.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        label.setForeground(new Color(93, 109, 126)); // Azul grisáceo
+        label.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(230, 232, 235), 1, true),
+            BorderFactory.createEmptyBorder(2, 4, 2, 4)
+        ));
+        label.setBackground(new Color(250, 251, 252));
+        label.setOpaque(true);
+        return label;
     }
 
     private void buscarEquipamiento() {
