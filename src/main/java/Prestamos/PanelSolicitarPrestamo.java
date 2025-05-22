@@ -32,6 +32,34 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 
+// Custom RoundedBorder class for rounded corners
+class RoundedBorder implements javax.swing.border.Border {
+    private int radius;
+
+    public RoundedBorder(int radius) {
+        this.radius = radius;
+    }
+
+    @Override
+    public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setColor(c.getForeground());
+        g2.drawRoundRect(x, y, width - 1, height - 1, radius, radius);
+        g2.dispose();
+    }
+
+    @Override
+    public Insets getBorderInsets(Component c) {
+        return new Insets(radius / 2, radius / 2, radius / 2, radius / 2);
+    }
+
+    @Override
+    public boolean isBorderOpaque() {
+        return false;
+    }
+}
+
 public class PanelSolicitarPrestamo extends JPanel {
     private static final Logger LOGGER = Logger.getLogger(PanelSolicitarPrestamo.class.getName());
     private JComboBox<String> comboLaboratorios;
@@ -57,17 +85,17 @@ public class PanelSolicitarPrestamo extends JPanel {
     private int ruUsuario;
     private Map<Integer, Integer> insumoCantidades;
 
-    // Color Palette
-    private static final Color PRIMARY_COLOR = new Color(33, 150, 243); // Material Blue
-    private static final Color SECONDARY_COLOR = new Color(100, 181, 246); // Light Blue
-    private static final Color BACKGROUND_COLOR = new Color(245, 245, 245); // Soft Gray
-    private static final Color CARD_COLOR = Color.WHITE;
+    // Updated Color Palette
+    private static final Color PRIMARY_COLOR = new Color(2, 136, 209); // Vibrant Blue
+    private static final Color SECONDARY_COLOR = new Color(38, 166, 154); // Vibrant Teal
+    private static final Color BACKGROUND_COLOR = Color.WHITE; // Pure White
+    private static final Color CARD_COLOR = Color.WHITE; // Pure White
     private static final Color TEXT_COLOR = new Color(33, 33, 33); // Dark Gray
-    private static final Color BORDER_COLOR = new Color(200, 200, 200); // Light Gray
-    private static final Color ACCENT_COLOR = new Color(187, 222, 251); // Pale Blue
-    private static final Color AVAILABLE_COLOR = new Color(165, 214, 167); // Soft Green
-    private static final Color UNAVAILABLE_COLOR = new Color(239, 154, 154); // Soft Red
-    private static final Color REMOVE_BUTTON_COLOR = new Color(244, 67, 54); // Red
+    private static final Color BORDER_COLOR = new Color(189, 189, 189); // Lighter Gray
+    private static final Color ACCENT_COLOR = new Color(79, 195, 247); // Vivid Light Blue
+    private static final Color AVAILABLE_COLOR = new Color(76, 175, 80); // Vibrant Green
+    private static final Color UNAVAILABLE_COLOR = new Color(244, 67, 54); // Vibrant Red
+    private static final Color REMOVE_BUTTON_COLOR = new Color(211, 47, 47); // Brighter Red
 
     public PanelSolicitarPrestamo(int ruUsuario) {
         this.ruUsuario = ruUsuario;
@@ -88,21 +116,21 @@ public class PanelSolicitarPrestamo extends JPanel {
     private void initComponents() {
         setLayout(new BorderLayout());
         setBackground(BACKGROUND_COLOR);
-        setBorder(new EmptyBorder(20, 20, 20, 20));
+        setBorder(new EmptyBorder(10, 10, 10, 10)); // Reduced padding
 
         // Título
         JLabel titleLabel = new JLabel("Solicitar Préstamo", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Roboto", Font.BOLD, 28));
+        titleLabel.setFont(new Font("Roboto", Font.BOLD, 24)); // Smaller font
         titleLabel.setForeground(PRIMARY_COLOR);
-        titleLabel.setBorder(new EmptyBorder(15, 0, 25, 0));
+        titleLabel.setBorder(new EmptyBorder(10, 0, 15, 0)); // Reduced padding
         add(titleLabel, BorderLayout.NORTH);
 
         // Panel principal
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setBackground(BACKGROUND_COLOR);
-        formPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
+        formPanel.setBorder(new EmptyBorder(10, 10, 10, 10)); // Reduced padding
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.insets = new Insets(5, 5, 5, 5); // Reduced insets
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1.0;
 
@@ -110,14 +138,14 @@ public class PanelSolicitarPrestamo extends JPanel {
         JPanel sectionLabHorario = createCardPanel("Selección de Laboratorio y Horario");
         sectionLabHorario.setLayout(new GridBagLayout());
         GridBagConstraints gbcSection = new GridBagConstraints();
-        gbcSection.insets = new Insets(10, 10, 10, 10);
+        gbcSection.insets = new Insets(5, 5, 5, 5); // Reduced insets
         gbcSection.fill = GridBagConstraints.HORIZONTAL;
         gbcSection.weightx = 1.0;
 
         gbcSection.gridx = 0;
         gbcSection.gridy = 0;
         JLabel lblLaboratorio = new JLabel("Laboratorio:");
-        lblLaboratorio.setFont(new Font("Roboto", Font.PLAIN, 16));
+        lblLaboratorio.setFont(new Font("Roboto", Font.PLAIN, 14)); // Smaller font
         lblLaboratorio.setForeground(TEXT_COLOR);
         sectionLabHorario.add(lblLaboratorio, gbcSection);
 
@@ -129,8 +157,8 @@ public class PanelSolicitarPrestamo extends JPanel {
         gbcSection.gridx = 0;
         gbcSection.gridy = 1;
         JLabel lblHorario = new JLabel("Horario:");
-        lblHorario.setFont(new Font("Roboto", Font.PLAIN, 16));
-        lblLaboratorio.setForeground(TEXT_COLOR);
+        lblHorario.setFont(new Font("Roboto", Font.PLAIN, 14)); // Smaller font
+        lblHorario.setForeground(TEXT_COLOR);
         sectionLabHorario.add(lblHorario, gbcSection);
 
         gbcSection.gridx = 1;
@@ -147,15 +175,15 @@ public class PanelSolicitarPrestamo extends JPanel {
         modeloEquipamientos = new DefaultTableModel(new String[]{"ID", "Nombre", "Modelo", "Disponibilidad"}, 0);
         tablaEquipamientos = createStyledTable(modeloEquipamientos);
         JScrollPane scrollEquipamientos = createStyledScrollPane(tablaEquipamientos);
-        scrollEquipamientos.setPreferredSize(new Dimension(450, 150));
+        scrollEquipamientos.setPreferredSize(new Dimension(350, 100)); // Smaller size
 
         modeloListaEquipamientos = new DefaultListModel<>();
         listaEquipamientosSeleccionados = new JList<>(modeloListaEquipamientos);
         setupListRenderer(listaEquipamientosSeleccionados, true);
         JScrollPane scrollListaEquipamientos = createStyledScrollPane(listaEquipamientosSeleccionados);
-        scrollListaEquipamientos.setPreferredSize(new Dimension(250, 150));
+        scrollListaEquipamientos.setPreferredSize(new Dimension(200, 100)); // Smaller size
 
-        JPanel equipamientoPanel = new JPanel(new BorderLayout(10, 10));
+        JPanel equipamientoPanel = new JPanel(new BorderLayout(5, 5)); // Reduced spacing
         equipamientoPanel.setOpaque(false);
         equipamientoPanel.add(scrollEquipamientos, BorderLayout.CENTER);
         equipamientoPanel.add(scrollListaEquipamientos, BorderLayout.EAST);
@@ -163,7 +191,7 @@ public class PanelSolicitarPrestamo extends JPanel {
         gbc.gridy = 1;
         gbc.weighty = 0.3;
         JPanel sectionEquipamientos = createCardPanel("Equipamientos Disponibles");
-        sectionEquipamientos.setLayout(new BorderLayout(10, 10));
+        sectionEquipamientos.setLayout(new BorderLayout(5, 5)); // Reduced spacing
         sectionEquipamientos.add(equipamientoPanel, BorderLayout.CENTER);
 
         btnAgregarEquipamiento = createStyledButton("Agregar Equipamiento", SECONDARY_COLOR);
@@ -174,35 +202,35 @@ public class PanelSolicitarPrestamo extends JPanel {
         modeloInsumos = new DefaultTableModel(new String[]{"ID", "Insumo", "Cantidad Disponible", "Categoría", "Disponibilidad"}, 0);
         tablaInsumos = createStyledTable(modeloInsumos);
         JScrollPane scrollInsumos = createStyledScrollPane(tablaInsumos);
-        scrollInsumos.setPreferredSize(new Dimension(450, 150));
+        scrollInsumos.setPreferredSize(new Dimension(350, 100)); // Smaller size
 
         modeloListaInsumos = new DefaultListModel<>();
         listaInsumosSeleccionados = new JList<>(modeloListaInsumos);
         setupListRenderer(listaInsumosSeleccionados, false);
         JScrollPane scrollListaInsumos = createStyledScrollPane(listaInsumosSeleccionados);
-        scrollListaInsumos.setPreferredSize(new Dimension(250, 150));
+        scrollListaInsumos.setPreferredSize(new Dimension(200, 100)); // Smaller size
 
-        JPanel insumoPanel = new JPanel(new BorderLayout(10, 10));
+        JPanel insumoPanel = new JPanel(new BorderLayout(5, 5)); // Reduced spacing
         insumoPanel.setOpaque(false);
         insumoPanel.add(scrollInsumos, BorderLayout.CENTER);
         insumoPanel.add(scrollListaInsumos, BorderLayout.EAST);
 
         gbc.gridy = 2;
         JPanel sectionInsumos = createCardPanel("Insumos Disponibles");
-        sectionInsumos.setLayout(new BorderLayout(10, 10));
+        sectionInsumos.setLayout(new BorderLayout(5, 5)); // Reduced spacing
         sectionInsumos.add(insumoPanel, BorderLayout.CENTER);
 
-        JPanel insumoInputPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 8));
+        JPanel insumoInputPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5)); // Reduced spacing
         insumoInputPanel.setBackground(CARD_COLOR);
         JLabel lblCantidad = new JLabel("Cantidad:");
-        lblCantidad.setFont(new Font("Roboto", Font.PLAIN, 16));
+        lblCantidad.setFont(new Font("Roboto", Font.PLAIN, 14)); // Smaller font
         lblCantidad.setForeground(TEXT_COLOR);
         insumoInputPanel.add(lblCantidad);
 
         txtCantidadInsumo = new JTextField(5);
-        txtCantidadInsumo.setFont(new Font("Roboto", Font.PLAIN, 16));
-        txtCantidadInsumo.setBorder(new LineBorder(BORDER_COLOR, 1, true));
-        txtCantidadInsumo.setPreferredSize(new Dimension(100, 35));
+        txtCantidadInsumo.setFont(new Font("Roboto", Font.PLAIN, 14)); // Smaller font
+        txtCantidadInsumo.setBorder(new RoundedBorder(10)); // Rounded border
+        txtCantidadInsumo.setPreferredSize(new Dimension(80, 30)); // Smaller size
         txtCantidadInsumo.getDocument().addDocumentListener(new DocumentListener() {
             public void insertUpdate(DocumentEvent e) { validarCantidad(); }
             public void removeUpdate(DocumentEvent e) { validarCantidad(); }
@@ -211,9 +239,9 @@ public class PanelSolicitarPrestamo extends JPanel {
                 String text = txtCantidadInsumo.getText().trim();
                 try {
                     int cantidad = Integer.parseInt(text);
-                    txtCantidadInsumo.setBorder(cantidad <= 0 ? new LineBorder(Color.RED, 1, true) : new LineBorder(BORDER_COLOR, 1, true));
+                    txtCantidadInsumo.setBorder(cantidad <= 0 ? new LineBorder(UNAVAILABLE_COLOR, 1, true) : new RoundedBorder(10));
                 } catch (NumberFormatException ex) {
-                    txtCantidadInsumo.setBorder(new LineBorder(Color.RED, 1, true));
+                    txtCantidadInsumo.setBorder(new LineBorder(UNAVAILABLE_COLOR, 1, true));
                 }
             }
         });
@@ -228,19 +256,19 @@ public class PanelSolicitarPrestamo extends JPanel {
         gbc.gridy = 3;
         gbc.weighty = 0.2;
         JPanel sectionObservaciones = createCardPanel("Observaciones");
-        sectionObservaciones.setLayout(new BorderLayout(10, 10));
-        txtObservaciones = new JTextArea(4, 20);
-        txtObservaciones.setFont(new Font("Roboto", Font.PLAIN, 16));
+        sectionObservaciones.setLayout(new BorderLayout(5, 5)); // Reduced spacing
+        txtObservaciones = new JTextArea(3, 20); // Smaller rows
+        txtObservaciones.setFont(new Font("Roboto", Font.PLAIN, 14)); // Smaller font
         txtObservaciones.setLineWrap(true);
         txtObservaciones.setWrapStyleWord(true);
-        txtObservaciones.setBorder(new LineBorder(BORDER_COLOR, 1, true));
+        txtObservaciones.setBorder(new RoundedBorder(10)); // Rounded border
         JScrollPane scrollObservaciones = createStyledScrollPane(txtObservaciones);
         sectionObservaciones.add(scrollObservaciones, BorderLayout.CENTER);
         formPanel.add(sectionObservaciones, gbc);
 
         // Botón Solicitar
         btnSolicitar = createStyledButton("Solicitar Préstamo", PRIMARY_COLOR);
-        btnSolicitar.setFont(new Font("Roboto", Font.BOLD, 18));
+        btnSolicitar.setFont(new Font("Roboto", Font.BOLD, 16)); // Smaller font
         gbc.gridy = 4;
         gbc.weighty = 0.1;
         gbc.fill = GridBagConstraints.NONE;
@@ -307,20 +335,20 @@ public class PanelSolicitarPrestamo extends JPanel {
         JPanel panel = new JPanel();
         panel.setBackground(CARD_COLOR);
         panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(BORDER_COLOR, 1, true),
-            new EmptyBorder(10, 10, 10, 10)
+            new RoundedBorder(10), // Rounded border
+            new EmptyBorder(5, 5, 5, 5) // Reduced padding
         ));
         panel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(BORDER_COLOR, 1, true),
+            new RoundedBorder(10),
             title,
             javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
             javax.swing.border.TitledBorder.DEFAULT_POSITION,
-            new Font("Roboto", Font.BOLD, 16),
+            new Font("Roboto", Font.BOLD, 14), // Smaller font
             PRIMARY_COLOR
         ));
         // Add subtle shadow
         panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 1, new Color(0, 0, 0, 30)),
+            BorderFactory.createMatteBorder(0, 0, 1, 1, new Color(0, 0, 0, 20)),
             panel.getBorder()
         ));
         return panel;
@@ -328,13 +356,13 @@ public class PanelSolicitarPrestamo extends JPanel {
 
     private JButton createStyledButton(String text, Color baseColor) {
         JButton button = new JButton(text);
-        button.setFont(new Font("Roboto", Font.PLAIN, 14));
+        button.setFont(new Font("Roboto", Font.PLAIN, 12)); // Smaller font
         button.setForeground(Color.WHITE);
         button.setBackground(baseColor);
-        button.setBorder(new LineBorder(baseColor, 1, true));
+        button.setBorder(new RoundedBorder(10)); // Rounded border
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setBorder(new EmptyBorder(10, 25, 10, 25));
+        button.setBorder(new EmptyBorder(8, 15, 8, 15)); // Reduced padding
         return button;
     }
 
@@ -345,15 +373,17 @@ public class PanelSolicitarPrestamo extends JPanel {
                 return false;
             }
         };
-        table.setRowHeight(35);
-        table.setFont(new Font("Roboto", Font.PLAIN, 14));
+        table.setRowHeight(25); // Reduced row height
+        table.setFont(new Font("Roboto", Font.PLAIN, 12)); // Smaller font
         table.setSelectionBackground(ACCENT_COLOR);
         table.setGridColor(BORDER_COLOR);
         table.setShowGrid(true);
-        table.getTableHeader().setFont(new Font("Roboto", Font.BOLD, 14));
+        table.getTableHeader().setFont(new Font("Roboto", Font.BOLD, 12)); // Smaller font
         table.getTableHeader().setBackground(PRIMARY_COLOR);
         table.getTableHeader().setForeground(Color.WHITE);
-        table.getTableHeader().setBorder(new LineBorder(BORDER_COLOR, 1, true));
+        table.setOpaque(false);
+        table.setBackground(new Color(255, 255, 255, 200)); // Semi-transparent
+        table.setBorder(new RoundedBorder(10)); // Rounded border
 
         // Custom renderer for Disponibilidad column
         table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
@@ -362,6 +392,7 @@ public class PanelSolicitarPrestamo extends JPanel {
                                                            boolean isSelected, boolean hasFocus,
                                                            int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                c.setFont(new Font("Roboto", Font.PLAIN, 12)); // Smaller font
                 if (model.getColumnName(column).equals("Disponibilidad")) {
                     if ("Disponible".equals(value)) {
                         c.setForeground(AVAILABLE_COLOR);
@@ -374,7 +405,7 @@ public class PanelSolicitarPrestamo extends JPanel {
                 if (isSelected) {
                     c.setBackground(ACCENT_COLOR);
                 } else {
-                    c.setBackground(CARD_COLOR);
+                    c.setBackground(new Color(255, 255, 255, 200)); // Semi-transparent
                 }
                 return c;
             }
@@ -382,28 +413,28 @@ public class PanelSolicitarPrestamo extends JPanel {
 
         // Adjust column widths for Equipamientos
         if (model.getColumnCount() == 4) {
-            table.getColumnModel().getColumn(0).setPreferredWidth(40);
-            table.getColumnModel().getColumn(1).setPreferredWidth(180);
-            table.getColumnModel().getColumn(2).setPreferredWidth(120);
-            table.getColumnModel().getColumn(3).setPreferredWidth(90);
+            table.getColumnModel().getColumn(0).setPreferredWidth(30);
+            table.getColumnModel().getColumn(1).setPreferredWidth(140);
+            table.getColumnModel().getColumn(2).setPreferredWidth(90);
+            table.getColumnModel().getColumn(3).setPreferredWidth(80);
         }
         // Adjust column widths for Insumos
         if (model.getColumnCount() == 5) {
-            table.getColumnModel().getColumn(0).setPreferredWidth(40);
-            table.getColumnModel().getColumn(1).setPreferredWidth(150);
-            table.getColumnModel().getColumn(2).setPreferredWidth(100);
-            table.getColumnModel().getColumn(3).setPreferredWidth(100);
-            table.getColumnModel().getColumn(4).setPreferredWidth(90);
+            table.getColumnModel().getColumn(0).setPreferredWidth(30);
+            table.getColumnModel().getColumn(1).setPreferredWidth(120);
+            table.getColumnModel().getColumn(2).setPreferredWidth(80);
+            table.getColumnModel().getColumn(3).setPreferredWidth(80);
+            table.getColumnModel().getColumn(4).setPreferredWidth(80);
         }
         return table;
     }
 
     private void setupListRenderer(JList<String> list, boolean isEquipamiento) {
-        list.setFont(new Font("Roboto", Font.PLAIN, 14));
+        list.setFont(new Font("Roboto", Font.PLAIN, 12)); // Smaller font
         list.setSelectionBackground(ACCENT_COLOR);
-        list.setBackground(CARD_COLOR);
+        list.setBackground(new Color(255, 255, 255, 200)); // Semi-transparent
         list.setForeground(TEXT_COLOR);
-        list.setBorder(new LineBorder(BORDER_COLOR, 1, true));
+        list.setBorder(new RoundedBorder(10)); // Rounded border
 
         list.setCellRenderer(new ListCellRenderer<String>() {
             @Override
@@ -411,20 +442,20 @@ public class PanelSolicitarPrestamo extends JPanel {
                                                           boolean isSelected, boolean cellHasFocus) {
                 JPanel panel = new JPanel(new BorderLayout(5, 0));
                 panel.setOpaque(true);
-                panel.setBackground(isSelected ? ACCENT_COLOR : CARD_COLOR);
+                panel.setBackground(isSelected ? ACCENT_COLOR : new Color(255, 255, 255, 200)); // Semi-transparent
 
                 JLabel label = new JLabel(value);
-                label.setFont(new Font("Roboto", Font.PLAIN, 14));
+                label.setFont(new Font("Roboto", Font.PLAIN, 12)); // Smaller font
                 label.setForeground(TEXT_COLOR);
                 panel.add(label, BorderLayout.CENTER);
 
                 JButton removeButton = new JButton("X");
-                removeButton.setFont(new Font("Roboto", Font.BOLD, 10));
+                removeButton.setFont(new Font("Roboto", Font.BOLD, 8)); // Smaller font
                 removeButton.setForeground(Color.WHITE);
                 removeButton.setBackground(REMOVE_BUTTON_COLOR);
                 removeButton.setBorder(new EmptyBorder(2, 4, 2, 4));
                 removeButton.setFocusPainted(false);
-                removeButton.setPreferredSize(new Dimension(20, 20));
+                removeButton.setPreferredSize(new Dimension(15, 15)); // Smaller button
                 panel.add(removeButton, BorderLayout.EAST);
 
                 removeButton.addActionListener(e -> {
@@ -450,8 +481,8 @@ public class PanelSolicitarPrestamo extends JPanel {
                 if (index >= 0 && index < list.getModel().getSize()) {
                     Rectangle rect = list.getCellBounds(index, index);
                     int x = e.getX() - rect.x;
-                    // Check if click is in the button area (last 20 pixels)
-                    if (x > rect.width - 25 && x <= rect.width) { // Adjusted range to match button width
+                    // Check if click is in the button area
+                    if (x > rect.width - 20 && x <= rect.width) {
                         try {
                             removeListItem(index, isEquipamiento);
                         } catch (Exception ex) {
@@ -512,7 +543,7 @@ public class PanelSolicitarPrestamo extends JPanel {
 
     private JScrollPane createStyledScrollPane(Component view) {
         JScrollPane scrollPane = new JScrollPane(view);
-        scrollPane.setBorder(new LineBorder(BORDER_COLOR, 1, true));
+        scrollPane.setBorder(new RoundedBorder(10)); // Rounded border
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         JScrollBar verticalScrollBar = scrollPane.getVerticalScrollBar();
@@ -523,19 +554,19 @@ public class PanelSolicitarPrestamo extends JPanel {
     }
 
     private void styleComboBox(JComboBox<String> comboBox) {
-        comboBox.setFont(new Font("Roboto", Font.PLAIN, 16));
+        comboBox.setFont(new Font("Roboto", Font.PLAIN, 14)); // Smaller font
         comboBox.setBackground(CARD_COLOR);
         comboBox.setForeground(TEXT_COLOR);
-        comboBox.setBorder(new LineBorder(BORDER_COLOR, 1, true));
-        comboBox.setPreferredSize(new Dimension(350, 40));
+        comboBox.setBorder(new RoundedBorder(10)); // Rounded border
+        comboBox.setPreferredSize(new Dimension(300, 35)); // Smaller size
         comboBox.setUI(new BasicComboBoxUI() {
             @Override
             protected JButton createArrowButton() {
                 JButton button = new JButton("▼");
-                button.setFont(new Font("Roboto", Font.PLAIN, 12));
+                button.setFont(new Font("Roboto", Font.PLAIN, 10)); // Smaller font
                 button.setBackground(CARD_COLOR);
                 button.setForeground(PRIMARY_COLOR);
-                button.setBorder(new LineBorder(BORDER_COLOR, 1, true));
+                button.setBorder(new RoundedBorder(10)); // Rounded border
                 button.setFocusPainted(false);
                 return button;
             }
@@ -593,11 +624,9 @@ public class PanelSolicitarPrestamo extends JPanel {
             JOptionPane.showMessageDialog(this, "Cantidad solicitada excede la disponible.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        // Store full details in the list item
         modeloListaInsumos.addElement("ID: " + idInsumo + " - " + nombre + " | " + categoria + " (Cantidad: " + cantidad + ")");
         insumoCantidades.put(idInsumo, cantidad);
         modeloInsumos.setValueAt(cantidadDisponible - cantidad, selectedRow, 2);
-        // Update disponibilidad based on new quantity
         modeloInsumos.setValueAt((cantidadDisponible - cantidad) > 0 ? "Disponible" : "No Disponible", selectedRow, 4);
         txtCantidadInsumo.setText("");
         System.out.println("Insumo agregado: ID " + idInsumo + ", Cantidad: " + cantidad);
@@ -618,7 +647,6 @@ public class PanelSolicitarPrestamo extends JPanel {
         }
 
         try {
-            // Validar ruUsuario
             System.out.println("Validando ruUsuario: " + ruUsuario);
             if (ruUsuario <= 0) {
                 throw new IllegalArgumentException("RU de usuario inválido: " + ruUsuario);
@@ -628,7 +656,6 @@ public class PanelSolicitarPrestamo extends JPanel {
             }
             System.out.println("Usuario validado: RU " + ruUsuario);
 
-            // Parsear idHorario
             System.out.println("Horario seleccionado: " + selectedHorario);
             int idHorario;
             try {
@@ -638,11 +665,9 @@ public class PanelSolicitarPrestamo extends JPanel {
             }
             System.out.println("ID de horario parseado: " + idHorario);
 
-            // Validar txtObservaciones
             String observaciones = txtObservaciones != null ? txtObservaciones.getText() : "";
             System.out.println("Observaciones: " + observaciones);
 
-            // Crear objeto Prestamo
             System.out.println("Creando objeto Prestamo");
             java.util.Date currentDate = new java.util.Date();
             String horaPrestamo = new SimpleDateFormat("HH:mm").format(currentDate);
@@ -660,7 +685,6 @@ public class PanelSolicitarPrestamo extends JPanel {
             );
             System.out.println("Objeto Prestamo creado: " + prestamo);
 
-            // Insertar préstamo
             System.out.println("Insertando préstamo en la base de datos");
             int idPrestamo = controladorPrestamo.insertar(prestamo);
             if (idPrestamo == -1) {
@@ -668,7 +692,6 @@ public class PanelSolicitarPrestamo extends JPanel {
             }
             System.out.println("Préstamo registrado con ID: " + idPrestamo);
 
-            // Procesar equipamientos e insumos
             System.out.println("Procesando equipamientos e insumos");
             for (Map.Entry<Integer, Integer> entry : insumoCantidades.entrySet()) {
                 int id = entry.getKey();
@@ -686,7 +709,6 @@ public class PanelSolicitarPrestamo extends JPanel {
             JOptionPane.showMessageDialog(this, "Préstamo solicitado con éxito. ID: " + idPrestamo, "Éxito", JOptionPane.INFORMATION_MESSAGE);
             System.out.println("Préstamo solicitado con éxito.");
 
-            // Limpiar el formulario
             insumoCantidades.clear();
             txtObservaciones.setText("");
             comboHorarios.setSelectedIndex(-1);
