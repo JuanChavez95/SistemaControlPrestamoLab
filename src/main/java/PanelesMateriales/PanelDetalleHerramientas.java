@@ -20,6 +20,36 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import com.toedter.calendar.JDateChooser;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
+
+// Custom RoundedBorder class for rounded corners
+class RoundedBorder implements javax.swing.border.Border {
+    private int radius;
+
+    public RoundedBorder(int radius) {
+        this.radius = radius;
+    }
+
+    @Override
+    public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setColor(c.getForeground());
+        g2.drawRoundRect(x, y, width - 1, height - 1, radius, radius);
+        g2.dispose();
+    }
+
+    @Override
+    public Insets getBorderInsets(Component c) {
+        return new Insets(radius / 2, radius / 2, radius / 2, radius / 2);
+    }
+
+    @Override
+    public boolean isBorderOpaque() {
+        return false;
+    }
+}
 
 public class PanelDetalleHerramientas extends JPanel {
     private JTextField txtId;
@@ -35,12 +65,23 @@ public class PanelDetalleHerramientas extends JPanel {
     private ControladorHistorialGeneral controlHistorialGeneral;
     private ControladorHistorialEquipamiento controlHistorialEquipamiento;
 
+    // Color Palette (from PanelSolicitarPrestamo)
+    private static final Color PRIMARY_COLOR = new Color(2, 136, 209); // Vibrant Blue
+    private static final Color SECONDARY_COLOR = new Color(38, 166, 154); // Vibrant Teal
+    private static final Color BACKGROUND_COLOR = Color.WHITE; // Pure White
+    private static final Color CARD_COLOR = Color.WHITE; // Pure White
+    private static final Color TEXT_COLOR = new Color(33, 33, 33); // Dark Gray
+    private static final Color BORDER_COLOR = new Color(189, 189, 189); // Lighter Gray
+    private static final Color ACCENT_COLOR = new Color(79, 195, 247); // Vivid Light Blue
+    private static final Color AVAILABLE_COLOR = new Color(76, 175, 80); // Vibrant Green
+    private static final Color UNAVAILABLE_COLOR = new Color(244, 67, 54); // Vibrant Red
+
     public PanelDetalleHerramientas() {
         controlEquipamiento = new ControladorEquipamiento();
         controlHistorialGeneral = new ControladorHistorialGeneral();
         controlHistorialEquipamiento = new ControladorHistorialEquipamiento();
-        setBackground(new Color(245, 245, 245));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setBackground(BACKGROUND_COLOR);
+        setBorder(new EmptyBorder(5, 5, 5, 5)); // Reduced padding
         initComponents();
     }
 
@@ -48,46 +89,53 @@ public class PanelDetalleHerramientas extends JPanel {
         setLayout(new BorderLayout());
 
         // Título
-        JLabel titleLabel = new JLabel("Detalle de Herramientas");
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        titleLabel.setForeground(new Color(33, 37, 41));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JLabel titleLabel = new JLabel("Detalle de Herramientas", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Roboto", Font.BOLD, 24));
+        titleLabel.setForeground(PRIMARY_COLOR);
+        titleLabel.setBorder(new EmptyBorder(5, 0, 10, 0)); // Reduced top/bottom padding
         add(titleLabel, BorderLayout.NORTH);
 
-        // Panel central (formulario y tabla)
-        JPanel contentPanel = new JPanel(new GridBagLayout());
-        contentPanel.setBackground(new Color(245, 245, 245));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 8, 8, 8);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        // Formulario
+        // Panel principal
         JPanel formPanel = new JPanel(new GridBagLayout());
-        formPanel.setBackground(Color.WHITE);
-        formPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)),
-            BorderFactory.createEmptyBorder(10, 10, 10, 10)
-        ));
+        formPanel.setBackground(BACKGROUND_COLOR);
+        formPanel.setBorder(new EmptyBorder(5, 10, 5, 10)); // Reduced padding
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(3, 3, 3, 3); // Tighter insets
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.weightx = 0.8;
 
-        // Inicializar txtId pero no agregarlo a la UI (se generará automáticamente)
+        // Sección: Formulario
+        JPanel sectionFormulario = createCardPanel("Registro de Historial");
+        sectionFormulario.setLayout(new GridBagLayout());
+        GridBagConstraints gbcSection = new GridBagConstraints();
+        gbcSection.insets = new Insets(3, 3, 3, 3); // Tighter insets
+        gbcSection.fill = GridBagConstraints.HORIZONTAL;
+        gbcSection.weightx = 1.0;
+
+        // Inicializar txtId (no visible en UI)
         txtId = new JTextField(10);
         txtId.setEditable(false);
 
-        // Campo para RU Administrador
+        // RU Administrador
         JLabel lblRUAdmin = new JLabel("RU Administrador:");
-        lblRUAdmin.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblRUAdmin.setFont(new Font("Roboto", Font.PLAIN, 14));
+        lblRUAdmin.setForeground(TEXT_COLOR);
         txtRUAdministrador = new JTextField(10);
-        txtRUAdministrador.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        gbc.gridx = 0; gbc.gridy = 0;
-        formPanel.add(lblRUAdmin, gbc);
-        gbc.gridx = 1;
-        formPanel.add(txtRUAdministrador, gbc);
+        txtRUAdministrador.setFont(new Font("Roboto", Font.PLAIN, 14));
+        txtRUAdministrador.setBorder(new RoundedBorder(10));
+        gbcSection.gridx = 0; gbcSection.gridy = 0;
+        sectionFormulario.add(lblRUAdmin, gbcSection);
+        gbcSection.gridx = 1;
+        sectionFormulario.add(txtRUAdministrador, gbcSection);
 
-        // Campo para seleccionar equipamiento
+        // Equipamiento
         JLabel lblEquipamiento = new JLabel("Equipamiento:");
-        lblEquipamiento.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblEquipamiento.setFont(new Font("Roboto", Font.PLAIN, 14));
+        lblEquipamiento.setForeground(TEXT_COLOR);
         cbEquipamiento = new JComboBox<>();
-        cbEquipamiento.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        cbEquipamiento.setFont(new Font("Roboto", Font.PLAIN, 14));
+        cbEquipamiento.setBorder(new RoundedBorder(10));
         cbEquipamiento.setRenderer(new ListCellRenderer<Equipamiento>() {
             @Override
             public Component getListCellRendererComponent(JList<? extends Equipamiento> list, Equipamiento value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -96,155 +144,203 @@ public class PanelDetalleHerramientas extends JPanel {
                     label.setText(value.getIdEquipamiento() + " - " + value.getNombreEquipamiento());
                 }
                 label.setOpaque(true);
-                label.setBackground(isSelected ? new Color(0, 123, 255) : Color.WHITE);
-                label.setForeground(isSelected ? Color.WHITE : Color.BLACK);
-                label.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-                label.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 5));
+                label.setBackground(isSelected ? ACCENT_COLOR : CARD_COLOR);
+                label.setForeground(isSelected ? Color.WHITE : TEXT_COLOR);
+                label.setFont(new Font("Roboto", Font.PLAIN, 14));
+                label.setBorder(new EmptyBorder(2, 5, 2, 5));
                 return label;
             }
         });
         cargarEquipamientos();
-        gbc.gridx = 0; gbc.gridy = 1;
-        formPanel.add(lblEquipamiento, gbc);
-        gbc.gridx = 1;
-        formPanel.add(cbEquipamiento, gbc);
+        gbcSection.gridx = 0; gbcSection.gridy = 1;
+        sectionFormulario.add(lblEquipamiento, gbcSection);
+        gbcSection.gridx = 1;
+        sectionFormulario.add(cbEquipamiento, gbcSection);
 
-        // Campo para seleccionar disponibilidad
+        // Disponibilidad
         JLabel lblDisponibilidad = new JLabel("Disponibilidad:");
-        lblDisponibilidad.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblDisponibilidad.setFont(new Font("Roboto", Font.PLAIN, 14));
+        lblDisponibilidad.setForeground(TEXT_COLOR);
         cbDisponibilidad = new JComboBox<>(new String[]{"Disponible", "No Disponible", "De Baja"});
-        cbDisponibilidad.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        gbc.gridx = 0; gbc.gridy = 2;
-        formPanel.add(lblDisponibilidad, gbc);
-        gbc.gridx = 1;
-        formPanel.add(cbDisponibilidad, gbc);
+        cbDisponibilidad.setFont(new Font("Roboto", Font.PLAIN, 14));
+        cbDisponibilidad.setBorder(new RoundedBorder(10));
+        gbcSection.gridx = 0; gbcSection.gridy = 2;
+        sectionFormulario.add(lblDisponibilidad, gbcSection);
+        gbcSection.gridx = 1;
+        sectionFormulario.add(cbDisponibilidad, gbcSection);
 
-        // Campo para seleccionar fecha
+        // Fecha
         JLabel lblFecha = new JLabel("Fecha:");
-        lblFecha.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblFecha.setFont(new Font("Roboto", Font.PLAIN, 14));
+        lblFecha.setForeground(TEXT_COLOR);
         dateChooser = new JDateChooser();
-        dateChooser.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        dateChooser.setDate(new Date()); // Establecer fecha actual por defecto
-        gbc.gridx = 0; gbc.gridy = 3;
-        formPanel.add(lblFecha, gbc);
-        gbc.gridx = 1;
-        formPanel.add(dateChooser, gbc);
+        dateChooser.setFont(new Font("Roboto", Font.PLAIN, 14));
+        dateChooser.setDate(new Date());
+        dateChooser.setBorder(new RoundedBorder(10));
+        gbcSection.gridx = 0; gbcSection.gridy = 3;
+        sectionFormulario.add(lblFecha, gbcSection);
+        gbcSection.gridx = 1;
+        sectionFormulario.add(dateChooser, gbcSection);
 
-        // Campo para seleccionar categoría
+        // Categoría
         JLabel lblCategoria = new JLabel("Categoría:");
-        lblCategoria.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblCategoria.setFont(new Font("Roboto", Font.PLAIN, 14));
+        lblCategoria.setForeground(TEXT_COLOR);
         cbCategoria = new JComboBox<>(new String[]{"Reparación", "Actualización", "Restaurada"});
-        cbCategoria.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        gbc.gridx = 0; gbc.gridy = 4;
-        formPanel.add(lblCategoria, gbc);
-        gbc.gridx = 1;
-        formPanel.add(cbCategoria, gbc);
+        cbCategoria.setFont(new Font("Roboto", Font.PLAIN, 14));
+        cbCategoria.setBorder(new RoundedBorder(10));
+        gbcSection.gridx = 0; gbcSection.gridy = 4;
+        sectionFormulario.add(lblCategoria, gbcSection);
+        gbcSection.gridx = 1;
+        sectionFormulario.add(cbCategoria, gbcSection);
 
-        // Campo para descripción
+        // Descripción
         JLabel lblDescripcion = new JLabel("Descripción:");
-        lblDescripcion.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        txtDescripcion = new JTextArea(5, 20);
-        txtDescripcion.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblDescripcion.setFont(new Font("Roboto", Font.PLAIN, 14));
+        lblDescripcion.setForeground(TEXT_COLOR);
+        txtDescripcion = new JTextArea(3, 20); // Reduced from 5 to 3 rows
+        txtDescripcion.setFont(new Font("Roboto", Font.PLAIN, 14));
         txtDescripcion.setLineWrap(true);
         txtDescripcion.setWrapStyleWord(true);
         JScrollPane scrollPane = new JScrollPane(txtDescripcion);
-        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
-        gbc.gridx = 0; gbc.gridy = 5;
-        formPanel.add(lblDescripcion, gbc);
-        gbc.gridx = 1; gbc.weighty = 1.0;
-        formPanel.add(scrollPane, gbc);
+        scrollPane.setBorder(new RoundedBorder(10));
+        gbcSection.gridx = 0; gbcSection.gridy = 5;
+        sectionFormulario.add(lblDescripcion, gbcSection);
+        gbcSection.gridx = 1; gbcSection.weighty = 1.0;
+        sectionFormulario.add(scrollPane, gbcSection);
 
-        // Panel de botones
-        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
-        panelBotones.setBackground(Color.WHITE);
-        btnAgregar = createStyledButton("Agregar", new Color(0, 123, 255));
-        btnModificar = createStyledButton("Modificar", new Color(40, 167, 69));
+        // Botones
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 3)); // Tighter padding
+        panelBotones.setBackground(CARD_COLOR);
+        btnAgregar = createStyledButton("Agregar", PRIMARY_COLOR);
+        btnModificar = createStyledButton("Modificar", SECONDARY_COLOR);
         btnLimpiar = createStyledButton("Limpiar", new Color(108, 117, 125));
         panelBotones.add(btnAgregar);
         panelBotones.add(btnModificar);
         panelBotones.add(btnLimpiar);
-        gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 2; gbc.weighty = 0;
-        formPanel.add(panelBotones, gbc);
+        gbcSection.gridx = 0; gbcSection.gridy = 6; gbcSection.gridwidth = 2; gbcSection.weighty = 0;
+        sectionFormulario.add(panelBotones, gbcSection);
 
-        // Tabla de historial de equipamiento
-        tablaHistorial = new JTable() {
-            @Override
-            public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
-                Component c = super.prepareRenderer(renderer, row, column);
-                if (row % 2 == 0) {
-                    c.setBackground(new Color(240, 240, 240));
-                } else {
-                    c.setBackground(Color.WHITE);
-                }
-                return c;
-            }
-        };
-        tablaHistorial.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        tablaHistorial.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
-        tablaHistorial.getTableHeader().setBackground(new Color(0, 123, 255));
-        tablaHistorial.getTableHeader().setForeground(Color.WHITE);
-        tablaHistorial.setRowHeight(30);
-        tablaHistorial.setGridColor(new Color(200, 200, 200));
-        
-        // Configurar modelo de tabla
+        gbc.gridx = 0; gbc.gridy = 0; gbc.weighty = 0.3; // Reduced weighty
+        formPanel.add(sectionFormulario, gbc);
+
+        // Sección: Tabla Historial
         DefaultTableModel model = new DefaultTableModel(
             new Object[]{"ID", "RU Admin", "Fecha", "Categoría", "Descripción", "Equipamiento", "Disponibilidad"}, 0
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Hacer que la tabla no sea editable
+                return false;
             }
         };
-        tablaHistorial.setModel(model);
+        tablaHistorial = createStyledTable(model);
+        JScrollPane scrollHistorial = createStyledScrollPane(tablaHistorial);
+        scrollHistorial.setPreferredSize(new Dimension(600, 200));
 
-        // Configurar ancho de columnas
-        configurarAnchoColumnas();
+        JPanel sectionHistorial = createCardPanel("Historial de Herramientas");
+        sectionHistorial.setLayout(new BorderLayout(5, 5));
+        sectionHistorial.add(scrollHistorial, BorderLayout.CENTER);
+        gbc.gridy = 1; gbc.weighty = 0.6;
+        formPanel.add(sectionHistorial, gbc);
 
-        // Hacer que la tabla sea redimensionable horizontalmente
-        tablaHistorial.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        // Envolver en JScrollPane
+        JScrollPane mainScroll = createStyledScrollPane(formPanel);
+        mainScroll.setBorder(null);
+        add(mainScroll, BorderLayout.CENTER);
 
-        // Crear scroll pane con barras de desplazamiento horizontal y vertical
-        JScrollPane tablaScrollPane = new JScrollPane(tablaHistorial, 
-            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
-            JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        tablaScrollPane.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)),
-            "Historial de Herramientas",
-            javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
-            javax.swing.border.TitledBorder.DEFAULT_POSITION,
-            new Font("Segoe UI", Font.BOLD, 14)
-        ));
-
-        // Agregar formulario y tabla al panel central
-        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 1; gbc.weightx = 0.3; gbc.weighty = 1.0;
-        gbc.fill = GridBagConstraints.BOTH;
-        contentPanel.add(formPanel, gbc);
-        gbc.gridx = 1; gbc.weightx = 0.7;
-        contentPanel.add(tablaScrollPane, gbc);
-
-        add(contentPanel, BorderLayout.CENTER);
-
-        // Configurar listeners para los botones
+        // Configurar listeners
         btnAgregar.addActionListener(e -> agregarHistorial());
         btnModificar.addActionListener(e -> modificarHistorial());
         btnLimpiar.addActionListener(e -> limpiarCampos());
-        
-        // Agregar listener para la selección de equipamiento
         cbEquipamiento.addActionListener(e -> actualizarDisponibilidadSeleccionada());
-        
-        // Listener para la tabla
         tablaHistorial.getSelectionModel().addListSelectionListener(e -> seleccionarHistorial());
 
         // Cargar historial inicial
         cargarHistorial();
     }
 
-    // Método para configurar el ancho de las columnas
-    private void configurarAnchoColumnas() {
+    private JPanel createCardPanel(String title) {
+        JPanel panel = new JPanel();
+        panel.setBackground(CARD_COLOR);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            new RoundedBorder(10),
+            new EmptyBorder(3, 3, 3, 3) // Reduced padding
+        ));
+        panel.setBorder(BorderFactory.createTitledBorder(
+            new RoundedBorder(10),
+            title,
+            javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+            javax.swing.border.TitledBorder.DEFAULT_POSITION,
+            new Font("Roboto", Font.BOLD, 14),
+            PRIMARY_COLOR
+        ));
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 1, new Color(0, 0, 0, 20)),
+            panel.getBorder()
+        ));
+        return panel;
+    }
+
+    private JButton createStyledButton(String text, Color baseColor) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Roboto", Font.PLAIN, 12)); // Reduced font size
+        button.setForeground(Color.WHITE);
+        button.setBackground(baseColor);
+        button.setBorder(new RoundedBorder(10));
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setBorder(new EmptyBorder(5, 10, 5, 10)); // Reduced padding
+        return button;
+    }
+
+    private JTable createStyledTable(DefaultTableModel model) {
+        JTable table = new JTable(model) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        table.setRowHeight(25);
+        table.setFont(new Font("Roboto", Font.PLAIN, 12));
+        table.setSelectionBackground(ACCENT_COLOR);
+        table.setGridColor(BORDER_COLOR);
+        table.setShowGrid(true);
+        table.getTableHeader().setFont(new Font("Roboto", Font.BOLD, 12));
+        table.getTableHeader().setBackground(PRIMARY_COLOR);
+        table.getTableHeader().setForeground(Color.WHITE);
+        table.setOpaque(false);
+        table.setBackground(new Color(255, 255, 255, 200));
+        table.setBorder(new RoundedBorder(10));
+
+        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                           boolean isSelected, boolean hasFocus,
+                                                           int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                c.setFont(new Font("Roboto", Font.PLAIN, 12));
+                if (table.getColumnName(column).equals("Disponibilidad")) {
+                    if ("Disponible".equals(value)) {
+                        c.setForeground(AVAILABLE_COLOR);
+                    } else if ("No Disponible".equals(value) || "De Baja".equals(value)) {
+                        c.setForeground(UNAVAILABLE_COLOR);
+                    }
+                } else {
+                    c.setForeground(TEXT_COLOR);
+                }
+                if (isSelected) {
+                    c.setBackground(ACCENT_COLOR);
+                } else {
+                    c.setBackground(new Color(255, 255, 255, 200));
+                }
+                return c;
+            }
+        });
+
         // Configurar ancho de columnas
         TableColumn columna;
-        for (int i = 0; i < tablaHistorial.getColumnModel().getColumnCount(); i++) {
-            columna = tablaHistorial.getColumnModel().getColumn(i);
+        for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
+            columna = table.getColumnModel().getColumn(i);
             switch (i) {
                 case 0: // ID
                     columna.setPreferredWidth(50);
@@ -259,7 +355,7 @@ public class PanelDetalleHerramientas extends JPanel {
                     columna.setPreferredWidth(100);
                     break;
                 case 4: // Descripción
-                    columna.setPreferredWidth(250);
+                    columna.setPreferredWidth(200);
                     break;
                 case 5: // Equipamiento
                     columna.setPreferredWidth(150);
@@ -269,30 +365,22 @@ public class PanelDetalleHerramientas extends JPanel {
                     break;
             }
         }
-    }
-    private JButton createStyledButton(String text, Color bgColor) {
-        JButton button = new JButton(text);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        button.setBackground(bgColor);
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
-        // Efecto hover
-        button.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                button.setBackground(bgColor.brighter());
-            }
 
-            @Override
-            public void mouseExited(MouseEvent e) {
-                button.setBackground(bgColor);
-            }
-        });
-        return button;
+        return table;
     }
+
+    private JScrollPane createStyledScrollPane(Component view) {
+        JScrollPane scrollPane = new JScrollPane(view);
+        scrollPane.setBorder(new RoundedBorder(10));
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        JScrollBar verticalScrollBar = scrollPane.getVerticalScrollBar();
+        verticalScrollBar.setUnitIncrement(15);
+        JScrollBar horizontalScrollBar = scrollPane.getHorizontalScrollBar();
+        horizontalScrollBar.setUnitIncrement(15);
+        return scrollPane;
+    }
+
     private void cargarEquipamientos() {
         cbEquipamiento.removeAllItems();
         try {
@@ -303,7 +391,7 @@ public class PanelDetalleHerramientas extends JPanel {
             JOptionPane.showMessageDialog(this, "Error al cargar equipamientos: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     private void actualizarDisponibilidadSeleccionada() {
         Equipamiento equipoSeleccionado = (Equipamiento) cbEquipamiento.getSelectedItem();
         if (equipoSeleccionado != null) {
@@ -321,24 +409,15 @@ public class PanelDetalleHerramientas extends JPanel {
         DefaultTableModel model = (DefaultTableModel) tablaHistorial.getModel();
         model.setRowCount(0);
         try {
-            // Listar el historial de todos los equipamientos
             for (Object[] registro : controlHistorialEquipamiento.buscarHistorialCompletoEquipamiento(
                     cbEquipamiento.getSelectedItem() != null ? 
                     ((Equipamiento)cbEquipamiento.getSelectedItem()).getIdEquipamiento() : 0)) {
-                
-                // Obtener el equipamiento para mostrar el nombre
                 int idEquipamiento = (int) registro[5];
                 Equipamiento equipo = controlEquipamiento.buscarPorId(idEquipamiento);
                 String nombreEquipo = equipo != null ? equipo.getNombreEquipamiento() : "Desconocido";
-                
                 model.addRow(new Object[]{
-                    registro[0],          // id_historial
-                    registro[1],          // ru_administrador
-                    registro[2],          // fecha
-                    registro[3],          // categoria
-                    registro[4],          // descripcion
-                    nombreEquipo,         // nombre_equipamiento
-                    equipo != null ? equipo.getDisponibilidad() : "Desconocido" // disponibilidad
+                    registro[0], registro[1], registro[2], registro[3], registro[4], nombreEquipo,
+                    equipo != null ? equipo.getDisponibilidad() : "Desconocido"
                 });
             }
         } catch (SQLException e) {
@@ -352,9 +431,7 @@ public class PanelDetalleHerramientas extends JPanel {
             JOptionPane.showMessageDialog(this, "Complete todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        
         try {
-            // Obtener RU del administrador desde el campo de texto
             int ruAdministrador;
             try {
                 ruAdministrador = Integer.parseInt(txtRUAdministrador.getText().trim());
@@ -362,28 +439,22 @@ public class PanelDetalleHerramientas extends JPanel {
                 JOptionPane.showMessageDialog(this, "El RU debe ser un número entero.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            
             java.sql.Date fecha = new java.sql.Date(dateChooser.getDate().getTime());
             String categoria = (String) cbCategoria.getSelectedItem();
             String descripcion = txtDescripcion.getText();
             int idEquipamiento = ((Equipamiento) cbEquipamiento.getSelectedItem()).getIdEquipamiento();
             String disponibilidad = (String) cbDisponibilidad.getSelectedItem();
 
-            // Primero, crear historial general
             HistorialGeneral historialGeneral = new HistorialGeneral(ruAdministrador, dateChooser.getDate(), categoria, descripcion);
             int idHistorial = controlHistorialGeneral.insertar(historialGeneral);
-            
-            // Luego, crear historial de equipamiento
             HistorialEquipamiento historialEquipamiento = new HistorialEquipamiento(idHistorial, idEquipamiento);
             controlHistorialEquipamiento.insertar(historialEquipamiento);
-            
-            // Actualizar la disponibilidad del equipamiento
             controlEquipamiento.actualizarDisponibilidad(idEquipamiento, disponibilidad);
-            
+
             JOptionPane.showMessageDialog(this, "Historial agregado correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
             limpiarCampos();
             cargarHistorial();
-            cargarEquipamientos(); // Recargar para reflejar los cambios
+            cargarEquipamientos();
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Error al agregar historial: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -399,12 +470,9 @@ public class PanelDetalleHerramientas extends JPanel {
             JOptionPane.showMessageDialog(this, "Complete todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        
         try {
             int idHistorial = Integer.parseInt(txtId.getText());
             int idEquipamiento = ((Equipamiento) cbEquipamiento.getSelectedItem()).getIdEquipamiento();
-            
-            // Obtener RU del administrador
             int ruAdministrador;
             try {
                 ruAdministrador = Integer.parseInt(txtRUAdministrador.getText().trim());
@@ -412,26 +480,20 @@ public class PanelDetalleHerramientas extends JPanel {
                 JOptionPane.showMessageDialog(this, "El RU debe ser un número entero.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            
-            // Actualizar historial general
             java.sql.Date fecha = new java.sql.Date(dateChooser.getDate().getTime());
             String categoria = (String) cbCategoria.getSelectedItem();
             String descripcion = txtDescripcion.getText();
             HistorialGeneral historialGeneral = new HistorialGeneral(idHistorial, ruAdministrador, dateChooser.getDate(), categoria, descripcion);
             controlHistorialGeneral.actualizar(historialGeneral);
-            
-            // Actualizar relación con equipamiento
             HistorialEquipamiento historialEquipamiento = new HistorialEquipamiento(idHistorial, idEquipamiento);
             controlHistorialEquipamiento.actualizar(historialEquipamiento);
-            
-            // Actualizar disponibilidad del equipamiento
             String disponibilidad = (String) cbDisponibilidad.getSelectedItem();
             controlEquipamiento.actualizarDisponibilidad(idEquipamiento, disponibilidad);
-            
+
             JOptionPane.showMessageDialog(this, "Historial modificado correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
             limpiarCampos();
             cargarHistorial();
-            cargarEquipamientos(); // Recargar para reflejar los cambios
+            cargarEquipamientos();
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Error al modificar historial: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -440,7 +502,7 @@ public class PanelDetalleHerramientas extends JPanel {
     private void limpiarCampos() {
         txtId.setText("");
         txtRUAdministrador.setText("");
-        dateChooser.setDate(new Date()); // Establecer fecha actual
+        dateChooser.setDate(new Date());
         cbCategoria.setSelectedIndex(0);
         cbDisponibilidad.setSelectedIndex(0);
         txtDescripcion.setText("");
@@ -456,29 +518,20 @@ public class PanelDetalleHerramientas extends JPanel {
             try {
                 int idHistorial = (Integer) tablaHistorial.getValueAt(fila, 0);
                 int ruAdmin = (Integer) tablaHistorial.getValueAt(fila, 1);
-                
-                // Establecer el RU del administrador en el campo de texto
                 txtRUAdministrador.setText(String.valueOf(ruAdmin));
                 txtId.setText(String.valueOf(idHistorial));
-                
-                // Cargar el historial seleccionado
                 HistorialGeneral historialGeneral = controlHistorialGeneral.buscarPorId(idHistorial);
                 HistorialEquipamiento historialEquipamiento = controlHistorialEquipamiento.buscarPorIdHistorial(idHistorial);
-                
                 if (historialGeneral != null && historialEquipamiento != null) {
                     dateChooser.setDate(historialGeneral.getFecha());
                     cbCategoria.setSelectedItem(historialGeneral.getCategoria());
                     txtDescripcion.setText(historialGeneral.getDescripcion());
-                    
-                    // Seleccionar el equipamiento en el combo
                     for (int i = 0; i < cbEquipamiento.getItemCount(); i++) {
                         if (cbEquipamiento.getItemAt(i).getIdEquipamiento() == historialEquipamiento.getIdEquipamiento()) {
                             cbEquipamiento.setSelectedIndex(i);
                             break;
                         }
                     }
-                    
-                    // La disponibilidad se actualiza automáticamente al seleccionar el equipamiento
                     actualizarDisponibilidadSeleccionada();
                 }
             } catch (SQLException e) {
