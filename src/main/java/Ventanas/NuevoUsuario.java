@@ -14,6 +14,7 @@ import javax.swing.border.LineBorder;
 import Clases.Usuario;
 import Controles.ControlUsuario;
 
+import org.mindrot.jbcrypt.BCrypt;
 /**
  * Ventana para registrar un nuevo usuario en el sistema
  * @author DOC
@@ -427,56 +428,62 @@ public class NuevoUsuario extends JFrame {
     }
 
     private void guardarUsuario() {
-        try {
-            // Recoger los datos de los campos
-            String nombre = cajaNombre.getText().trim();
-            String APP = cajaAPP.getText().trim();
-            String APM = cajaAPM.getText().trim();
-            String correo = cajaCorreo.getText().trim();
-            String password = cajaContra.getText().trim();
-            String ruText = cajaRU.getText().trim();
-            String ciText = cajaCI.getText().trim();
-            String role = (String) cajarol.getSelectedItem();
+    try {
+        // Recoger los datos de los campos
+        String nombre = cajaNombre.getText().trim();
+        String APP = cajaAPP.getText().trim();
+        String APM = cajaAPM.getText().trim();
+        String correo = cajaCorreo.getText().trim();
+        String password = cajaContra.getText().trim();
+        String ruText = cajaRU.getText().trim();
+        String ciText = cajaCI.getText().trim();
+        String role = (String) cajarol.getSelectedItem();
 
-            // Validar campos vacíos y placeholders (usando la lógica del CÓDIGO 2)
-            if (nombre.isEmpty() || nombre.equals("Ingrese el nombre") ||
-                APP.isEmpty() || APP.equals("Ingrese el apellido paterno") ||
-                APM.isEmpty() || APM.equals("Ingrese el apellido materno") ||
-                correo.isEmpty() || correo.equals("ejemplo@correo.com") ||
-                password.isEmpty() || password.equals("Ingrese su contraseña") ||
-                ruText.isEmpty() || ruText.equals("Ingrese el R.U.") ||
-                ciText.isEmpty() || ciText.equals("Ingrese el C.I.")) {
-                throw new CredencialesInvalidas("Por favor, complete todos los campos");
-            }
-
-            // Convertir RU y CI a números
-            int ru = Integer.parseInt(ruText);
-            int ci = Integer.parseInt(ciText);
-
-            // Crear una nueva instancia de Usuario
-            Usuario nuevoUsuario = new Usuario(ru, nombre, APP, APM, password, ci, role, correo);
-            ControlUsuario controlUsuario = new ControlUsuario();
-            controlUsuario.insertar(nuevoUsuario);
-
-            // Mostrar mensaje de éxito (estilo del CÓDIGO 2)
-            JOptionPane.showMessageDialog(this, "Usuario guardado exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            dispose();
-
-        } catch (NumberFormatException nfe) {
-            mostrarMensajeError("RU o CI deben ser números válidos");
-        } catch (CredencialesInvalidas ex) {
-            mostrarMensajeError(ex.getMessage());
-        } catch (SQLException sqle) {
-            String msg = sqle.getMessage();
-            if (msg.contains("Duplicate entry")) {
-                mostrarMensajeError("El RU, CI o correo ya está registrado");
-            } else {
-                mostrarMensajeError("Error al guardar el usuario:\n" + msg);
-            }
-        } catch (Exception ex) {
-            mostrarMensajeError("Error del sistema");
+        // Validar campos vacíos y placeholders
+        if (nombre.isEmpty() || nombre.equals("Ingrese el nombre") ||
+            APP.isEmpty() || APP.equals("Ingrese el apellido paterno") ||
+            APM.isEmpty() || APM.equals("Ingrese el apellido materno") ||
+            correo.isEmpty() || correo.equals("ejemplo@correo.com") ||
+            password.isEmpty() || password.equals("Ingrese su contraseña") ||
+            ruText.isEmpty() || ruText.equals("Ingrese el R.U.") ||
+            ciText.isEmpty() || ciText.equals("Ingrese el C.I.")) {
+            throw new CredencialesInvalidas("Por favor, complete todos los campos");
         }
+
+      
+
+        // Convertir RU y CI a números
+        int ru = Integer.parseInt(ruText);
+        int ci = Integer.parseInt(ciText);
+
+        // ENCRIPTAR LA CONTRASEÑA CON BCRYPT
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+
+        // Crear una nueva instancia de Usuario con la contraseña encriptada
+        Usuario nuevoUsuario = new Usuario(ru, nombre, APP, APM, hashedPassword, ci, role, correo);
+        ControlUsuario controlUsuario = new ControlUsuario();
+        controlUsuario.insertar(nuevoUsuario);
+
+        // Mostrar mensaje de éxito
+        JOptionPane.showMessageDialog(this, "Usuario guardado exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        dispose();
+
+    } catch (NumberFormatException nfe) {
+        mostrarMensajeError("RU o CI deben ser números válidos");
+    } catch (CredencialesInvalidas ex) {
+        mostrarMensajeError(ex.getMessage());
+    } catch (SQLException sqle) {
+        String msg = sqle.getMessage();
+        if (msg.contains("Duplicate entry")) {
+            mostrarMensajeError("El RU, CI o correo ya está registrado");
+        } else {
+            mostrarMensajeError("Error al guardar el usuario:\n" + msg);
+        }
+    } catch (Exception ex) {
+        mostrarMensajeError("Error del sistema: " + ex.getMessage());
     }
+}
+
 
     private void mostrarMensajeError(String mensaje) {
         JOptionPane optionPane = new JOptionPane(
@@ -490,4 +497,5 @@ public class NuevoUsuario extends JFrame {
         JDialog dialog = optionPane.createDialog(this, "Error");
         dialog.setVisible(true);
     }
+    
 }
