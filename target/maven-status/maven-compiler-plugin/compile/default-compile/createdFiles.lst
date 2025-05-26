@@ -57,11 +57,13 @@ Paneles\PanelVisualizarEquipo$RoundedBorder.class
 Paneles\PanelHistorialEquipo$1.class
 Controles\ControladorDetallePrestamoEquipamiento.class
 Clases\HistorialEquipos.class
+PanelesMateriales\PanelPrediccionEquipamientoInsumos$1.class
 Ventanas\login.class
 Controles\ControladorSancionEquipamiento.class
 Utilidades\ServicioCorreo$1.class
 Prestamos\PanelNotificacion$3.class
 com\mycompany\sistemacontrolprestamolab\SistemaControlPrestamoLab.class
+PanelesMateriales\PanelPrediccionEquipamientoInsumos$PrediccionEquipamiento.class
 Ventanas\NuevoUsuario$8.class
 Reportes\PanelReportePrestamo$DetalleEquipamiento.class
 Servicios\HorarioService.class
@@ -93,6 +95,7 @@ Servicios\RolService.class
 Ventanas\NuevoAdministrador$4.class
 Clases\Equipo.class
 Paneles\PanelEquipo$3.class
+PanelesMateriales\PanelPrediccionEquipamientoInsumos$PrediccionInsumo.class
 PanelSanciones\PanelSancionar$3.class
 Ventanas\login$3.class
 Ventanas\NuevoUsuario$4.class
@@ -106,6 +109,7 @@ Prestamos\PanelNotificacion$2.class
 PanelesMateriales\PanelHerramientas$RoundedButton.class
 Controles\ControladorHistorialEquipamiento.class
 Ventanas\Principal$1.class
+PanelesMateriales\PanelPrediccionEquipamientoInsumos$3.class
 Ventanas\Principal$6.class
 Ventanas\NuevoAdministrador$2.class
 Clases\HistorialEquipamiento.class
@@ -130,6 +134,7 @@ Paneles\PanelEditar$2.class
 Ventanas\NuevoUsuario$11.class
 Ventanas\Principal3$2.class
 PanelSanciones\PanelListaSanciones$2.class
+PanelesMateriales\PanelPrediccionEquipamientoInsumos$PriorityTableCellRenderer.class
 Reportes\PanelReportePrestamo$DetalleInsumo.class
 Ventanas\Principal2$4.class
 Paneles\PanelEditar$3.class
@@ -146,6 +151,7 @@ Ventanas\Principal2$3.class
 Paneles\PanelEquipo$2.class
 Ventanas\NuevoAdministrador$1.class
 Ventanas\Principal2$RoundedBorder.class
+PanelesMateriales\PanelPrediccionEquipamientoInsumos$2.class
 Paneles\PanelVisualizarHorario$RoundedPanel.class
 Ventanas\Principal$5.class
 Clases\DetallePrestamoEquipamiento.class
@@ -155,12 +161,14 @@ Paneles\PanelDocentes.class
 Ventanas\Principal3$RoundedBorder.class
 Ventanas\NuevoAdministrador.class
 Controles\ControladorInsumo.class
+PanelesMateriales\PanelPrediccionEquipamientoInsumos$4.class
 Prestamos\PanelVisualizarPrestamos$3.class
 Ventanas\Principal2$2.class
 Paneles\HistorialRoundedBorder.class
 PanelesMateriales\PanelDetalleHerramientas.class
 Paneles\PanelEditar$1.class
 Paneles\PanelHorario$2.class
+PanelesMateriales\PanelPrediccionEquipamientoInsumos.class
 PanelesMateriales\PanelDetalleHerramientas$1.class
 Prestamos\PanelSolicitarPrestamo$4.class
 PanelSanciones\PanelListaSanciones$7.class
@@ -185,11 +193,13 @@ PanelesMateriales\PanelDetalleHerramientas$3.class
 Ventanas\Principal$3.class
 interfaces\GenericDAO.class
 PanelSanciones\PanelSancionar$RoundedButton.class
+PanelesMateriales\PanelPrediccionEquipamientoInsumos$6.class
 PanelesMateriales\PanelEditarHerramientas$3.class
 Controles\ControladorSancion.class
 PanelSanciones\PanelListaSanciones.class
 Ventanas\NuevoUsuario$2.class
 Paneles\PanelAdministradores$1.class
+PanelesMateriales\PanelPrediccionEquipamientoInsumos$5.class
 Prestamos\PanelVisualizarPrestamos$6.class
 Ventanas\NuevoUsuario$3.class
 PanelesMateriales\PanelDetalleHerramientas$4.class

@@ -48,6 +48,7 @@ import Controles.ControladorEquipamiento;
 import Controles.ControladorInsumo;
 import Controles.ControladorPrestamo;
 import Controles.ControladorLaboratorio;
+import PanelesMateriales.PanelPrediccionEquipamientoInsumos;
 import java.util.ArrayList;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.CategoryLabelPositions;
@@ -193,7 +194,7 @@ public class Principal extends JFrame {
     	buttonPanel.add(createMenuButton("Usuarios", new String[]{"Docentes", "Estudiantes", "Administradores", "Editar Usuarios"}));
     	buttonPanel.add(createMenuButton("Equipos", new String[]{"Máquinas", "Editar Equipos", "Detalle Equipos", "Generar Reportes Equipos", "Estadística de Equipos"}));
     	buttonPanel.add(createMenuButton("Préstamos", new String[]{"Visualizar Préstamos", "Generar Reportes", "Estadística de Préstamos"}));
-    	buttonPanel.add(createMenuButton("Materiales", new String[]{"Herramientas", "Insumos", "Editar Herramientas", "Editar Insumos", "Detalle Herramientas"}));
+    	buttonPanel.add(createMenuButton("Materiales", new String[]{"Herramientas", "Insumos", "Editar Herramientas", "Editar Insumos", "Detalle Herramientas", "Predicciones"}));
     	buttonPanel.add(createMenuButton("Sanciones", new String[]{"Lista de Sanciones", "Sancionar"}));
 
     	panel.add(buttonPanel, BorderLayout.NORTH);
@@ -352,6 +353,8 @@ public class Principal extends JFrame {
                     contenidoEspecifico = crearPanelEditarInsumos();
                 } else if (subOpcion.equals("Detalle Herramientas")) {
                     contenidoEspecifico = crearPanelDetalleHerramientas();
+                } else if (subOpcion.equals("Predicciones")) {
+                    contenidoEspecifico = crearPanelPrediccionEquipamientoInsumos();
                 }
                 break;
             case "Sanciones":
@@ -448,6 +451,10 @@ public class Principal extends JFrame {
 
     private JPanel crearPanelDetalleHerramientas() {
         return new PanelDetalleHerramientas();
+    }
+    
+    private JPanel crearPanelPrediccionEquipamientoInsumos() {
+        return new PanelPrediccionEquipamientoInsumos();
     }
 
     private JPanel crearPanelListaSanciones() {
