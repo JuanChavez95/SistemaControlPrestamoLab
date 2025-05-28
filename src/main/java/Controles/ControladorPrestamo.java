@@ -481,5 +481,35 @@ public class ControladorPrestamo {
         }
         return null;
     }
+    
+    
+    public List<Map<String, Object>> obtenerEquipamientosPrestamoConCantidades(int idPrestamo) throws SQLException {
+        List<Map<String, Object>> lista = new ArrayList<>();
+        String sql = "SELECT e.id_equipamiento, e.nombre_equipamiento, COUNT(*) AS cantidad " +
+                     "FROM detalle_prestamo_equipamiento dpe " +
+                     "JOIN equipamiento e ON dpe.id_equipamiento = e.id_equipamiento " +
+                     "WHERE dpe.id_prestamo = ? " +
+                     "GROUP BY e.id_equipamiento, e.nombre_equipamiento";
+
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idPrestamo);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Map<String, Object> item = new HashMap<>();
+                item.put("id_equipamiento", rs.getInt("id_equipamiento"));
+                item.put("nombre_equipamiento", rs.getString("nombre_equipamiento"));
+                item.put("cantidad", rs.getInt("cantidad"));
+                lista.add(item);
+            }
+        } catch (SQLException ex) {
+            System.err.println("Error al obtener equipamientos del préstamo con ID " + idPrestamo + ": " + ex.getMessage());
+            throw ex;
+        }
+
+        return lista;
+    }
+
 
 }

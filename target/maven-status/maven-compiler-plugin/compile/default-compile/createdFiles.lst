@@ -1,3 +1,4 @@
+PanelesMateriales\PanelPrediccionEquipamientoInsumos$RecommendationTableCellRenderer.class
 Paneles\RoundedBorder.class
 Ventanas\NuevoUsuario$7.class
 Ventanas\login$6.class
@@ -19,6 +20,7 @@ Prestamos\PanelNotificacion$4.class
 Clases\Equipamiento.class
 Paneles\PanelVisualizarHorario.class
 PanelesMateriales\PanelEditarInsumos$1.class
+PanelesMateriales\PanelPrediccionEquipamientoInsumos$AnalisisInsumo.class
 DataBase\ConexionBD.class
 Prestamos\PanelSolicitarPrestamo$2.class
 PanelesMateriales\PanelEditarInsumos.class
@@ -63,7 +65,6 @@ Controles\ControladorSancionEquipamiento.class
 Utilidades\ServicioCorreo$1.class
 Prestamos\PanelNotificacion$3.class
 com\mycompany\sistemacontrolprestamolab\SistemaControlPrestamoLab.class
-PanelesMateriales\PanelPrediccionEquipamientoInsumos$PrediccionEquipamiento.class
 Ventanas\NuevoUsuario$8.class
 Reportes\PanelReportePrestamo$DetalleEquipamiento.class
 Servicios\HorarioService.class
@@ -73,6 +74,7 @@ Controles\ControladorHorario.class
 Ventanas\NuevoUsuario$9.class
 Controles\ControlAdministrador.class
 Ventanas\Principal$7.class
+PanelesMateriales\PanelPrediccionEquipamientoInsumos$AnalisisEquipamiento.class
 Paneles\PanelHistorialEquipo$2.class
 PanelSanciones\PanelSancionesVigentes.class
 Paneles\PanelVisualizarEquipo$RoundedButton.class
@@ -95,7 +97,6 @@ Servicios\RolService.class
 Ventanas\NuevoAdministrador$4.class
 Clases\Equipo.class
 Paneles\PanelEquipo$3.class
-PanelesMateriales\PanelPrediccionEquipamientoInsumos$PrediccionInsumo.class
 PanelSanciones\PanelSancionar$3.class
 Ventanas\login$3.class
 Ventanas\NuevoUsuario$4.class
@@ -134,7 +135,6 @@ Paneles\PanelEditar$2.class
 Ventanas\NuevoUsuario$11.class
 Ventanas\Principal3$2.class
 PanelSanciones\PanelListaSanciones$2.class
-PanelesMateriales\PanelPrediccionEquipamientoInsumos$PriorityTableCellRenderer.class
 Reportes\PanelReportePrestamo$DetalleInsumo.class
 Ventanas\Principal2$4.class
 Paneles\PanelEditar$3.class
@@ -193,7 +193,6 @@ PanelesMateriales\PanelDetalleHerramientas$3.class
 Ventanas\Principal$3.class
 interfaces\GenericDAO.class
 PanelSanciones\PanelSancionar$RoundedButton.class
-PanelesMateriales\PanelPrediccionEquipamientoInsumos$6.class
 PanelesMateriales\PanelEditarHerramientas$3.class
 Controles\ControladorSancion.class
 PanelSanciones\PanelListaSanciones.class

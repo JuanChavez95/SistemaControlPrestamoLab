@@ -20,8 +20,8 @@ import java.text.SimpleDateFormat;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Panel de Predicción para Equipamientos e Insumos
- * Proporciona estimaciones y recomendaciones basadas en análisis de datos históricos
+ * Panel de Predicción Simplificado para Equipamientos e Insumos
+ * Proporciona recomendaciones básicas para mantenimiento y reposición
  */
 public class PanelPrediccionEquipamientoInsumos extends JPanel {
     
@@ -29,7 +29,6 @@ public class PanelPrediccionEquipamientoInsumos extends JPanel {
     private ControladorEquipamiento controladorEquipamiento;
     private ControladorInsumo controladorInsumo;
     private ControladorPrestamo controladorPrestamo;
-    private ControladorHistorialGeneral controladorHistorial;
     private ControladorHistorialEquipamiento controladorHistorialEquipamiento;
     
     // Componentes de la interfaz
@@ -45,8 +44,7 @@ public class PanelPrediccionEquipamientoInsumos extends JPanel {
     private DefaultTableModel modeloInsumos;
     private JTextArea areaRecomendacionesInsumos;
     
-    // Panel de Análisis
-    private JTextArea areaAnalisisGeneral;
+    // Barra de progreso
     private JProgressBar progressBar;
     
     public PanelPrediccionEquipamientoInsumos() {
@@ -60,7 +58,6 @@ public class PanelPrediccionEquipamientoInsumos extends JPanel {
         controladorEquipamiento = new ControladorEquipamiento();
         controladorInsumo = new ControladorInsumo();
         controladorPrestamo = new ControladorPrestamo();
-        controladorHistorial = new ControladorHistorialGeneral();
         controladorHistorialEquipamiento = new ControladorHistorialEquipamiento();
     }
     
@@ -78,10 +75,6 @@ public class PanelPrediccionEquipamientoInsumos extends JPanel {
         JPanel panelInsumos = crearPanelInsumos();
         tabbedPane.addTab("Predicción Insumos", panelInsumos);
         
-        // Pestaña de Análisis General
-        JPanel panelAnalisis = crearPanelAnalisis();
-        tabbedPane.addTab("Análisis General", panelAnalisis);
-        
         add(tabbedPane, BorderLayout.CENTER);
         
         // Barra de progreso
@@ -97,17 +90,13 @@ public class PanelPrediccionEquipamientoInsumos extends JPanel {
         // Panel superior con controles
         JPanel panelControles = new JPanel(new FlowLayout());
         JButton btnActualizar = new JButton("Actualizar Predicciones");
-        JButton btnExportar = new JButton("Exportar Reporte");
         
         btnActualizar.addActionListener(e -> actualizarPrediccionesEquipamientos());
-        btnExportar.addActionListener(e -> exportarReporteEquipamientos());
-        
         panelControles.add(btnActualizar);
-        panelControles.add(btnExportar);
         
-        // Tabla de predicciones
-        String[] columnas = {"ID", "Equipamiento", "Estado Actual", "Días Desde Último Mantenimiento", 
-                           "Predicción Mantenimiento", "Prioridad", "Recomendación"};
+        // Tabla de predicciones simplificada
+        String[] columnas = {"ID", "Equipamiento", "Estado Actual", "Última Actividad", 
+                           "Préstamos Realizados", "Recomendación"};
         modeloEquipamientos = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -119,8 +108,8 @@ public class PanelPrediccionEquipamientoInsumos extends JPanel {
         tablaPrediccionEquipamientos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tablaPrediccionEquipamientos.getTableHeader().setReorderingAllowed(false);
         
-        // Configurar colores según prioridad
-        tablaPrediccionEquipamientos.setDefaultRenderer(Object.class, new PriorityTableCellRenderer());
+        // Configurar colores según recomendación
+        tablaPrediccionEquipamientos.setDefaultRenderer(Object.class, new RecommendationTableCellRenderer());
         
         JScrollPane scrollTabla = new JScrollPane(tablaPrediccionEquipamientos);
         scrollTabla.setPreferredSize(new Dimension(800, 300));
@@ -129,7 +118,7 @@ public class PanelPrediccionEquipamientoInsumos extends JPanel {
         areaRecomendacionesEquipamientos = new JTextArea(8, 50);
         areaRecomendacionesEquipamientos.setEditable(false);
         areaRecomendacionesEquipamientos.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        areaRecomendacionesEquipamientos.setBorder(new TitledBorder("Recomendaciones Detalladas"));
+        areaRecomendacionesEquipamientos.setBorder(new TitledBorder("Recomendaciones de Mantenimiento"));
         
         JScrollPane scrollRecomendaciones = new JScrollPane(areaRecomendacionesEquipamientos);
         
@@ -147,17 +136,13 @@ public class PanelPrediccionEquipamientoInsumos extends JPanel {
         // Panel superior con controles
         JPanel panelControles = new JPanel(new FlowLayout());
         JButton btnActualizar = new JButton("Actualizar Predicciones");
-        JButton btnExportar = new JButton("Exportar Reporte");
         
         btnActualizar.addActionListener(e -> actualizarPrediccionesInsumos());
-        btnExportar.addActionListener(e -> exportarReporteInsumos());
-        
         panelControles.add(btnActualizar);
-        panelControles.add(btnExportar);
         
-        // Tabla de predicciones
-        String[] columnas = {"ID", "Insumo", "Cantidad Actual", "Consumo Promedio/Día", 
-                           "Días Restantes", "Fecha Agotamiento", "Prioridad", "Recomendación"};
+        // Tabla de predicciones simplificada
+        String[] columnas = {"ID", "Insumo", "Cantidad Actual", "Consumo Diario", 
+                           "Estado", "Recomendación"};
         modeloInsumos = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -169,8 +154,8 @@ public class PanelPrediccionEquipamientoInsumos extends JPanel {
         tablaPrediccionInsumos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tablaPrediccionInsumos.getTableHeader().setReorderingAllowed(false);
         
-        // Configurar colores según prioridad
-        tablaPrediccionInsumos.setDefaultRenderer(Object.class, new PriorityTableCellRenderer());
+        // Configurar colores según estado
+        tablaPrediccionInsumos.setDefaultRenderer(Object.class, new RecommendationTableCellRenderer());
         
         JScrollPane scrollTabla = new JScrollPane(tablaPrediccionInsumos);
         scrollTabla.setPreferredSize(new Dimension(800, 300));
@@ -179,7 +164,7 @@ public class PanelPrediccionEquipamientoInsumos extends JPanel {
         areaRecomendacionesInsumos = new JTextArea(8, 50);
         areaRecomendacionesInsumos.setEditable(false);
         areaRecomendacionesInsumos.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        areaRecomendacionesInsumos.setBorder(new TitledBorder("Recomendaciones de Compra"));
+        areaRecomendacionesInsumos.setBorder(new TitledBorder("Recomendaciones de Reposición"));
         
         JScrollPane scrollRecomendaciones = new JScrollPane(areaRecomendacionesInsumos);
         
@@ -191,35 +176,8 @@ public class PanelPrediccionEquipamientoInsumos extends JPanel {
         return panel;
     }
     
-    private JPanel crearPanelAnalisis() {
-        JPanel panel = new JPanel(new BorderLayout());
-        
-        // Panel superior con controles
-        JPanel panelControles = new JPanel(new FlowLayout());
-        JButton btnGenerar = new JButton("Generar Análisis Completo");
-        JButton btnExportar = new JButton("Exportar Análisis");
-        
-        btnGenerar.addActionListener(e -> generarAnalisisCompleto());
-        btnExportar.addActionListener(e -> exportarAnalisisCompleto());
-        
-        panelControles.add(btnGenerar);
-        panelControles.add(btnExportar);
-        
-        // Área de análisis
-        areaAnalisisGeneral = new JTextArea(25, 80);
-        areaAnalisisGeneral.setEditable(false);
-        areaAnalisisGeneral.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        
-        JScrollPane scrollAnalisis = new JScrollPane(areaAnalisisGeneral);
-        
-        panel.add(panelControles, BorderLayout.NORTH);
-        panel.add(scrollAnalisis, BorderLayout.CENTER);
-        
-        return panel;
-    }
-    
     private void configurarLayout() {
-        setBorder(BorderFactory.createTitledBorder("Sistema de Predicción y Recomendaciones"));
+        setBorder(BorderFactory.createTitledBorder("Sistema de Predicción - Equipamientos e Insumos"));
     }
     
     private void cargarDatosIniciales() {
@@ -251,61 +209,30 @@ public class PanelPrediccionEquipamientoInsumos extends JPanel {
                 
                 try {
                     List<Equipamiento> equipamientos = controladorEquipamiento.listar();
-                    List<PrediccionEquipamiento> predicciones = new ArrayList<>();
+                    List<AnalisisEquipamiento> analisis = new ArrayList<>();
                     
                     for (Equipamiento equipo : equipamientos) {
-                        PrediccionEquipamiento prediccion = analizarEquipamiento(equipo);
-                        predicciones.add(prediccion);
+                        AnalisisEquipamiento analisisEquipo = analizarEquipamiento(equipo);
+                        analisis.add(analisisEquipo);
                     }
                     
-                    // Ordenar por prioridad
-                    predicciones.sort((p1, p2) -> p2.prioridad.compareTo(p1.prioridad));
+                    // Ordenar por prioridad de recomendación
+                    analisis.sort((a1, a2) -> obtenerPrioridadNumerica(a2.recomendacion) - obtenerPrioridadNumerica(a1.recomendacion));
                     
                     // Agregar a la tabla
-                    for (PrediccionEquipamiento p : predicciones) {
+                    for (AnalisisEquipamiento a : analisis) {
                         modeloEquipamientos.addRow(new Object[]{
-                            p.equipamiento.getIdEquipamiento(),
-                            p.equipamiento.getNombreEquipamiento() + " (" + p.equipamiento.getMarca() + ")",
-                            p.equipamiento.getEstado(),
-                            p.diasSinMantenimiento,
-                            p.prediccionMantenimiento,
-                            p.prioridad,
-                            p.recomendacion
+                            a.equipamiento.getIdEquipamiento(),
+                            a.equipamiento.getNombreEquipamiento() + " (" + a.equipamiento.getMarca() + ")",
+                            a.equipamiento.getEstado(),
+                            a.ultimaActividad,
+                            a.totalPrestamos,
+                            a.recomendacion
                         });
                     }
                     
                     // Generar recomendaciones detalladas
-                    recomendaciones.append("=== RECOMENDACIONES DE MANTENIMIENTO ===\n\n");
-                    
-                    long equiposUrgentes = predicciones.stream()
-                        .filter(p -> p.prioridad.equals("URGENTE"))
-                        .count();
-                    
-                    long equiposAlta = predicciones.stream()
-                        .filter(p -> p.prioridad.equals("ALTA"))
-                        .count();
-                    
-                    recomendaciones.append(String.format("• Equipos que requieren atención URGENTE: %d\n", equiposUrgentes));
-                    recomendaciones.append(String.format("• Equipos con prioridad ALTA: %d\n\n", equiposAlta));
-                    
-                    if (equiposUrgentes > 0) {
-                        recomendaciones.append("ACCIONES INMEDIATAS REQUERIDAS:\n");
-                        predicciones.stream()
-                            .filter(p -> p.prioridad.equals("URGENTE"))
-                            .forEach(p -> recomendaciones.append(String.format("- %s: %s\n", 
-                                p.equipamiento.getNombreEquipamiento(), p.recomendacion)));
-                        recomendaciones.append("\n");
-                    }
-                    
-                    // Estadísticas generales
-                    Map<String, Long> estadoStats = equipamientos.stream()
-                        .collect(java.util.stream.Collectors.groupingBy(
-                            Equipamiento::getEstado, 
-                            java.util.stream.Collectors.counting()));
-                    
-                    recomendaciones.append("ESTADÍSTICAS GENERALES:\n");
-                    estadoStats.forEach((estado, count) -> 
-                        recomendaciones.append(String.format("- %s: %d equipos\n", estado, count)));
+                    generarRecomendacionesEquipamientos(analisis, recomendaciones);
                     
                     SwingUtilities.invokeLater(() -> {
                         areaRecomendacionesEquipamientos.setText(recomendaciones.toString());
@@ -344,71 +271,30 @@ public class PanelPrediccionEquipamientoInsumos extends JPanel {
                 
                 try {
                     List<Insumo> insumos = controladorInsumo.listar();
-                    List<PrediccionInsumo> predicciones = new ArrayList<>();
+                    List<AnalisisInsumo> analisis = new ArrayList<>();
                     
                     for (Insumo insumo : insumos) {
-                        PrediccionInsumo prediccion = analizarInsumo(insumo);
-                        predicciones.add(prediccion);
+                        AnalisisInsumo analisisInsumo = analizarInsumo(insumo);
+                        analisis.add(analisisInsumo);
                     }
                     
-                    // Ordenar por prioridad
-                    predicciones.sort((p1, p2) -> p2.prioridad.compareTo(p1.prioridad));
+                    // Ordenar por prioridad de reposición
+                    analisis.sort((a1, a2) -> obtenerPrioridadNumerica(a2.recomendacion) - obtenerPrioridadNumerica(a1.recomendacion));
                     
                     // Agregar a la tabla
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                    for (PrediccionInsumo p : predicciones) {
-                        String fechaAgotamiento = p.fechaAgotamiento != null ? 
-                            sdf.format(p.fechaAgotamiento) : "N/A";
-                        
+                    for (AnalisisInsumo a : analisis) {
                         modeloInsumos.addRow(new Object[]{
-                            p.insumo.getIdInsumo(),
-                            p.insumo.getNombreInsumo(),
-                            p.insumo.getCantidad(),
-                            String.format("%.2f", p.consumoPromedioDiario),
-                            p.diasRestantes,
-                            fechaAgotamiento,
-                            p.prioridad,
-                            p.recomendacion
+                            a.insumo.getIdInsumo(),
+                            a.insumo.getNombreInsumo(),
+                            a.insumo.getCantidad(),
+                            String.format("%.2f", a.consumoDiario),
+                            a.estado,
+                            a.recomendacion
                         });
                     }
                     
-                    // Generar recomendaciones de compra
-                    recomendaciones.append("=== RECOMENDACIONES DE COMPRA ===\n\n");
-                    
-                    long insumosUrgentes = predicciones.stream()
-                        .filter(p -> p.prioridad.equals("URGENTE"))
-                        .count();
-                    
-                    long insumosAlta = predicciones.stream()
-                        .filter(p -> p.prioridad.equals("ALTA"))
-                        .count();
-                    
-                    recomendaciones.append(String.format("• Insumos que requieren compra URGENTE: %d\n", insumosUrgentes));
-                    recomendaciones.append(String.format("• Insumos con prioridad ALTA: %d\n\n", insumosAlta));
-                    
-                    if (insumosUrgentes > 0) {
-                        recomendaciones.append("COMPRAS INMEDIATAS REQUERIDAS:\n");
-                        predicciones.stream()
-                            .filter(p -> p.prioridad.equals("URGENTE"))
-                            .forEach(p -> recomendaciones.append(String.format("- %s: %s\n", 
-                                p.insumo.getNombreInsumo(), p.recomendacion)));
-                        recomendaciones.append("\n");
-                    }
-                    
-                    // Presupuesto estimado
-                    double presupuestoEstimado = calcularPresupuestoEstimado(predicciones);
-                    recomendaciones.append(String.format("PRESUPUESTO ESTIMADO MENSUAL: $%.2f\n\n", presupuestoEstimado));
-                    
-                    // Análisis por categoría
-                    Map<String, List<PrediccionInsumo>> categorias = predicciones.stream()
-                        .collect(java.util.stream.Collectors.groupingBy(p -> p.insumo.getCategoria()));
-                    
-                    recomendaciones.append("ANÁLISIS POR CATEGORÍA:\n");
-                    categorias.forEach((categoria, lista) -> {
-                        long urgentes = lista.stream().filter(p -> p.prioridad.equals("URGENTE")).count();
-                        recomendaciones.append(String.format("- %s: %d insumos (%d urgentes)\n", 
-                            categoria, lista.size(), urgentes));
-                    });
+                    // Generar recomendaciones detalladas
+                    generarRecomendacionesInsumos(analisis, recomendaciones);
                     
                     SwingUtilities.invokeLater(() -> {
                         areaRecomendacionesInsumos.setText(recomendaciones.toString());
@@ -435,157 +321,279 @@ public class PanelPrediccionEquipamientoInsumos extends JPanel {
         worker.execute();
     }
     
-    private PrediccionEquipamiento analizarEquipamiento(Equipamiento equipo) {
-        PrediccionEquipamiento prediccion = new PrediccionEquipamiento();
-        prediccion.equipamiento = equipo;
+    private AnalisisEquipamiento analizarEquipamiento(Equipamiento equipo) {
+        AnalisisEquipamiento analisis = new AnalisisEquipamiento();
+        analisis.equipamiento = equipo;
         
         try {
-            // Analizar historial del equipamiento
+            // Obtener historial del equipamiento
             List<Object[]> historial = controladorHistorialEquipamiento
                 .buscarHistorialCompletoEquipamiento(equipo.getIdEquipamiento());
             
-            // Calcular días desde último mantenimiento
-            prediccion.diasSinMantenimiento = calcularDiasSinMantenimiento(historial);
+            // Contar préstamos realizados
+            analisis.totalPrestamos = contarPrestamosEquipamiento(equipo.getIdEquipamiento());
             
-            // Determinar prioridad y recomendación basada en estado y historial
-            if (equipo.getEstado().equals("Dañado") || equipo.getEstado().equals("En reparación")) {
-                prediccion.prioridad = "URGENTE";
-                prediccion.prediccionMantenimiento = "Inmediato";
-                prediccion.recomendacion = "Reparación urgente requerida";
-            } else if (prediccion.diasSinMantenimiento > 180) { // 6 meses
-                prediccion.prioridad = "URGENTE";
-                prediccion.prediccionMantenimiento = "Inmediato";
-                prediccion.recomendacion = "Mantenimiento preventivo urgente";
-            } else if (prediccion.diasSinMantenimiento > 120) { // 4 meses
-                prediccion.prioridad = "ALTA";
-                prediccion.prediccionMantenimiento = "1-2 semanas";
-                prediccion.recomendacion = "Programar mantenimiento preventivo";
-            } else if (prediccion.diasSinMantenimiento > 90) { // 3 meses
-                prediccion.prioridad = "MEDIA";
-                prediccion.prediccionMantenimiento = "1 mes";
-                prediccion.recomendacion = "Monitorear estado y programar revisión";
+            // Determinar última actividad
+            analisis.ultimaActividad = obtenerUltimaActividad(historial);
+            
+            // Analizar estado del equipamiento y historial de mantenimiento
+            String estado = equipo.getEstado();
+            String ultimaCategoria = obtenerUltimaCategoriaMantenimiento(historial);
+            int diasSinActividad = calcularDiasSinActividad(historial);
+            
+            // Determinar recomendación basada en estado, historial y préstamos
+            if (estado.equals("De Baja")) {
+                analisis.recomendacion = "Dar Baja";
+            } else if (estado.equals("No disponible")) {
+                analisis.recomendacion = "Reparación";
+            } else if (estado.equals("Uso Medio")) {
+                if (ultimaCategoria != null && ultimaCategoria.equals("Reparación") && diasSinActividad > 60) {
+                    analisis.recomendacion = "Reparación";
+                } else if (diasSinActividad > 180 || analisis.totalPrestamos > 50) {
+                    analisis.recomendacion = "Reparación";
+                } else {
+                    analisis.recomendacion = "Normal";
+                }
+            } else if (estado.equals("Nuevo")) {
+                if (analisis.totalPrestamos > 20) {
+                    analisis.recomendacion = "Normal";
+                } else {
+                    analisis.recomendacion = "Normal";
+                }
             } else {
-                prediccion.prioridad = "BAJA";
-                prediccion.prediccionMantenimiento = "2-3 meses";
-                prediccion.recomendacion = "Estado óptimo, continuar monitoreo";
+                analisis.recomendacion = "Normal";
             }
             
-            // Ajustar según disponibilidad
-            if (equipo.getDisponibilidad().equals("No Disponible")) {
-                prediccion.prioridad = "URGENTE";
-                prediccion.recomendacion += " - Equipo fuera de servicio";
-            }
-            
-        } catch (SQLException e) {
-            prediccion.diasSinMantenimiento = 0;
-            prediccion.prioridad = "DESCONOCIDO";
-            prediccion.prediccionMantenimiento = "Sin datos";
-            prediccion.recomendacion = "Error al analizar historial";
-        }
-        
-        return prediccion;
-    }
-    
-    private PrediccionInsumo analizarInsumo(Insumo insumo) {
-        PrediccionInsumo prediccion = new PrediccionInsumo();
-        prediccion.insumo = insumo;
-        
-        try {
-            // Calcular consumo promedio basado en préstamos
-            prediccion.consumoPromedioDiario = calcularConsumoPromedio(insumo.getIdInsumo());
-            
-            // Calcular días restantes
-            if (prediccion.consumoPromedioDiario > 0) {
-                prediccion.diasRestantes = (int) (insumo.getCantidad() / prediccion.consumoPromedioDiario);
-                
-                // Calcular fecha de agotamiento
-                Calendar cal = Calendar.getInstance();
-                cal.add(Calendar.DAY_OF_MONTH, prediccion.diasRestantes);
-                prediccion.fechaAgotamiento = cal.getTime();
-            } else {
-                prediccion.diasRestantes = Integer.MAX_VALUE;
-                prediccion.fechaAgotamiento = null;
-            }
-            
-            // Determinar prioridad
-            if (insumo.getCantidad() == 0) {
-                prediccion.prioridad = "URGENTE";
-                prediccion.recomendacion = "AGOTADO - Compra inmediata";
-            } else if (prediccion.diasRestantes <= 7) {
-                prediccion.prioridad = "URGENTE";
-                prediccion.recomendacion = "Comprar inmediatamente - Se agota en menos de 1 semana";
-            } else if (prediccion.diasRestantes <= 15) {
-                prediccion.prioridad = "ALTA";
-                prediccion.recomendacion = "Programar compra urgente - Se agota en 2 semanas";
-            } else if (prediccion.diasRestantes <= 30) {
-                prediccion.prioridad = "MEDIA";
-                prediccion.recomendacion = "Planificar compra - Se agota en 1 mes";
-            } else if (prediccion.diasRestantes <= 60) {
-                prediccion.prioridad = "BAJA";
-                prediccion.recomendacion = "Monitorear consumo - Se agota en 2 meses";
-            } else {
-                prediccion.prioridad = "BAJA";
-                prediccion.recomendacion = "Stock suficiente - Monitoreo rutinario";
-            }
-            
-            // Ajustar cantidad recomendada de compra
-            if (prediccion.consumoPromedioDiario > 0) {
-                int cantidadMensual = (int) (prediccion.consumoPromedioDiario * 30);
-                int cantidadRecomendada = Math.max(cantidadMensual * 2, 50); // Mínimo 2 meses de stock
-                
-                if (!prediccion.prioridad.equals("BAJA")) {
-                    prediccion.recomendacion += String.format(" (Cantidad sugerida: %d unidades)", cantidadRecomendada);
+            // Ajustar recomendación basada en historial de mantenimiento
+            if (ultimaCategoria != null) {
+                switch (ultimaCategoria) {
+                    case "Restauración":
+                        if (diasSinActividad > 45) {
+                            analisis.recomendacion = "Reparación";
+                        }
+                        break;
+                    case "Actualización":
+                        if (diasSinActividad > 90 && !analisis.recomendacion.equals("Reparación")) {
+                            analisis.recomendacion = "Normal";
+                        }
+                        break;
                 }
             }
             
-        } catch (Exception e) {
-            prediccion.consumoPromedioDiario = 0;
-            prediccion.diasRestantes = 0;
-            prediccion.prioridad = "DESCONOCIDO";
-            prediccion.recomendacion = "Error al analizar consumo";
+        } catch (SQLException e) {
+            analisis.ultimaActividad = "Sin datos";
+            analisis.totalPrestamos = 0;
+            analisis.recomendacion = "Normal";
         }
         
-        return prediccion;
+        return analisis;
     }
     
-    private int calcularDiasSinMantenimiento(List<Object[]> historial) {
-        if (historial.isEmpty()) {
-            return 365; // Si no hay historial, asumir que necesita mantenimiento
+    private AnalisisInsumo analizarInsumo(Insumo insumo) {
+        AnalisisInsumo analisis = new AnalisisInsumo();
+        analisis.insumo = insumo;
+        
+        try {
+            // Calcular consumo diario promedio
+            analisis.consumoDiario = calcularConsumoPromedio(insumo.getIdInsumo());
+            
+            int cantidadActual = insumo.getCantidad();
+            
+            // Determinar estado y recomendación
+            if (cantidadActual == 0) {
+                analisis.estado = "Agotado";
+                analisis.recomendacion = "Reposición Urgente";
+            } else if (cantidadActual < 10) {
+                analisis.estado = "Crítico";
+                analisis.recomendacion = "Reposición Urgente";
+            } else if (cantidadActual < 20) {
+                analisis.estado = "Bajo";
+                analisis.recomendacion = "Reposición Necesaria";
+            } else if (cantidadActual < 50) {
+                analisis.estado = "Aceptable";
+                analisis.recomendacion = "Monitorear";
+            } else {
+                analisis.estado = "Suficiente";
+                analisis.recomendacion = "Normal";
+            }
+            
+        } catch (Exception e) {
+            analisis.consumoDiario = 0;
+            analisis.estado = "Sin datos";
+            analisis.recomendacion = "Normal";
         }
         
-        // Buscar el último mantenimiento
-        Date ultimoMantenimiento = null;
+        return analisis;
+    }
+    
+    private void generarRecomendacionesEquipamientos(List<AnalisisEquipamiento> analisis, StringBuilder recomendaciones) {
+        recomendaciones.append("=== RECOMENDACIONES DE EQUIPAMIENTOS ===\n\n");
+        
+        long equiposReparacion = analisis.stream().filter(a -> a.recomendacion.equals("Reparación")).count();
+        long equiposBaja = analisis.stream().filter(a -> a.recomendacion.equals("Dar Baja")).count();
+        long equiposNormal = analisis.stream().filter(a -> a.recomendacion.equals("Normal")).count();
+        
+        recomendaciones.append(String.format("• Equipos que necesitan REPARACIÓN: %d\n", equiposReparacion));
+        recomendaciones.append(String.format("• Equipos para DAR DE BAJA: %d\n", equiposBaja));
+        recomendaciones.append(String.format("• Equipos en estado NORMAL: %d\n\n", equiposNormal));
+        
+        if (equiposReparacion > 0) {
+            recomendaciones.append("EQUIPOS QUE REQUIEREN REPARACIÓN:\n");
+            analisis.stream()
+                .filter(a -> a.recomendacion.equals("Reparación"))
+                .forEach(a -> recomendaciones.append(String.format("- %s (Estado: %s, Préstamos: %d)\n", 
+                    a.equipamiento.getNombreEquipamiento(), a.equipamiento.getEstado(), a.totalPrestamos)));
+            recomendaciones.append("\n");
+        }
+        
+        if (equiposBaja > 0) {
+            recomendaciones.append("EQUIPOS PARA DAR DE BAJA:\n");
+            analisis.stream()
+                .filter(a -> a.recomendacion.equals("Dar Baja"))
+                .forEach(a -> recomendaciones.append(String.format("- %s (Estado: %s)\n", 
+                    a.equipamiento.getNombreEquipamiento(), a.equipamiento.getEstado())));
+            recomendaciones.append("\n");
+        }
+        
+        recomendaciones.append("RESUMEN GENERAL:\n");
+        recomendaciones.append(String.format("Total de equipamientos analizados: %d\n", analisis.size()));
+        recomendaciones.append(String.format("Equipos que requieren atención: %d\n", equiposReparacion + equiposBaja));
+    }
+    
+    private void generarRecomendacionesInsumos(List<AnalisisInsumo> analisis, StringBuilder recomendaciones) {
+        recomendaciones.append("=== RECOMENDACIONES DE INSUMOS ===\n\n");
+        
+        long insumosUrgente = analisis.stream().filter(a -> a.recomendacion.equals("Reposición Urgente")).count();
+        long insumosNecesaria = analisis.stream().filter(a -> a.recomendacion.equals("Reposición Necesaria")).count();
+        
+        recomendaciones.append(String.format("• Insumos con REPOSICIÓN URGENTE: %d\n", insumosUrgente));
+        recomendaciones.append(String.format("• Insumos con REPOSICIÓN NECESARIA: %d\n\n", insumosNecesaria));
+        
+        if (insumosUrgente > 0) {
+            recomendaciones.append("INSUMOS PARA REPOSICIÓN URGENTE:\n");
+            analisis.stream()
+                .filter(a -> a.recomendacion.equals("Reposición Urgente"))
+                .forEach(a -> recomendaciones.append(String.format("- %s (Cantidad: %d, Consumo diario: %.2f)\n", 
+                    a.insumo.getNombreInsumo(), a.insumo.getCantidad(), a.consumoDiario)));
+            recomendaciones.append("\n");
+        }
+        
+        if (insumosNecesaria > 0) {
+            recomendaciones.append("INSUMOS PARA REPOSICIÓN NECESARIA:\n");
+            analisis.stream()
+                .filter(a -> a.recomendacion.equals("Reposición Necesaria"))
+                .forEach(a -> recomendaciones.append(String.format("- %s (Cantidad: %d, Consumo diario: %.2f)\n", 
+                    a.insumo.getNombreInsumo(), a.insumo.getCantidad(), a.consumoDiario)));
+            recomendaciones.append("\n");
+        }
+        
+        recomendaciones.append("ANÁLISIS POR CATEGORÍA:\n");
+        Map<String, List<AnalisisInsumo>> categorias = analisis.stream()
+            .collect(java.util.stream.Collectors.groupingBy(a -> a.insumo.getCategoria()));
+        
+        categorias.forEach((categoria, lista) -> {
+            long criticos = lista.stream().filter(a -> a.estado.equals("Crítico") || a.estado.equals("Agotado")).count();
+            recomendaciones.append(String.format("- %s: %d insumos (%d críticos)\n", categoria, lista.size(), criticos));
+        });
+    }
+    
+    // Métodos auxiliares
+    private int contarPrestamosEquipamiento(int idEquipamiento) {
+    try {
+        List<Prestamo> prestamos = controladorPrestamo.listar();
+        int contador = 0;
+
+        for (Prestamo prestamo : prestamos) {
+            List<Map<String, Object>> equipos = controladorPrestamo
+                .obtenerEquipamientosPrestamoConCantidades(prestamo.getIdPrestamo());
+
+            for (Map<String, Object> equipo : equipos) {
+                int id = (int) equipo.get("id_equipamiento");
+                if (id == idEquipamiento) {
+                    contador++;
+                    break; // No es necesario revisar más si ya lo contiene
+                }
+            }
+        }
+        return contador;
+    } catch (SQLException e) {
+        System.err.println("Error al contar préstamos para equipamiento " + idEquipamiento + ": " + e.getMessage());
+        return 0;
+    }
+}
+
+    
+    private String obtenerUltimaActividad(List<Object[]> historial) {
+        if (historial.isEmpty()) {
+            return "Sin actividad";
+        }
+        
+        Date ultimaFecha = null;
+        for (Object[] registro : historial) {
+            Date fecha = (Date) registro[2];
+            if (ultimaFecha == null || fecha.after(ultimaFecha)) {
+                ultimaFecha = fecha;
+            }
+        }
+        
+        if (ultimaFecha != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            return sdf.format(ultimaFecha);
+        }
+        
+        return "Sin fecha";
+    }
+    
+    private String obtenerUltimaCategoriaMantenimiento(List<Object[]> historial) {
+        String ultimaCategoria = null;
+        Date ultimaFecha = null;
+        
         for (Object[] registro : historial) {
             String categoria = (String) registro[3];
             Date fecha = (Date) registro[2];
             
-            if (categoria != null && categoria.toLowerCase().contains("mantenimiento")) {
-                if (ultimoMantenimiento == null || fecha.after(ultimoMantenimiento)) {
-                    ultimoMantenimiento = fecha;
+            if (categoria != null && (categoria.equals("Reparación") || 
+                                     categoria.equals("Actualización") || 
+                                     categoria.equals("Restauración"))) {
+                if (ultimaFecha == null || fecha.after(ultimaFecha)) {
+                    ultimaFecha = fecha;
+                    ultimaCategoria = categoria;
                 }
             }
         }
         
-        if (ultimoMantenimiento == null) {
-            return 365; // No hay registro de mantenimiento
+        return ultimaCategoria;
+    }
+    
+    private int calcularDiasSinActividad(List<Object[]> historial) {
+        if (historial.isEmpty()) {
+            return 365;
         }
         
-        long diffMs = System.currentTimeMillis() - ultimoMantenimiento.getTime();
+        Date ultimaActividad = null;
+        for (Object[] registro : historial) {
+            Date fecha = (Date) registro[2];
+            if (ultimaActividad == null || fecha.after(ultimaActividad)) {
+                ultimaActividad = fecha;
+            }
+        }
+        
+        if (ultimaActividad == null) {
+            return 365;
+        }
+        
+        long diffMs = System.currentTimeMillis() - ultimaActividad.getTime();
         return (int) TimeUnit.MILLISECONDS.toDays(diffMs);
     }
     
     private double calcularConsumoPromedio(int idInsumo) throws SQLException {
-        // Obtener préstamos de los últimos 30 días
         List<Prestamo> prestamos = controladorPrestamo.listar();
         
-        // Filtrar préstamos recientes y calcular consumo
         Calendar hace30Dias = Calendar.getInstance();
         hace30Dias.add(Calendar.DAY_OF_MONTH, -30);
         
-        double consumoTotal = 0;
+        int totalConsumo = 0;
         int diasConConsumo = 0;
-        
-        Map<java.sql.Date, Integer> consumoPorDia = new HashMap<>();
         
         for (Prestamo prestamo : prestamos) {
             if (prestamo.getFechaPrestamo().after(hace30Dias.getTime())) {
@@ -594,8 +602,8 @@ public class PanelPrediccionEquipamientoInsumos extends JPanel {
                         .obtenerInsumosPrestamoConCantidades(prestamo.getIdPrestamo());
                     
                     if (insumos.containsKey(idInsumo)) {
-                        int cantidad = insumos.get(idInsumo);
-                        consumoPorDia.merge(prestamo.getFechaPrestamo(), cantidad, Integer::sum);
+                        totalConsumo += insumos.get(idInsumo);
+                        diasConConsumo++;
                     }
                 } catch (SQLException e) {
                     // Continuar con el siguiente préstamo
@@ -603,431 +611,47 @@ public class PanelPrediccionEquipamientoInsumos extends JPanel {
             }
         }
         
-        if (consumoPorDia.isEmpty()) {
-            return 0; // No hay consumo registrado
+        if (diasConConsumo == 0) {
+            return 0;
         }
         
-        // Calcular promedio
-        int totalConsumo = consumoPorDia.values().stream().mapToInt(Integer::intValue).sum();
-        return (double) totalConsumo / 30.0; // Promedio en 30 días
+        return (double) totalConsumo / 30.0; // Promedio diario en 30 días
     }
     
-    private double calcularPresupuestoEstimado(List<PrediccionInsumo> predicciones) {
-        // Estimación básica de presupuesto mensual
-        double presupuesto = 0;
-        
-        for (PrediccionInsumo p : predicciones) {
-            if (p.prioridad.equals("URGENTE") || p.prioridad.equals("ALTA")) {
-                // Precio estimado por categoría (valores de ejemplo)
-                double precioEstimado = obtenerPrecioEstimado(p.insumo.getCategoria());
-                double cantidadMensual = p.consumoPromedioDiario * 30;
-                presupuesto += precioEstimado * cantidadMensual;
-            }
-        }
-        
-        return presupuesto;
-    }
-    
-    private double obtenerPrecioEstimado(String categoria) {
-        // Precios estimados por categoría (valores de ejemplo)
-        switch (categoria.toLowerCase()) {
-            case "químicos": return 15.0;
-            case "vidriería": return 8.0;
-            case "reactivos": return 25.0;
-            case "consumibles": return 5.0;
-            case "materiales": return 10.0;
-            default: return 12.0;
+    private int obtenerPrioridadNumerica(String recomendacion) {
+        switch (recomendacion) {
+            case "Reposición Urgente":
+            case "Dar Baja":
+                return 4;
+            case "Reparación":
+            case "Reposición Necesaria":
+                return 3;
+            case "Monitorear":
+                return 2;
+            case "Normal":
+                return 1;
+            default:
+                return 0;
         }
     }
     
-    private void generarAnalisisCompleto() {
-        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-            @Override
-            protected Void doInBackground() throws Exception {
-                progressBar.setString("Generando análisis completo...");
-                progressBar.setIndeterminate(true);
-                
-                StringBuilder analisis = new StringBuilder();
-                
-                try {
-                    // Título del análisis
-                    analisis.append("=".repeat(80)).append("\n");
-                    analisis.append("           ANÁLISIS COMPLETO DEL SISTEMA DE LABORATORIO\n");
-                    analisis.append("=".repeat(80)).append("\n\n");
-                    
-                    // Fecha del análisis
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-                    analisis.append("Fecha de análisis: ").append(sdf.format(new Date())).append("\n\n");
-                    
-                    // 1. RESUMEN EJECUTIVO
-                    analisis.append("1. RESUMEN EJECUTIVO\n");
-                    analisis.append("-".repeat(50)).append("\n");
-                    
-                    List<Equipamiento> equipamientos = controladorEquipamiento.listar();
-                    List<Insumo> insumos = controladorInsumo.listar();
-                    List<Prestamo> prestamos = controladorPrestamo.listar();
-                    
-                    // Estadísticas generales
-                    analisis.append(String.format("• Total de equipamientos: %d\n", equipamientos.size()));
-                    analisis.append(String.format("• Total de insumos: %d\n", insumos.size()));
-                    analisis.append(String.format("• Total de préstamos registrados: %d\n", prestamos.size()));
-                    
-                    // Estados de equipamientos
-                    Map<String, Long> estadosEquipos = equipamientos.stream()
-                        .collect(java.util.stream.Collectors.groupingBy(
-                            Equipamiento::getEstado, 
-                            java.util.stream.Collectors.counting()));
-                    
-                    analisis.append("\nEstado de equipamientos:\n");
-                    estadosEquipos.forEach((estado, count) -> 
-                        analisis.append(String.format("  - %s: %d (%.1f%%)\n", 
-                            estado, count, (count * 100.0) / equipamientos.size())));
-                    
-                    // 2. ANÁLISIS DE EQUIPAMIENTOS
-                    analisis.append("\n\n2. ANÁLISIS DETALLADO DE EQUIPAMIENTOS\n");
-                    analisis.append("-".repeat(50)).append("\n");
-                    
-                    // Equipos que requieren atención urgente
-                    List<Equipamiento> equiposUrgentes = equipamientos.stream()
-                        .filter(e -> e.getEstado().equals("Dañado") || 
-                                   e.getEstado().equals("En reparación") ||
-                                   e.getDisponibilidad().equals("No Disponible"))
-                        .collect(java.util.stream.Collectors.toList());
-                    
-                    analisis.append(String.format("Equipos que requieren atención urgente: %d\n", equiposUrgentes.size()));
-                    if (!equiposUrgentes.isEmpty()) {
-                        analisis.append("Lista de equipos urgentes:\n");
-                        for (Equipamiento e : equiposUrgentes) {
-                            analisis.append(String.format("  • %s (%s) - Estado: %s, Disponibilidad: %s\n",
-                                e.getNombreEquipamiento(), e.getMarca(), e.getEstado(), e.getDisponibilidad()));
-                        }
-                    }
-                    
-                    // Análisis por ubicación
-                    Map<Integer, Long> equiposPorUbicacion = equipamientos.stream()
-                        .collect(java.util.stream.Collectors.groupingBy(
-                            Equipamiento::getIdLaboratorio, 
-                            java.util.stream.Collectors.counting()));
-
-                    
-                    analisis.append("\nDistribución por ubicación:\n");
-                    equiposPorUbicacion.forEach((ubicacion, count) -> 
-                        analisis.append(String.format("  - %s: %d equipos\n", ubicacion, count)));
-                    
-                    // 3. ANÁLISIS DE INSUMOS
-                    analisis.append("\n\n3. ANÁLISIS DETALLADO DE INSUMOS\n");
-                    analisis.append("-".repeat(50)).append("\n");
-                    
-                    // Insumos con stock crítico
-                    List<Insumo> insumosAgotados = insumos.stream()
-                        .filter(i -> i.getCantidad() == 0)
-                        .collect(java.util.stream.Collectors.toList());
-                    
-                    List<Insumo> insumosBajos = insumos.stream()
-                        .filter(i -> i.getCantidad() > 0 && i.getCantidad() <= 10)
-                        .collect(java.util.stream.Collectors.toList());
-                    
-                    analisis.append(String.format("Insumos agotados: %d\n", insumosAgotados.size()));
-                    analisis.append(String.format("Insumos con stock bajo (≤10): %d\n", insumosBajos.size()));
-                    
-                    if (!insumosAgotados.isEmpty()) {
-                        analisis.append("\nInsumos AGOTADOS (requieren compra inmediata):\n");
-                        for (Insumo i : insumosAgotados) {
-                            analisis.append(String.format("  • %s (Categoría: %s)\n",
-                                i.getNombreInsumo(), i.getCategoria()));
-                        }
-                    }
-                    
-                    if (!insumosBajos.isEmpty()) {
-                        analisis.append("\nInsumos con STOCK BAJO:\n");
-                        for (Insumo i : insumosBajos) {
-                            analisis.append(String.format("  • %s - Cantidad: %d (Categoría: %s)\n",
-                                i.getNombreInsumo(), i.getCantidad(), i.getCategoria()));
-                        }
-                    }
-                    
-                    // Análisis por categoría
-                    Map<String, List<Insumo>> insumosPorCategoria = insumos.stream()
-                        .collect(java.util.stream.Collectors.groupingBy(Insumo::getCategoria));
-                    
-                    analisis.append("\nAnálisis por categoría:\n");
-                    insumosPorCategoria.forEach((categoria, lista) -> {
-                        int totalCantidad = lista.stream().mapToInt(Insumo::getCantidad).sum();
-                        long agotados = lista.stream().filter(i -> i.getCantidad() == 0).count();
-                        analisis.append(String.format("  - %s: %d insumos, Stock total: %d, Agotados: %d\n",
-                            categoria, lista.size(), totalCantidad, agotados));
-                    });
-                    
-                    // 4. ANÁLISIS DE ACTIVIDAD (PRÉSTAMOS)
-                    analisis.append("\n\n4. ANÁLISIS DE ACTIVIDAD DEL LABORATORIO\n");
-                    analisis.append("-".repeat(50)).append("\n");
-                    
-                    // Préstamos por mes (últimos 6 meses)
-                    Calendar hace6Meses = Calendar.getInstance();
-                    hace6Meses.add(Calendar.MONTH, -6);
-                    
-                    List<Prestamo> prestamosRecientes = prestamos.stream()
-                        .filter(p -> p.getFechaPrestamo().after(hace6Meses.getTime()))
-                        .collect(java.util.stream.Collectors.toList());
-                    
-                    analisis.append(String.format("Préstamos en los últimos 6 meses: %d\n", prestamosRecientes.size()));
-                    analisis.append(String.format("Promedio mensual: %.1f préstamos\n", prestamosRecientes.size() / 6.0));
-                    
-                    // Actividad por estado
-                    Map<String, Long> prestamosPorEstado = prestamosRecientes.stream()
-                        .collect(java.util.stream.Collectors.groupingBy(
-                            Prestamo::getEstadoPrestamo, 
-                            java.util.stream.Collectors.counting()));
-                    
-                    analisis.append("\nEstado de préstamos recientes:\n");
-                    prestamosPorEstado.forEach((estado, count) -> 
-                        analisis.append(String.format("  - %s: %d\n", estado, count)));
-                    
-                    // 5. RECOMENDACIONES PRIORITARIAS
-                    analisis.append("\n\n5. RECOMENDACIONES PRIORITARIAS\n");
-                    analisis.append("-".repeat(50)).append("\n");
-                    
-                    int prioridad = 1;
-                    
-                    if (!equiposUrgentes.isEmpty()) {
-                        analisis.append(String.format("%d. EQUIPAMIENTOS - ACCIÓN INMEDIATA\n", prioridad++));
-                        analisis.append("   Revisar y reparar equipos en estado crítico.\n");
-                        analisis.append("   Tiempo estimado: 1-2 semanas\n\n");
-                    }
-                    
-                    if (!insumosAgotados.isEmpty()) {
-                        analisis.append(String.format("%d. INSUMOS - COMPRA URGENTE\n", prioridad++));
-                        analisis.append("   Adquirir insumos agotados para mantener operatividad.\n");
-                        analisis.append("   Tiempo estimado: 1 semana\n\n");
-                    }
-                    
-                    if (!insumosBajos.isEmpty()) {
-                        analisis.append(String.format("%d. INVENTARIO - PLANIFICACIÓN\n", prioridad++));
-                        analisis.append("   Establecer puntos de reorden para evitar agotamientos.\n");
-                        analisis.append("   Implementar sistema de alertas automáticas.\n\n");
-                    }
-                    
-                    analisis.append(String.format("%d. MANTENIMIENTO PREVENTIVO\n", prioridad++));
-                    analisis.append("   Establecer calendario de mantenimiento regular.\n");
-                    analisis.append("   Frecuencia recomendada: cada 3 meses\n\n");
-                    
-                    analisis.append(String.format("%d. OPTIMIZACIÓN DE PROCESOS\n", prioridad++));
-                    analisis.append("   Implementar sistema de predicción automática.\n");
-                    analisis.append("   Capacitar personal en gestión preventiva.\n\n");
-                    
-                    // 6. PROYECCIONES Y TENDENCIAS
-                    analisis.append("\n6. PROYECCIONES Y TENDENCIAS\n");
-                    analisis.append("-".repeat(50)).append("\n");
-                    
-                    // Tendencia de uso
-                    if (prestamosRecientes.size() > 0) {
-                        double tendenciaMensual = prestamosRecientes.size() / 6.0;
-                        analisis.append(String.format("Proyección de préstamos próximos 3 meses: %.0f\n", tendenciaMensual * 3));
-                        
-                        // Cálculo de eficiencia
-                        long prestamosDevueltos = prestamosRecientes.stream()
-                            .filter(p -> p.getEstadoPrestamo().equals("Devuelto"))
-                            .count();
-                        
-                        if (prestamosRecientes.size() > 0) {
-                            double eficiencia = (prestamosDevueltos * 100.0) / prestamosRecientes.size();
-                            analisis.append(String.format("Eficiencia de devoluciones: %.1f%%\n", eficiencia));
-                            
-                            if (eficiencia < 80) {
-                                analisis.append("   ⚠ ALERTA: Eficiencia de devoluciones baja\n");
-                            }
-                        }
-                    }
-                    
-                    // 7. INDICADORES CLAVE
-                    analisis.append("\n\n7. INDICADORES CLAVE DE RENDIMIENTO (KPI)\n");
-                    analisis.append("-".repeat(50)).append("\n");
-                    
-                    double disponibilidadEquipos = equipamientos.stream()
-                        .mapToDouble(e -> e.getDisponibilidad().equals("Disponible") ? 1.0 : 0.0)
-                        .average().orElse(0.0) * 100;
-                    
-                    double stockAdecuado = insumos.stream()
-                        .mapToDouble(i -> i.getCantidad() > 10 ? 1.0 : 0.0)
-                        .average().orElse(0.0) * 100;
-                    
-                    analisis.append(String.format("• Disponibilidad de equipos: %.1f%%\n", disponibilidadEquipos));
-                    analisis.append(String.format("• Nivel de stock adecuado: %.1f%%\n", stockAdecuado));
-                    analisis.append(String.format("• Equipos operativos: %d de %d\n", 
-                        (int)equipamientos.stream().filter(e -> !e.getEstado().equals("Dañado")).count(),
-                        equipamientos.size()));
-                    
-                    // Estado general del laboratorio
-                    analisis.append("\n\n8. EVALUACIÓN GENERAL DEL LABORATORIO\n");
-                    analisis.append("-".repeat(50)).append("\n");
-                    
-                    double puntuacionGeneral = (disponibilidadEquipos + stockAdecuado) / 2;
-                    String estadoGeneral;
-                    
-                    if (puntuacionGeneral >= 80) {
-                        estadoGeneral = "EXCELENTE";
-                    } else if (puntuacionGeneral >= 60) {
-                        estadoGeneral = "BUENO";
-                    } else if (puntuacionGeneral >= 40) {
-                        estadoGeneral = "REGULAR";
-                    } else {
-                        estadoGeneral = "CRÍTICO";
-                    }
-                    
-                    analisis.append(String.format("Estado general: %s (%.1f/100)\n", estadoGeneral, puntuacionGeneral));
-                    
-                    if (puntuacionGeneral < 60) {
-                        analisis.append("\n⚠ RECOMENDACIÓN: Se requiere atención inmediata para mejorar\n");
-                        analisis.append("   la operatividad del laboratorio.\n");
-                    }
-                    
-                    analisis.append("\n").append("=".repeat(80)).append("\n");
-                    analisis.append("                    FIN DEL ANÁLISIS\n");
-                    analisis.append("=".repeat(80));
-                    
-                } catch (SQLException e) {
-                    analisis.append("Error al generar análisis completo: ").append(e.getMessage());
-                }
-                
-                SwingUtilities.invokeLater(() -> {
-                    areaAnalisisGeneral.setText(analisis.toString());
-                    areaAnalisisGeneral.setCaretPosition(0);
-                });
-                
-                return null;
-            }
-            
-            @Override
-            protected void done() {
-                progressBar.setIndeterminate(false);
-                progressBar.setString("Análisis completo generado");
-            }
-        };
-        worker.execute();
-    }
-    
-    private void exportarReporteEquipamientos() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Guardar Reporte de Equipamientos");
-        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Archivos de texto", "txt"));
-        
-        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-            try {
-                java.io.File file = fileChooser.getSelectedFile();
-                if (!file.getName().endsWith(".txt")) {
-                    file = new java.io.File(file.getAbsolutePath() + ".txt");
-                }
-                
-                StringBuilder reporte = new StringBuilder();
-                reporte.append("REPORTE DE PREDICCIONES - EQUIPAMIENTOS\n");
-                reporte.append("Fecha: ").append(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date())).append("\n");
-                reporte.append("="+ "=".repeat(60)).append("\n\n");
-                
-                // Datos de la tabla
-                for (int i = 0; i < modeloEquipamientos.getRowCount(); i++) {
-                    reporte.append(String.format("ID: %s\n", modeloEquipamientos.getValueAt(i, 0)));
-                    reporte.append(String.format("Equipamiento: %s\n", modeloEquipamientos.getValueAt(i, 1)));
-                    reporte.append(String.format("Estado: %s\n", modeloEquipamientos.getValueAt(i, 2)));
-                    reporte.append(String.format("Días sin mantenimiento: %s\n", modeloEquipamientos.getValueAt(i, 3)));
-                    reporte.append(String.format("Predicción: %s\n", modeloEquipamientos.getValueAt(i, 4)));
-                    reporte.append(String.format("Prioridad: %s\n", modeloEquipamientos.getValueAt(i, 5)));
-                    reporte.append(String.format("Recomendación: %s\n", modeloEquipamientos.getValueAt(i, 6)));
-                    reporte.append("-".repeat(50)).append("\n");
-                }
-                
-                reporte.append("\n").append(areaRecomendacionesEquipamientos.getText());
-                
-                java.nio.file.Files.write(file.toPath(), reporte.toString().getBytes());
-                JOptionPane.showMessageDialog(this, "Reporte exportado exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Error al exportar: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-    
-    private void exportarReporteInsumos() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Guardar Reporte de Insumos");
-        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Archivos de texto", "txt"));
-        
-        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-            try {
-                java.io.File file = fileChooser.getSelectedFile();
-                if (!file.getName().endsWith(".txt")) {
-                    file = new java.io.File(file.getAbsolutePath() + ".txt");
-                }
-                
-                StringBuilder reporte = new StringBuilder();
-                reporte.append("REPORTE DE PREDICCIONES - INSUMOS\n");
-                reporte.append("Fecha: ").append(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date())).append("\n");
-                reporte.append("="+ "=".repeat(60)).append("\n\n");
-                
-                // Datos de la tabla
-                for (int i = 0; i < modeloInsumos.getRowCount(); i++) {
-                    reporte.append(String.format("ID: %s\n", modeloInsumos.getValueAt(i, 0)));
-                    reporte.append(String.format("Insumo: %s\n", modeloInsumos.getValueAt(i, 1)));
-                    reporte.append(String.format("Cantidad actual: %s\n", modeloInsumos.getValueAt(i, 2)));
-                    reporte.append(String.format("Consumo promedio/día: %s\n", modeloInsumos.getValueAt(i, 3)));
-                    reporte.append(String.format("Días restantes: %s\n", modeloInsumos.getValueAt(i, 4)));
-                    reporte.append(String.format("Fecha agotamiento: %s\n", modeloInsumos.getValueAt(i, 5)));
-                    reporte.append(String.format("Prioridad: %s\n", modeloInsumos.getValueAt(i, 6)));
-                    reporte.append(String.format("Recomendación: %s\n", modeloInsumos.getValueAt(i, 7)));
-                    reporte.append("-".repeat(50)).append("\n");
-                }
-                
-                reporte.append("\n").append(areaRecomendacionesInsumos.getText());
-                
-                java.nio.file.Files.write(file.toPath(), reporte.toString().getBytes());
-                JOptionPane.showMessageDialog(this, "Reporte exportado exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Error al exportar: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-    
-    private void exportarAnalisisCompleto() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Guardar Análisis Completo");
-        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Archivos de texto", "txt"));
-        
-        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-            try {
-                java.io.File file = fileChooser.getSelectedFile();
-                if (!file.getName().endsWith(".txt")) {
-                    file = new java.io.File(file.getAbsolutePath() + ".txt");
-                }
-                
-                java.nio.file.Files.write(file.toPath(), areaAnalisisGeneral.getText().getBytes());
-                JOptionPane.showMessageDialog(this, "Análisis exportado exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Error al exportar: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-    
-    // Clases auxiliares para predicciones
-    private static class PrediccionEquipamiento {
+    // Clases auxiliares para análisis
+    private static class AnalisisEquipamiento {
         Equipamiento equipamiento;
-        int diasSinMantenimiento;
-        String prediccionMantenimiento;
-        String prioridad;
+        String ultimaActividad;
+        int totalPrestamos;
         String recomendacion;
     }
     
-    private static class PrediccionInsumo {
+    private static class AnalisisInsumo {
         Insumo insumo;
-        double consumoPromedioDiario;
-        int diasRestantes;
-        Date fechaAgotamiento;
-        String prioridad;
+        double consumoDiario;
+        String estado;
         String recomendacion;
     }
     
-    // Renderer personalizado para colorear filas según prioridad
-    private static class PriorityTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
+    // Renderer personalizado para colorear filas según recomendación
+    private static class RecommendationTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, 
                 boolean hasFocus, int row, int column) {
@@ -1035,26 +659,25 @@ public class PanelPrediccionEquipamientoInsumos extends JPanel {
             Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             
             if (!isSelected) {
-                String prioridad = "";
+                String recomendacion = "";
                 
-                // Obtener la prioridad de la fila
-                if (table.getColumnCount() > 5) { // Para equipamientos
-                    prioridad = (String) table.getValueAt(row, 5);
-                } else if (table.getColumnCount() > 6) { // Para insumos
-                    prioridad = (String) table.getValueAt(row, 6);
-                }
+                // Obtener la recomendación de la última columna
+                int ultimaColumna = table.getColumnCount() - 1;
+                recomendacion = (String) table.getValueAt(row, ultimaColumna);
                 
-                switch (prioridad) {
-                    case "URGENTE":
+                switch (recomendacion) {
+                    case "Reposición Urgente":
+                    case "Dar Baja":
                         c.setBackground(new Color(255, 200, 200)); // Rojo claro
                         break;
-                    case "ALTA":
+                    case "Reparación":
+                    case "Reposición Necesaria":
                         c.setBackground(new Color(255, 230, 200)); // Naranja claro
                         break;
-                    case "MEDIA":
+                    case "Monitorear":
                         c.setBackground(new Color(255, 255, 200)); // Amarillo claro
                         break;
-                    case "BAJA":
+                    case "Normal":
                         c.setBackground(new Color(200, 255, 200)); // Verde claro
                         break;
                     default:
