@@ -39,6 +39,10 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import java.awt.Desktop;
 
+
+import com.itextpdf.text.Image;
+
+
 // Para gráficos estadísticos
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -54,6 +58,7 @@ import java.io.ByteArrayOutputStream;
 import Clases.Equipamiento;
 import Controles.ControladorEquipamiento;
 import Controles.ControladorDetallePrestamoEquipamiento;
+import com.itextpdf.text.FontFactory;
 
 /**
  * Panel para generar reportes de préstamos en formato PDF.
@@ -780,100 +785,252 @@ public class PanelReportePrestamo extends JPanel {
      * Genera un reporte en formato PDF con los datos de préstamos del laboratorio
      */
     private void generarDocumentoPDF(List<ReportePrestamo> prestamos, int idLaboratorio, java.sql.Date fechaInicial, java.sql.Date fechaFinal) {
-        try {
-            String nombreArchivo = DIRECTORIO_REPORTES + "Reporte_Prestamos_Lab" + idLaboratorio + "_" + new SimpleDateFormat("yyyyMMdd").format(new Date()) + ".pdf";
+    try {
+        String nombreArchivo = DIRECTORIO_REPORTES + "Reporte_Prestamos_Lab" + idLaboratorio + "_" + new SimpleDateFormat("yyyyMMdd").format(new Date()) + ".pdf";
 
-            Document documento = new Document(PageSize.A4);
-            try (FileOutputStream outputStream = new FileOutputStream(nombreArchivo)) {
-                PdfWriter.getInstance(documento, outputStream);
-                documento.open();
+        Document documento = new Document(PageSize.A4, 50, 50, 80, 50);
+        try (FileOutputStream outputStream = new FileOutputStream(nombreArchivo)) {
+            PdfWriter writer = PdfWriter.getInstance(documento, outputStream);
+            documento.open();
 
-                // Agregar encabezado
-                agregarEncabezadoPDF(documento, "REPORTE DE PRÉSTAMOS DE LABORATORIO " + idLaboratorio, fechaInicial, fechaFinal);
+            // Agregar encabezado completo con logo y datos institucionales
+            agregarEncabezadoCompleto(documento, idLaboratorio, fechaInicial, fechaFinal);
+            
+            // Agregar línea divisoria
+            documento.add(new Paragraph(" "));
+            Paragraph linea = new Paragraph("_".repeat(100));
+            linea.setAlignment(Element.ALIGN_CENTER);
+            linea.getFont().setColor(BaseColor.GRAY);
+            documento.add(linea);
+            documento.add(new Paragraph(" "));
 
-                // Subtítulo
-                Paragraph subtitulo = new Paragraph("PRÉSTAMOS REALIZADOS", FONT_SUBTITULO);
-                subtitulo.setAlignment(Element.ALIGN_CENTER);
-                documento.add(subtitulo);
-                documento.add(new Paragraph(" "));
+            // Subtítulo principal
+            com.itextpdf.text.Font fontSubtitulo = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 14, com.itextpdf.text.Font.BOLD, BaseColor.DARK_GRAY);
+            Paragraph subtitulo = new Paragraph("PRÉSTAMOS REALIZADOS", fontSubtitulo);
+            subtitulo.setAlignment(Element.ALIGN_CENTER);
+            subtitulo.setSpacingAfter(10);
+            documento.add(subtitulo);
 
-                // Crear tabla
-                PdfPTable tabla = new PdfPTable(6);
-                tabla.setWidthPercentage(100);
-                float[] anchos = {1.5f, 1f, 1.5f, 1.5f, 1.5f, 2.5f};
-                tabla.setWidths(anchos);
+            // Información del período
+            SimpleDateFormat sdfPeriodo = new SimpleDateFormat("dd/MM/yyyy");
+            com.itextpdf.text.Font fontPeriodo = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.NORMAL, BaseColor.DARK_GRAY);
+            Paragraph periodo = new Paragraph(
+                String.format("Periodo: %s - %s", 
+                    sdfPeriodo.format(fechaInicial), 
+                    sdfPeriodo.format(fechaFinal)),
+                fontPeriodo
+            );
+            periodo.setAlignment(Element.ALIGN_CENTER);
+            periodo.setSpacingAfter(5);
+            documento.add(periodo);
 
-                // Encabezados
-                String[] titulos = {"Fecha", "Hora", "RU Usuario", "RU Administrador", "ID Horario", "Observaciones"};
-                for (String titulo : titulos) {
-                    PdfPCell celda = new PdfPCell(new Phrase(titulo, FONT_TABLA_ENCABEZADO));
-                    celda.setHorizontalAlignment(Element.ALIGN_CENTER);
-                    celda.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                    celda.setPadding(5);
-                    tabla.addCell(celda);
-                }
+            // Fecha de generación
+            com.itextpdf.text.Font fontFechaGen = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.NORMAL, BaseColor.GRAY);
+            Paragraph fechaGen = new Paragraph(
+                "Fecha de Generación: " + new SimpleDateFormat("dd/MM/yyyy").format(new Date()),
+                fontFechaGen
+            );
+            fechaGen.setAlignment(Element.ALIGN_CENTER);
+            fechaGen.setSpacingAfter(15);
+            documento.add(fechaGen);
 
-                // Llenar tabla
-                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                for (int i = 0; i < prestamos.size(); i++) {
-                    ReportePrestamo prestamo = prestamos.get(i);
-                    BaseColor colorFondo = (i % 2 == 1) ? new BaseColor(240, 240, 255) : BaseColor.WHITE;
+            // Crear tabla mejorada
+            PdfPTable tabla = new PdfPTable(6);
+            tabla.setWidthPercentage(100);
+            float[] anchos = {1.8f, 1.2f, 1.5f, 1.8f, 1.5f, 2.5f};
+            tabla.setWidths(anchos);
+            tabla.setSpacingBefore(10);
 
-                    PdfPCell celdaFecha = new PdfPCell(new Phrase(sdf.format(prestamo.getFecha()), FONT_TABLA_CELDA));
-                    celdaFecha.setBackgroundColor(colorFondo);
-                    celdaFecha.setHorizontalAlignment(Element.ALIGN_CENTER);
-                    celdaFecha.setPadding(5);
-                    tabla.addCell(celdaFecha);
-
-                    PdfPCell celdaHora = new PdfPCell(new Phrase(prestamo.getHora(), FONT_TABLA_CELDA));
-                    celdaHora.setBackgroundColor(colorFondo);
-                    celdaHora.setHorizontalAlignment(Element.ALIGN_CENTER);
-                    celdaHora.setPadding(5);
-                    tabla.addCell(celdaHora);
-
-                    PdfPCell celdaUsuario = new PdfPCell(new Phrase(String.valueOf(prestamo.getRuUsuario()), FONT_TABLA_CELDA));
-                    celdaUsuario.setBackgroundColor(colorFondo);
-                    celdaUsuario.setHorizontalAlignment(Element.ALIGN_CENTER);
-                    celdaUsuario.setPadding(5);
-                    tabla.addCell(celdaUsuario);
-
-                    String valorAdmin = prestamo.getRuAdministrador() != null ? String.valueOf(prestamo.getRuAdministrador()) : "N/A";
-                    PdfPCell celdaAdmin = new PdfPCell(new Phrase(valorAdmin, FONT_TABLA_CELDA));
-                    celdaAdmin.setBackgroundColor(colorFondo);
-                    celdaAdmin.setHorizontalAlignment(Element.ALIGN_CENTER);
-                    celdaAdmin.setPadding(5);
-                    tabla.addCell(celdaAdmin);
-
-                    String valorHorario = prestamo.getIdHorario() != null ? String.valueOf(prestamo.getIdHorario()) : "N/A";
-                    PdfPCell celdaHorario = new PdfPCell(new Phrase(valorHorario, FONT_TABLA_CELDA));
-                    celdaHorario.setBackgroundColor(colorFondo);
-                    celdaHorario.setHorizontalAlignment(Element.ALIGN_CENTER);
-                    celdaHorario.setPadding(5);
-                    tabla.addCell(celdaHorario);
-
-                    String valorObs = prestamo.getObservaciones() != null && !prestamo.getObservaciones().isEmpty() ? prestamo.getObservaciones() : "Ninguna";
-                    PdfPCell celdaObs = new PdfPCell(new Phrase(valorObs, FONT_TABLA_CELDA));
-                    celdaObs.setBackgroundColor(colorFondo);
-                    celdaObs.setPadding(5);
-                    tabla.addCell(celdaObs);
-                }
-
-                if (prestamos.isEmpty()) {
-                    PdfPCell celdaNoData = new PdfPCell(new Phrase("No hay préstamos registrados en este período", FONT_TABLA_CELDA));
-                    celdaNoData.setColspan(6);
-                    celdaNoData.setHorizontalAlignment(Element.ALIGN_CENTER);
-                    celdaNoData.setPadding(10);
-                    tabla.addCell(celdaNoData);
-                }
-
-                documento.add(tabla);
-                documento.close();
-                abrirArchivoPDF(nombreArchivo);
+            // Encabezados de tabla con mejor estilo
+            String[] titulos = {"Fecha", "Hora", "RU Usuario", "RU\nAdministrador", "ID Horario", "Observaciones"};
+            com.itextpdf.text.Font fontEncabezado = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.BOLD, BaseColor.WHITE);
+            
+            for (String titulo : titulos) {
+                PdfPCell celda = new PdfPCell(new Phrase(titulo, fontEncabezado));
+                celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+                celda.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                celda.setBackgroundColor(new BaseColor(52, 73, 94)); // Azul oscuro profesional
+                celda.setPadding(8);
+                celda.setBorderColor(BaseColor.WHITE);
+                celda.setBorderWidth(1);
+                tabla.addCell(celda);
             }
-        } catch (Exception e) {
-            manejarError("Error al generar el documento PDF", e);
+
+            // Llenar tabla con datos
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            com.itextpdf.text.Font fontCelda = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 9, com.itextpdf.text.Font.NORMAL, BaseColor.BLACK);
+            
+            for (int i = 0; i < prestamos.size(); i++) {
+                ReportePrestamo prestamo = prestamos.get(i);
+                BaseColor colorFondo = (i % 2 == 0) ? BaseColor.WHITE : new BaseColor(248, 249, 250);
+
+                // Celda Fecha
+                PdfPCell celdaFecha = new PdfPCell(new Phrase(sdf.format(prestamo.getFecha()), fontCelda));
+                configurarCelda(celdaFecha, colorFondo, Element.ALIGN_CENTER);
+                tabla.addCell(celdaFecha);
+
+                // Celda Hora
+                PdfPCell celdaHora = new PdfPCell(new Phrase(prestamo.getHora(), fontCelda));
+                configurarCelda(celdaHora, colorFondo, Element.ALIGN_CENTER);
+                tabla.addCell(celdaHora);
+
+                // Celda RU Usuario
+                PdfPCell celdaUsuario = new PdfPCell(new Phrase(String.valueOf(prestamo.getRuUsuario()), fontCelda));
+                configurarCelda(celdaUsuario, colorFondo, Element.ALIGN_CENTER);
+                tabla.addCell(celdaUsuario);
+
+                // Celda RU Administrador
+                String valorAdmin = prestamo.getRuAdministrador() != null ? String.valueOf(prestamo.getRuAdministrador()) : "N/A";
+                PdfPCell celdaAdmin = new PdfPCell(new Phrase(valorAdmin, fontCelda));
+                configurarCelda(celdaAdmin, colorFondo, Element.ALIGN_CENTER);
+                tabla.addCell(celdaAdmin);
+
+                // Celda ID Horario
+                String valorHorario = prestamo.getIdHorario() != null ? String.valueOf(prestamo.getIdHorario()) : "N/A";
+                PdfPCell celdaHorario = new PdfPCell(new Phrase(valorHorario, fontCelda));
+                configurarCelda(celdaHorario, colorFondo, Element.ALIGN_CENTER);
+                tabla.addCell(celdaHorario);
+
+                // Celda Observaciones
+                String valorObs = (prestamo.getObservaciones() != null && !prestamo.getObservaciones().trim().isEmpty()) 
+                    ? prestamo.getObservaciones() : "Ninguna";
+                PdfPCell celdaObs = new PdfPCell(new Phrase(valorObs, fontCelda));
+                configurarCelda(celdaObs, colorFondo, Element.ALIGN_LEFT);
+                tabla.addCell(celdaObs);
+            }
+
+            // Mensaje cuando no hay datos
+            if (prestamos.isEmpty()) {
+                com.itextpdf.text.Font fontNoData = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 11, com.itextpdf.text.Font.ITALIC, BaseColor.GRAY);
+                PdfPCell celdaNoData = new PdfPCell(new Phrase("No hay préstamos registrados en este período", fontNoData));
+                celdaNoData.setColspan(6);
+                celdaNoData.setHorizontalAlignment(Element.ALIGN_CENTER);
+                celdaNoData.setPadding(20);
+                celdaNoData.setBackgroundColor(new BaseColor(252, 252, 252));
+                tabla.addCell(celdaNoData);
+            }
+
+            documento.add(tabla);
+            
+            // Agregar pie de página con información adicional
+            agregarPiePagina(documento, prestamos.size());
+
+            documento.close();
+            abrirArchivoPDF(nombreArchivo);
         }
+    } catch (Exception e) {
+        manejarError("Error al generar el documento PDF", e);
     }
+}
+
+// Método auxiliar para configurar celdas
+private void configurarCelda(PdfPCell celda, BaseColor colorFondo, int alineacion) {
+    celda.setBackgroundColor(colorFondo);
+    celda.setHorizontalAlignment(alineacion);
+    celda.setVerticalAlignment(Element.ALIGN_MIDDLE);
+    celda.setPadding(6);
+    celda.setBorderColor(new BaseColor(220, 220, 220));
+    celda.setBorderWidth(0.5f);
+}
+
+// Método para agregar encabezado completo
+private void agregarEncabezadoCompleto(Document documento, int idLaboratorio, java.sql.Date fechaInicial, java.sql.Date fechaFinal) throws Exception {
+    // Crear tabla para el encabezado
+    PdfPTable tablaEncabezado = new PdfPTable(3);
+    tablaEncabezado.setWidthPercentage(100);
+    float[] anchosEncabezado = {1f, 3f, 1f};
+    tablaEncabezado.setWidths(anchosEncabezado);
+
+    // Logo izquierdo
+    try {
+        Image logo = Image.getInstance("C:\\Users\\DOC\\Desktop\\PROYECTO V\\images.png");
+        logo.scaleToFit(60, 60);
+        PdfPCell celdaLogo = new PdfPCell(logo);
+        celdaLogo.setBorder(Rectangle.NO_BORDER);
+        celdaLogo.setHorizontalAlignment(Element.ALIGN_CENTER);
+        celdaLogo.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        tablaEncabezado.addCell(celdaLogo);
+    } catch (Exception e) {
+        // Si no se puede cargar el logo, agregar celda vacía
+        PdfPCell celdaVacia = new PdfPCell();
+        celdaVacia.setBorder(Rectangle.NO_BORDER);
+        tablaEncabezado.addCell(celdaVacia);
+    }
+
+    // Información central con fuentes correctas
+    com.itextpdf.text.Font fontGestion = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.BOLD, BaseColor.DARK_GRAY);
+    Paragraph gestion = new Paragraph("GESTIÓN: 1 - 2025", fontGestion);
+    gestion.setAlignment(Element.ALIGN_CENTER);
+    
+    com.itextpdf.text.Font fontUniversidad = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 14, com.itextpdf.text.Font.BOLD, new BaseColor(52, 73, 94));
+    Paragraph universidad = new Paragraph("UNIVERSIDAD SALESIANA DE BOLIVIA", fontUniversidad);
+    universidad.setAlignment(Element.ALIGN_CENTER);
+    universidad.setSpacingAfter(3);
+    
+    com.itextpdf.text.Font fontTitulo = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.BOLD, BaseColor.BLACK);
+    Paragraph titulo = new Paragraph("REPORTE DE PRÉSTAMOS DE LABORATORIO " + idLaboratorio, fontTitulo);
+    titulo.setAlignment(Element.ALIGN_CENTER);
+    titulo.setSpacingAfter(8);
+    
+    com.itextpdf.text.Font fontInfo = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 9, com.itextpdf.text.Font.NORMAL, BaseColor.GRAY);
+    Paragraph direccion = new Paragraph("Av. Chacaltaya Nro. 1258, Zona Achachicala\nEl Alto, La Paz, Bolivia", fontInfo);
+    direccion.setAlignment(Element.ALIGN_CENTER);
+    
+    Paragraph contacto = new Paragraph("Teléfono: +591 2305210\nCorreo: informaciones@usalesiana.edu.bo", fontInfo);
+    contacto.setAlignment(Element.ALIGN_CENTER);
+
+    PdfPCell celdaCentral = new PdfPCell();
+    celdaCentral.setBorder(Rectangle.NO_BORDER);
+    celdaCentral.addElement(gestion);
+    celdaCentral.addElement(universidad);
+    celdaCentral.addElement(titulo);
+    celdaCentral.addElement(direccion);
+    celdaCentral.addElement(contacto);
+    tablaEncabezado.addCell(celdaCentral);
+
+    // Celda derecha vacía para balance
+    PdfPCell celdaDerecha = new PdfPCell();
+    celdaDerecha.setBorder(Rectangle.NO_BORDER);
+    tablaEncabezado.addCell(celdaDerecha);
+
+    documento.add(tablaEncabezado);
+}
+
+// Método para agregar pie de página
+private void agregarPiePagina(Document documento, int totalPrestamos) throws Exception {
+    documento.add(new Paragraph(" "));
+    documento.add(new Paragraph(" "));
+    
+    // Resumen
+    com.itextpdf.text.Font fontResumen = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 11, com.itextpdf.text.Font.BOLD, BaseColor.DARK_GRAY);
+    Paragraph resumen = new Paragraph("Total de préstamos registrados: " + totalPrestamos, fontResumen);
+    resumen.setAlignment(Element.ALIGN_RIGHT);
+    resumen.setSpacingAfter(15);
+    documento.add(resumen);
+    
+    // Aviso legal
+    com.itextpdf.text.Font fontAviso = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 8, com.itextpdf.text.Font.NORMAL, BaseColor.GRAY);
+    Paragraph aviso = new Paragraph(
+        "Este documento debe ser utilizado de manera responsable. Cualquier uso indebido o alteración de su " +
+        "contenido será motivo de sanciones conforme a las normativas institucionales y podrá ser reportado a las " +
+        "autoridades competentes de la universidad.",
+        fontAviso
+    );
+    aviso.setAlignment(Element.ALIGN_JUSTIFIED);
+    aviso.setSpacingBefore(20);
+    
+    // Agregar marco al aviso
+    PdfPTable tablaAviso = new PdfPTable(1);
+    tablaAviso.setWidthPercentage(100);
+    PdfPCell celdaAviso = new PdfPCell(aviso);
+    celdaAviso.setPadding(10);
+    celdaAviso.setBorderColor(BaseColor.LIGHT_GRAY);
+    celdaAviso.setBorderWidth(1);
+    celdaAviso.setBackgroundColor(new BaseColor(250, 250, 250));
+    tablaAviso.addCell(celdaAviso);
+    
+    documento.add(tablaAviso);
+}
 
     // Clases para detalles de equipamiento e insumos
     private class DetalleEquipamiento {
