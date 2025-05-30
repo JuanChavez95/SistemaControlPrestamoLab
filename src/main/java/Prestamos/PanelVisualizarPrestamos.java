@@ -761,20 +761,77 @@ public class PanelVisualizarPrestamos extends JPanel {
         
         // NUEVO: Enviar correo de notificación
         try {
-            String emailUsuario = controladorPrestamo.obtenerEmailUsuario(ruUsuario);
-            if (emailUsuario != null && !emailUsuario.isEmpty()) {
-                boolean correoEnviado = ServicioCorreo.enviarNotificacionPrestamo(emailUsuario, ruUsuario, true);
-                if (correoEnviado) {
-                    LOGGER.info("Correo de aceptación enviado exitosamente al usuario RU: " + ruUsuario);
-                } else {
-                    LOGGER.warning("No se pudo enviar el correo de aceptación al usuario RU: " + ruUsuario);
-                }
-            } else {
-                LOGGER.warning("No se encontró email para el usuario RU: " + ruUsuario);
+    String emailUsuario = controladorPrestamo.obtenerEmailUsuario(ruUsuario);
+    if (emailUsuario != null && !emailUsuario.isEmpty()) {
+        
+        // Obtener información detallada del préstamo
+        Prestamo prestamo = controladorPrestamo.buscarPorId(idPrestamo);
+        
+        // Información del horario
+        String horarioInfo = "";
+        
+        if (idHorario != null) {
+            Horario horario = controladorHorario.buscarPorId(idHorario);
+            if (horario != null) {
+                horarioInfo = String.format("Horario:\n  ID: %d\n  Materia: %s\n  Día: %s\n  Hora: %s\n  Estado: %s\n\n",
+                    horario.getIdHorario(), horario.getMateria(), horario.getDia(), 
+                    horario.getHora(), horario.getEstado());
             }
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error al enviar correo de aceptación para usuario RU: " + ruUsuario, e);
         }
+        
+        // Información del equipamiento
+        StringBuilder equipamientoInfo = new StringBuilder();
+        
+        if (!equipamientoIds.isEmpty()) {
+            equipamientoInfo.append("Equipamiento:\n");
+            for (Integer id : equipamientoIds) {
+                Clases.Equipamiento equipamiento = controladorEquipamiento.buscarPorId(id);
+                if (equipamiento != null) {
+                    equipamientoInfo.append(String.format("  ID %d: %s (%s)\n", 
+                        id, equipamiento.getNombreEquipamiento(), equipamiento.getDisponibilidad()));
+                }
+            }
+            equipamientoInfo.append("\n");
+        }
+        
+        // Información de los insumos
+        StringBuilder insumosInfo = new StringBuilder();
+       
+        if (!detallesInsumo.isEmpty()) {
+            insumosInfo.append("Insumos:\n");
+            for (DetallePrestamoInsumo detalle : detallesInsumo) {
+                String nombreInsumo = controladorInsumo.obtenerNombreInsumo(detalle.getIdInsumo());
+                insumosInfo.append(String.format("  ID %d: %s - Cantidad Inicial: %d, Cantidad Final: %d\n",
+                    detalle.getIdInsumo(), nombreInsumo, detalle.getCantidadInicial(), 0));
+            }
+            insumosInfo.append("\n");
+        }
+        
+        // Construir el mensaje completo
+        String mensajeDetallado = String.format(
+            "ID Préstamo: %d\nFecha: %s\n\n%s%s%sObservaciones: %s",
+            prestamo.getIdPrestamo(),
+            prestamo.getFechaPrestamo(),
+            horarioInfo,
+            equipamientoInfo.toString(),
+            insumosInfo.toString(),
+            observaciones != null && !observaciones.trim().isEmpty() ? observaciones : ""
+        );
+        
+        boolean correoEnviado = ServicioCorreo.enviarNotificacionPrestamoDetallado(
+            emailUsuario, ruUsuario, true, mensajeDetallado);
+            
+        if (correoEnviado) {
+            LOGGER.info("Correo de aceptación enviado exitosamente al usuario RU: " + ruUsuario);
+        } else {
+            LOGGER.warning("No se pudo enviar el correo de aceptación al usuario RU: " + ruUsuario);
+        }
+    } else {
+        LOGGER.warning("No se encontró email para el usuario RU: " + ruUsuario);
+    }
+} catch (Exception e) {
+    LOGGER.log(Level.WARNING, "Error al enviar correo de aceptación para usuario RU: " + ruUsuario, e);
+}
         
         JOptionPane.showMessageDialog(this, "Préstamo aceptado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
         cargarPrestamos();

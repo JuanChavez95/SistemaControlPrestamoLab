@@ -22,7 +22,7 @@ public class ServicioCorreo {
     private static final String SMTP_HOST = "smtp.gmail.com";
     private static final String SMTP_PORT = "587";
     private static final String EMAIL_ADMIN = "carlomachac@gmail.com"; // Cambiar por el email del administrador
-    private static final String PASSWORD_ADMIN = "gato"; // Cambiar por la contraseña de aplicación
+    private static final String PASSWORD_ADMIN = "dfaw ebbk hwna yosc"; // Cambiar por la contraseña de aplicación
     
     /**
      * Envía un correo de notificación sobre el estado del préstamo.
@@ -99,4 +99,75 @@ public class ServicioCorreo {
         }
         return true;
     }
+    
+    // AGREGAR ESTE NUEVO MÉTODO A LA CLASE ServicioCorreo:
+
+/**
+ * Envía un correo de notificación detallado sobre el estado del préstamo.
+ * 
+ * @param emailUsuario Correo electrónico del usuario
+ * @param ruUsuario RU del usuario
+ * @param esAceptado true si el préstamo fue aceptado, false si fue rechazado
+ * @param detallesPrestamo Información detallada del préstamo
+ * @return true si el correo se envió exitosamente, false en caso contrario
+ */
+public static boolean enviarNotificacionPrestamoDetallado(String emailUsuario, int ruUsuario, boolean esAceptado, String detallesPrestamo) {
+    try {
+        // Configurar propiedades del servidor SMTP
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", SMTP_HOST);
+        props.put("mail.smtp.port", SMTP_PORT);
+        props.put("mail.smtp.ssl.trust", SMTP_HOST);
+        
+        // Crear la sesión con autenticación
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(EMAIL_ADMIN, PASSWORD_ADMIN);
+            }
+        });
+        
+        // Crear el mensaje
+        Message mensaje = new MimeMessage(session);
+        mensaje.setFrom(new InternetAddress(EMAIL_ADMIN));
+        mensaje.setRecipients(Message.RecipientType.TO, InternetAddress.parse(emailUsuario));
+        
+        // Configurar asunto y contenido según el estado
+        if (esAceptado) {
+            mensaje.setSubject("Préstamo Aceptado - Sistema de Préstamos");
+            String contenido = "Hola usuario RU: " + ruUsuario + "\n\n" +
+                              "El préstamo solicitado se aceptó correctamente.\n\n" +
+                              "DETALLES DEL PRÉSTAMO:\n" +
+                              "========================\n" +
+                              detallesPrestamo + "\n" +
+                              "========================\n\n" +
+                              "¡GRACIAS POR SU ESPERA!\n\n" +
+                              "Sistema de Préstamos\n" +
+                              "Administración";
+            mensaje.setText(contenido);
+        } else {
+            mensaje.setSubject("Préstamo Rechazado - Sistema de Préstamos");
+            mensaje.setText("Hola usuario RU: " + ruUsuario + "\n\n" +
+                          "El préstamo solicitado fue rechazado.\n" +
+                          "¡GRACIAS POR SU ESPERA!\n\n" +
+                          "Sistema de Préstamos\n" +
+                          "Administración");
+        }
+        
+        // Enviar el mensaje
+        Transport.send(mensaje);
+        
+        LOGGER.info("Correo detallado enviado exitosamente a: " + emailUsuario + " para usuario RU: " + ruUsuario);
+        return true;
+        
+    } catch (MessagingException e) {
+        LOGGER.log(Level.SEVERE, "Error al enviar correo detallado a " + emailUsuario + " para usuario RU: " + ruUsuario, e);
+        return false;
+    } catch (Exception e) {
+        LOGGER.log(Level.SEVERE, "Error inesperado al enviar correo detallado", e);
+        return false;
+    }
+}
 }
