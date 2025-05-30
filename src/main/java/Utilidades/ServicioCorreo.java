@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 
 /**
+ * Equipo de SOLDADOS CAÍDOS
  * Clase utilitaria para el envío de correos electrónicos.
  * Maneja la configuración SMTP y el envío de notificaciones.
  */
@@ -18,11 +19,13 @@ public class ServicioCorreo {
     
     private static final Logger LOGGER = Logger.getLogger(ServicioCorreo.class.getName());
     
-    // Configuración del servidor SMTP (Gmail como ejemplo)
+    // Configuración del servidor SMTP 
+    //La contraseña empleada en el email es una contraseña de 2P o segundo paso para una mayor seguridad.
+    //Posteriormente se debe crear una contraseña de aplicación y así el proceso funciona correctamente.
     private static final String SMTP_HOST = "smtp.gmail.com";
     private static final String SMTP_PORT = "587";
-    private static final String EMAIL_ADMIN = "carlomachac@gmail.com"; // Cambiar por el email del administrador
-    private static final String PASSWORD_ADMIN = "dfaw ebbk hwna yosc"; // Cambiar por la contraseña de aplicación
+    private static final String EMAIL_ADMIN = "carlomachac@gmail.com"; // Email del administrador
+    private static final String PASSWORD_ADMIN = "gato"; 
     
     /**
      * Envía un correo de notificación sobre el estado del préstamo.
@@ -34,7 +37,7 @@ public class ServicioCorreo {
      */
     public static boolean enviarNotificacionPrestamo(String emailUsuario, int ruUsuario, boolean esAceptado) {
         try {
-            // Configurar propiedades del servidor SMTP
+            // Configurar propiedades del servidor SMTP para eviar el correo
             Properties props = new Properties();
             props.put("mail.smtp.auth", "true");
             props.put("mail.smtp.starttls.enable", "true");
@@ -42,7 +45,7 @@ public class ServicioCorreo {
             props.put("mail.smtp.port", SMTP_PORT);
             props.put("mail.smtp.ssl.trust", SMTP_HOST);
             
-            // Crear la sesión con autenticación
+            // Crear la sesión con autenticación en la cuenta correspondiente
             Session session = Session.getInstance(props, new Authenticator() {
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
@@ -50,7 +53,7 @@ public class ServicioCorreo {
                 }
             });
             
-            // Crear el mensaje
+            // Crear el mensaje a enviar
             Message mensaje = new MimeMessage(session);
             mensaje.setFrom(new InternetAddress(EMAIL_ADMIN));
             mensaje.setRecipients(Message.RecipientType.TO, InternetAddress.parse(emailUsuario));
@@ -121,7 +124,7 @@ public static boolean enviarNotificacionPrestamoDetallado(String emailUsuario, i
         props.put("mail.smtp.port", SMTP_PORT);
         props.put("mail.smtp.ssl.trust", SMTP_HOST);
         
-        // Crear la sesión con autenticación
+        // Crear la sesión con autenticación para enviar el correo
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
@@ -134,7 +137,8 @@ public static boolean enviarNotificacionPrestamoDetallado(String emailUsuario, i
         mensaje.setFrom(new InternetAddress(EMAIL_ADMIN));
         mensaje.setRecipients(Message.RecipientType.TO, InternetAddress.parse(emailUsuario));
         
-        // Configurar asunto y contenido según el estado
+        // Configurar asunto y contenido según el estado del correo
+        //Información completa del préstamo sobre los recursos involucrados
         if (esAceptado) {
             mensaje.setSubject("Préstamo Aceptado - Sistema de Préstamos");
             String contenido = "Hola usuario RU: " + ruUsuario + "\n\n" +
@@ -156,7 +160,7 @@ public static boolean enviarNotificacionPrestamoDetallado(String emailUsuario, i
                           "Administración");
         }
         
-        // Enviar el mensaje
+        // Enviar el mensaje 
         Transport.send(mensaje);
         
         LOGGER.info("Correo detallado enviado exitosamente a: " + emailUsuario + " para usuario RU: " + ruUsuario);
