@@ -93,6 +93,7 @@ Prestamos\PanelNotificacion$1.class
 Clases\Equipos.class
 Clases\Prestamo.class
 PanelesMateriales\PanelEditarInsumos$3.class
+PanelesMateriales\PanelPrediccionEquipamientoInsumos$AlgoritmoGenetico$Individuo.class
 Prestamos\PanelVisualizarPrestamos$RoundedButton.class
 Servicios\RolService.class
 Ventanas\NuevoAdministrador$4.class
@@ -106,6 +107,7 @@ Paneles\PanelHorario$1.class
 Servicios\UsuarioService.class
 Ventanas\Principal3.class
 Clases\HistorialGeneral.class
+PanelesMateriales\PanelPrediccionEquipamientoInsumos$ResultadoHistorico.class
 Reportes\PanelReportePrestamo$ReportePrestamo.class
 Prestamos\PanelNotificacion$2.class
 PanelesMateriales\PanelHerramientas$RoundedButton.class
@@ -141,6 +143,7 @@ Ventanas\Principal2$4.class
 Paneles\PanelEditar$3.class
 Paneles\PanelEditar.class
 Clases\Rol.class
+PanelesMateriales\PanelPrediccionEquipamientoInsumos$8.class
 Ventanas\login$2.class
 Clases\CategoriaEquipo.class
 Prestamos\PanelSolicitarPrestamo$1.class
@@ -180,6 +183,7 @@ Ventanas\login$7.class
 Clases\EquipoPrestamo.class
 PanelSanciones\PanelListaSanciones$4.class
 Servicios\PrestamoService.class
+PanelesMateriales\PanelPrediccionEquipamientoInsumos$7.class
 Ventanas\Principal3$3.class
 Prestamos\PanelSolicitarPrestamo$5.class
 Prestamos\PanelSolicitarPrestamo.class
@@ -194,6 +198,7 @@ PanelesMateriales\PanelDetalleHerramientas$3.class
 Ventanas\Principal$3.class
 interfaces\GenericDAO.class
 PanelSanciones\PanelSancionar$RoundedButton.class
+PanelesMateriales\PanelPrediccionEquipamientoInsumos$6.class
 PanelesMateriales\PanelEditarHerramientas$3.class
 Controles\ControladorSancion.class
 PanelSanciones\PanelListaSanciones.class
@@ -209,4 +214,5 @@ Ventanas\Principal$2.class
 Paneles\PanelLaboratorio$2.class
 PanelesMateriales\PanelInsumos.class
 PanelSanciones\PanelListaSanciones$6.class
+PanelesMateriales\PanelPrediccionEquipamientoInsumos$AlgoritmoGenetico.class
 Ventanas\login$5.class

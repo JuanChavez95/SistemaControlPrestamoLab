@@ -510,6 +510,24 @@ public class ControladorPrestamo {
 
         return lista;
     }
+    
+    
+    public int contarPrestamosPorEquipamiento(int idEquipamiento) throws SQLException {
+    String sql = "SELECT COUNT(*) FROM detalle_prestamo_equipamiento WHERE id_equipamiento = ?";
+    try (Connection conn = ConexionBD.conectar();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, idEquipamiento);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1);
+        }
+    } catch (SQLException ex) {
+        System.err.println("Error al contar préstamos del equipamiento con ID " + idEquipamiento + ": " + ex.getMessage());
+        throw ex;
+    }
+    return 0;
+    }
+
 
 
 }
