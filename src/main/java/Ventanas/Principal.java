@@ -63,7 +63,12 @@ import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 
-
+//Importaciones ncesarias para la auditoría
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import DataBase.ConexionBD; 
 
 /**
  * Ventana principal del Sistema de Control y Préstamo de Laboratorios para administradores.
@@ -77,6 +82,8 @@ public class Principal extends JFrame {
     private JPanel contentPanel;
     private JLabel usuarioLabel;
     private int ruUsuario; // Añadido para almacenar el RU del usuario
+    private String nombreUsuario; // NUEVA VARIABLE
+    private String apellidoUsuario; // NUEVA VARIABLE
     private static final Color PRIMARY_COLOR = new Color(33, 97, 140);
     private static final Color SECONDARY_COLOR = new Color(235, 245, 255);
     private static final Color ACCENT_COLOR = new Color(52, 152, 219);
@@ -89,6 +96,11 @@ public class Principal extends JFrame {
     public Principal(int ruUsuario) {
         this.ruUsuario = ruUsuario; // Inicializar ruUsuario
         // Configuración de la ventana
+        // NUEVO: Obtener nombre y apellido del usuario
+        obtenerDatosUsuario();
+        
+        // NUEVO: Marcar sesión como activa
+        marcarSesionActiva(true);
         setTitle("Sistema de Control y Préstamo de Laboratorios - Administrador");
         setSize(1200, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -110,6 +122,96 @@ public class Principal extends JFrame {
         // Centrar la ventana
         setLocationRelativeTo(null);
         setVisible(true);
+        // AÑADIR: Listener para cerrar sesión al cerrar ventana
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                marcarSesionActiva(false);
+                System.exit(0);
+            }
+        });
+    }
+    
+    /**
+     * Obtiene el nombre y apellido del usuario desde la base de datos
+     */
+    private void obtenerDatosUsuario() {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        
+        try {
+            // Reemplaza ConexionBD.getConnection() con tu método de conexión
+            conn = ConexionBD.conectar(); // CAMBIA ESTO POR TU CLASE DE CONEXIÓN
+            
+            String sql = "SELECT nombre, apellido_paterno, apellido_materno FROM usuario WHERE ru = ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, ruUsuario);
+            rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                this.nombreUsuario = rs.getString("nombre");
+                String apellidoPaterno = rs.getString("apellido_paterno");
+                String apellidoMaterno = rs.getString("apellido_materno");
+                
+                // Concatenar apellidos
+                this.apellidoUsuario = apellidoPaterno;
+                if (apellidoMaterno != null && !apellidoMaterno.trim().isEmpty()) {
+                    this.apellidoUsuario += " " + apellidoMaterno;
+                }
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // Valores por defecto en caso de error
+            this.nombreUsuario = "Usuario";
+            this.apellidoUsuario = "Desconocido";
+        } finally {
+            // Cerrar recursos
+            try {
+                if (rs != null) rs.close();
+                if (pstmt != null) pstmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    /**
+     * Marca la sesión del administrador como activa o inactiva
+     */
+    private void marcarSesionActiva(boolean activa) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        
+        try {
+            conn = ConexionBD.conectar(); // CAMBIA ESTO POR TU CLASE DE CONEXIÓN
+            
+            // Primero, desactivar todas las sesiones
+            String sqlDesactivar = "UPDATE administrador SET sesion_activa = FALSE";
+            pstmt = conn.prepareStatement(sqlDesactivar);
+            pstmt.executeUpdate();
+            pstmt.close();
+            
+            // Luego, activar solo la sesión actual si es necesario
+            if (activa) {
+                String sqlActivar = "UPDATE administrador SET sesion_activa = TRUE WHERE ru = ?";
+                pstmt = conn.prepareStatement(sqlActivar);
+                pstmt.setInt(1, ruUsuario);
+                pstmt.executeUpdate();
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (pstmt != null) pstmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private JPanel createBackgroundPanel() {

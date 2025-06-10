@@ -1051,7 +1051,7 @@ public class PanelReportePrestamo extends JPanel {
 
         // Logo izquierdo
         try {
-            Image logo = Image.getInstance("C:\\Users\\Windows\\Documents\\NetBeansProjects\\SistemaControlPrestamoLab-main\\logo.png");
+            Image logo = Image.getInstance("C:\\Users\\DOC\\Desktop\\PROYECTO V\\images.png");
             logo.scaleToFit(60, 60);
             PdfPCell celdaLogo = new PdfPCell(logo);
             celdaLogo.setBorder(Rectangle.NO_BORDER);

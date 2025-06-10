@@ -15,19 +15,30 @@ import javax.swing.border.LineBorder;
 import Clases.Administrador;
 import Controles.ControlAdministrador;
 import exceptions.CredencialesInvalidas;
+import org.mindrot.jbcrypt.BCrypt;
 
 /**
  * Ventana para registrar un nuevo administrador en el sistema
  * @author DOC
  */
 public class NuevoAdministrador extends JFrame {
-    private JTextField cajaNombre, cajaAPP, cajaAPM, cajacorreo, cajaContra, cajaRU, cajaCI, cajaFI, cajaNIT, cajasalario;
+    private JTextField cajaNombre, cajaAPP, cajaAPM, cajacorreo, cajaRU, cajaCI, cajaFI, cajaNIT, cajasalario;
+    private JPasswordField cajaContra;
     private JComboBox<String> cajarol;
 
     public NuevoAdministrador() {
         inicializarComponentes();
         setLocationRelativeTo(null); // Centra la ventana en la pantalla
         setVisible(true);
+    }
+    
+    /**
+     * Encripta una contraseña usando BCrypt (compatible con login.java)
+     * @param password La contraseña en texto plano
+     * @return La contraseña encriptada con BCrypt
+     */
+    private String encriptarPassword(String password) {
+        return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
     private void inicializarComponentes() {
@@ -219,7 +230,7 @@ public class NuevoAdministrador extends JFrame {
         contraLabel.setForeground(Color.DARK_GRAY);
         formPanel.add(contraLabel);
 
-        cajaContra = new JTextField();
+        cajaContra = new JPasswordField();
         cajaContra.setBounds(rightColumnX + labelWidth, yStart, fieldWidth, fieldHeight);
         cajaContra.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         cajaContra.setForeground(Color.BLACK);
@@ -334,7 +345,7 @@ public class NuevoAdministrador extends JFrame {
                     String nombre = cajaNombre.getText();
                     String APP = cajaAPP.getText();
                     String APM = cajaAPM.getText();
-                    String password = cajaContra.getText();
+                    String password = encriptarPassword(new String(cajaContra.getPassword()));
                     String ruText = cajaRU.getText();
                     String ciText = cajaCI.getText();
                     String correo = cajacorreo.getText();
@@ -344,7 +355,8 @@ public class NuevoAdministrador extends JFrame {
                     String salarioText = cajasalario.getText();
 
                     // Verificar si los se encuentran vacíos
-                    if (nombre.isEmpty() || APP.isEmpty() || APM.isEmpty() || password.isEmpty() ||
+                    if (nombre.isEmpty() || APP.isEmpty() || APM.isEmpty() || 
+                        new String(cajaContra.getPassword()).isEmpty() ||
                         correo.isEmpty() || ruText.isEmpty() || ciText.isEmpty() ||
                         fechainicio.isEmpty() || salarioText.isEmpty() || nit.isEmpty()) {
                         throw new CredencialesInvalidas("Campos vacíos");
