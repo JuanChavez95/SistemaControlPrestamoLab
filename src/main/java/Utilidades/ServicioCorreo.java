@@ -25,7 +25,7 @@ public class ServicioCorreo {
     private static final String SMTP_HOST = "smtp.gmail.com";
     private static final String SMTP_PORT = "587";
     private static final String EMAIL_ADMIN = "carlomachac@gmail.com"; // Email del administrador
-    private static final String PASSWORD_ADMIN = "gato"; 
+    private static final String PASSWORD_ADMIN = "cduv drsp mkdg swfp"; 
     
     /**
      * Envía un correo de notificación sobre el estado del préstamo.

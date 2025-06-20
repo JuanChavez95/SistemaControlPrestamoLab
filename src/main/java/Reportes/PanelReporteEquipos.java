@@ -423,7 +423,7 @@ public class PanelReporteEquipos extends JPanel {
 
         // Logo izquierdo (simulado, ajusta la ruta según tu sistema)
         try {
-            com.itextpdf.text.Image logo = com.itextpdf.text.Image.getInstance("C:\\Users\\DOC\\Desktop\\PROYECTO V\\imagen.png");
+            com.itextpdf.text.Image logo = com.itextpdf.text.Image.getInstance("C:\\Users\\DOC\\Desktop\\PROYECTO V\\images.png");
             logo.scaleToFit(60, 60);
             PdfPCell celdaLogo = new PdfPCell(logo);
             celdaLogo.setBorder(Rectangle.NO_BORDER);

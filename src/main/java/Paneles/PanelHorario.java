@@ -107,9 +107,9 @@ public class PanelHorario extends JPanel {
         cajaMateria.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         cajaMateria.setPreferredSize(new Dimension(180, 25));
 
-        comboParalelo = new JComboBox<>(new String[]{"111", "112", "113"});
-        comboSemestre = new JComboBox<>(new String[]{"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"});
-        comboCarrera = new JComboBox<>(new String[]{"Ingeniería de Sistemas", "Derecho", "Contaduría", "Gastronomía", "Psicomotricidad", "Ingeniería Comercial", "Parvularía"});
+        comboParalelo = new JComboBox<>(new String[]{"111", "112", "113", "000"});
+        comboSemestre = new JComboBox<>(new String[]{"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "Ninguno",});
+        comboCarrera = new JComboBox<>(new String[]{"Ingeniería de Sistemas", "Derecho", "Contaduría", "Gastronomía", "Psicomotricidad", "Ingeniería Comercial", "Parvularía", "Ninguno"});
         comboHora = new JComboBox<>(new String[]{"7:30 A 9:00", "9:15 A 10:45", "11:00 A 12:30", "12:30 A 13:30"});
         comboDia = new JComboBox<>(new String[]{"Lunes", "Martes", "Miércoles", "Jueves", "Viernes"});
         comboEstado = new JComboBox<>(new String[]{"Asignado", "Disponible", "No Disponible", "Préstamo"});

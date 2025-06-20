@@ -2,6 +2,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nb://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nb://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package Paneles;
 
 import Clases.Horario;
@@ -21,6 +25,7 @@ public class PanelVisualizarHorario extends JPanel {
     private static final Color COLOR_DISPONIBLE = new Color(144, 238, 144); // Verde claro
     private static final Color COLOR_NO_DISPONIBLE = new Color(255, 102, 102); // Rojo claro
     private static final Color COLOR_PRESTAMO = new Color(255, 165, 0); // Naranja
+    private static final Color COLOR_SIN_HORARIO = new Color(255, 255, 0); // Amarillo
     
     // Controladores
     private ControladorHorario controladorHorario;
@@ -138,7 +143,7 @@ private void mostrarHorario(int idLaboratorio) {
     gridPanel.setLayout(new GridLayout(4, 6));
     celdas = new JPanel[4][5];
     
-    // Agregar filas de horas y celdas de horario
+    // Agregar filas de horas y celdas de horario - INICIALIZAR CON "SIN HORARIO"
     for (int hora = 0; hora < 4; hora++) {
         // Celda de hora (centered and further reduced width)
         JLabel labelHora = new JLabel(horas[hora], SwingConstants.CENTER);
@@ -151,7 +156,8 @@ private void mostrarHorario(int idLaboratorio) {
         gridPanel.add(labelHora);
         
         for (int dia = 0; dia < 5; dia++) {
-            celdas[hora][dia] = crearCeldaHorario("Disponible", "", 0, "", "", COLOR_DISPONIBLE);
+            // Inicializar todas las celdas como "SIN HORARIO" (amarillo)
+            celdas[hora][dia] = crearCeldaHorario("SIN HORARIO", "", 0, "", "", COLOR_SIN_HORARIO);
             gridPanel.add(celdas[hora][dia]);
         }
     }
@@ -180,28 +186,40 @@ private void mostrarHorario(int idLaboratorio) {
                     
                     Horario h = horariosPorDiaYHora.get(dias[dia]).get(horas[hora]);
                     Color color;
+                    String estado;
                     
-                    // Determinar el color según el estado
-                    switch (h.getEstado()) {
-                        case "Asignado":
-                            color = COLOR_ASIGNADO;
-                            break;
-                        case "Disponible":
-                            color = COLOR_DISPONIBLE;
-                            break;
-                        case "No Disponible":
-                            color = COLOR_NO_DISPONIBLE;
-                            break;
-                        case "Préstamo":
-                            color = COLOR_PRESTAMO;
-                            break;
-                        default:
-                            color = COLOR_DISPONIBLE;
+                    // NUEVA LÓGICA: Verificar si es DISPONIBLE según los criterios especificados
+                    if (h.getMateria() == null && 
+                        "Ninguno".equals(h.getSemestre()) && 
+                        "Ninguno".equals(h.getCarrera()) && 
+                        h.getParalelo() == 0) {
+                        // Es DISPONIBLE (verde)
+                        estado = "DISPONIBLE";
+                        color = COLOR_DISPONIBLE;
+                    } else {
+                        // Determinar el color según el estado original
+                        estado = h.getEstado() != null ? h.getEstado() : "Disponible";
+                        switch (h.getEstado()) {
+                            case "Asignado":
+                                color = COLOR_ASIGNADO;
+                                break;
+                            case "Disponible":
+                                color = COLOR_DISPONIBLE;
+                                break;
+                            case "No Disponible":
+                                color = COLOR_NO_DISPONIBLE;
+                                break;
+                            case "Préstamo":
+                                color = COLOR_PRESTAMO;
+                                break;
+                            default:
+                                color = COLOR_DISPONIBLE;
+                        }
                     }
                     
                     // Actualizar la celda con la información del horario
                     celdas[hora][dia] = crearCeldaHorario(
-                        h.getEstado() != null ? h.getEstado() : "Disponible",
+                        estado,
                         h.getMateria() != null ? h.getMateria() : "",
                         h.getParalelo(),
                         h.getSemestre() != null ? h.getSemestre() : "",
@@ -213,6 +231,7 @@ private void mostrarHorario(int idLaboratorio) {
                     gridPanel.remove(hora * 6 + dia + 1); // +1 para saltar la celda de hora
                     gridPanel.add(celdas[hora][dia], hora * 6 + dia + 1);
                 }
+                // Si no hay horario para esta celda, se mantiene como "SIN HORARIO" (amarillo)
             }
         }
     } catch (SQLException e) {
@@ -236,7 +255,7 @@ private void mostrarHorario(int idLaboratorio) {
     // Agregar el panel centrado al panel de horario
     panelHorario.add(centeredPanel, BorderLayout.CENTER);
     
-    // Leyenda de colores
+    // Leyenda de colores - AGREGADA LA NUEVA LEYENDA
     JPanel leyendaPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
     leyendaPanel.setBackground(Color.WHITE);
     
@@ -244,6 +263,7 @@ private void mostrarHorario(int idLaboratorio) {
     agregarLeyendaColor(leyendaPanel, "Disponible", COLOR_DISPONIBLE);
     agregarLeyendaColor(leyendaPanel, "No Disponible", COLOR_NO_DISPONIBLE);
     agregarLeyendaColor(leyendaPanel, "Préstamo", COLOR_PRESTAMO);
+    agregarLeyendaColor(leyendaPanel, "Sin Horario", COLOR_SIN_HORARIO);
     
     panelHorario.add(leyendaPanel, BorderLayout.SOUTH);
     

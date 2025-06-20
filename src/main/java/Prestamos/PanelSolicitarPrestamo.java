@@ -398,6 +398,8 @@ public class PanelSolicitarPrestamo extends JPanel {
                         c.setForeground(AVAILABLE_COLOR);
                     } else if ("No Disponible".equals(value)) {
                         c.setForeground(UNAVAILABLE_COLOR);
+                    } else if ("Prestado".equals(value)) {
+                        c.setForeground(UNAVAILABLE_COLOR);
                     }
                 } else {
                     c.setForeground(TEXT_COLOR);
@@ -752,32 +754,41 @@ public class PanelSolicitarPrestamo extends JPanel {
     }
 
     private void cargarHorarios() {
-        try {
-            String selectedLab = (String) comboLaboratorios.getSelectedItem();
-            if (selectedLab == null) {
-                System.out.println("No se seleccionó ningún laboratorio.");
-                JOptionPane.showMessageDialog(this, "Seleccione un laboratorio primero.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            int idLaboratorio = Integer.parseInt(selectedLab.split(" - ")[0]);
-            List<Horario> horarios = controladorHorario.listarPorLaboratorio(idLaboratorio);
-            comboHorarios.removeAllItems();
-            if (horarios.isEmpty()) {
-                System.out.println("No hay horarios disponibles para el laboratorio ID: " + idLaboratorio);
-                JOptionPane.showMessageDialog(this, "No hay horarios disponibles para este laboratorio.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            for (Horario h : horarios) {
-                comboHorarios.addItem(h.getIdHorario() + " - " + h.getDia() + " " + h.getHora());
-            }
-            System.out.println("Horarios cargados: " + horarios.size());
-            cargarEquipamientos(idLaboratorio);
-            cargarInsumos(idLaboratorio);
-        } catch (SQLException ex) {
-            LOGGER.severe("Error al cargar horarios: " + ex.getMessage());
-            throw new RuntimeException("Error al cargar horarios", ex);
+    try {
+        String selectedLab = (String) comboLaboratorios.getSelectedItem();
+        if (selectedLab == null) {
+            System.out.println("No se seleccionó ningún laboratorio.");
+            JOptionPane.showMessageDialog(this, "Seleccione un laboratorio primero.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
         }
+        int idLaboratorio = Integer.parseInt(selectedLab.split(" - ")[0]);
+        List<Horario> horarios = controladorHorario.listarPorLaboratorio(idLaboratorio);
+        comboHorarios.removeAllItems();
+        
+       // Filtrar solo horarios disponibles
+        List<Horario> horariosDisponibles = new ArrayList<>();
+        for (Horario h : horarios) {
+            if ("Disponible".equalsIgnoreCase(h.getEstado()) || "Asignado".equalsIgnoreCase(h.getEstado())) {
+                horariosDisponibles.add(h);
+            }
+        }        
+        if (horariosDisponibles.isEmpty()) {
+            System.out.println("No hay horarios disponibles para el laboratorio ID: " + idLaboratorio);
+            JOptionPane.showMessageDialog(this, "No hay horarios disponibles para este laboratorio.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        for (Horario h : horariosDisponibles) {
+            comboHorarios.addItem(h.getIdHorario() + " - " + h.getDia() + " " + h.getHora());
+        }
+        System.out.println("Horarios disponibles cargados: " + horariosDisponibles.size());
+        cargarEquipamientos(idLaboratorio);
+        cargarInsumos(idLaboratorio);
+    } catch (SQLException ex) {
+        LOGGER.severe("Error al cargar horarios: " + ex.getMessage());
+        throw new RuntimeException("Error al cargar horarios", ex);
     }
+}
 
     private void cargarEquipamientos(int idLaboratorio) {
         try {
