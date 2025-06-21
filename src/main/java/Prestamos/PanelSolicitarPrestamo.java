@@ -636,12 +636,43 @@ public class PanelSolicitarPrestamo extends JPanel {
 
     private void solicitarPrestamo() {
         System.out.println("Iniciando solicitud de préstamo");
+
+        // NUEVA VALIDACIÓN: Verificar si el usuario puede solicitar un préstamo
+        try {
+            if (!controladorPrestamo.puedesolicitarPrestamo(ruUsuario)) {
+                // Obtener información detallada de préstamos activos
+                List<Clases.Prestamo> prestamosActivos = controladorPrestamo.obtenerPrestamosActivos(ruUsuario);
+
+                StringBuilder mensaje = new StringBuilder();
+                mensaje.append("No puede solicitar un préstamo porque ya tiene préstamo(s) activo(s):\n\n");
+
+                for (Clases.Prestamo p : prestamosActivos) {
+                    mensaje.append("• ID Préstamo: ").append(p.getIdPrestamo())
+                           .append(" - Estado: ").append(p.getEstadoPrestamo())
+                           .append(" - Fecha: ").append(p.getFechaPrestamo())
+                           .append("\n");
+                }
+
+                mensaje.append("\nSolo puede solicitar un nuevo préstamo cuando sus préstamos actuales estén 'Terminados' o 'Rechazados'.");
+
+                JOptionPane.showMessageDialog(this, mensaje.toString(), "Préstamo No Permitido", JOptionPane.WARNING_MESSAGE);
+                System.out.println("Solicitud rechazada: Usuario RU " + ruUsuario + " tiene préstamos activos");
+                return;
+            }
+        } catch (SQLException ex) {
+            LOGGER.severe("Error al verificar préstamos activos: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Error al verificar préstamos activos: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Continuar con las validaciones existentes
         String selectedHorario = (String) comboHorarios.getSelectedItem();
         if (selectedHorario == null) {
             JOptionPane.showMessageDialog(this, "Seleccione un horario.", "Error", JOptionPane.ERROR_MESSAGE);
             System.out.println("Error: No se seleccionó un horario.");
             return;
         }
+
         if (insumoCantidades.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Agregue al menos un equipamiento o insumo.", "Error", JOptionPane.ERROR_MESSAGE);
             System.out.println("Error: No se agregaron equipamientos ni insumos.");
@@ -711,6 +742,7 @@ public class PanelSolicitarPrestamo extends JPanel {
             JOptionPane.showMessageDialog(this, "Préstamo solicitado con éxito. ID: " + idPrestamo, "Éxito", JOptionPane.INFORMATION_MESSAGE);
             System.out.println("Préstamo solicitado con éxito.");
 
+            // Limpiar formulario
             insumoCantidades.clear();
             txtObservaciones.setText("");
             comboHorarios.setSelectedIndex(-1);
@@ -718,6 +750,7 @@ public class PanelSolicitarPrestamo extends JPanel {
             modeloListaInsumos.clear();
             cargarInsumos(Integer.parseInt(((String) comboLaboratorios.getSelectedItem()).split(" - ")[0]));
             cargarEquipamientos(Integer.parseInt(((String) comboLaboratorios.getSelectedItem()).split(" - ")[0]));
+
         } catch (SQLException ex) {
             LOGGER.severe("Error SQL al solicitar préstamo: " + ex.getMessage());
             System.err.println("Error SQL: " + ex.getMessage());

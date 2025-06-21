@@ -527,6 +527,77 @@ public class ControladorPrestamo {
     }
     return 0;
     }
+    
+    /**
+    * Verifica si un usuario puede solicitar un préstamo.
+    * Un usuario puede solicitar un préstamo solo si no tiene préstamos 
+    * con estado "Pendiente" o "Aceptado".
+    * 
+    * @param ruUsuario RU del usuario
+    * @return true si puede solicitar, false si no puede
+    * @throws SQLException si hay error en la consulta
+    */
+   public boolean puedesolicitarPrestamo(int ruUsuario) throws SQLException {
+       String sql = "SELECT COUNT(*) FROM prestamo WHERE ru_usuario = ? AND (estado_prestamo = 'Pendiente' OR estado_prestamo = 'Aceptado')";
+       System.out.println("Verificando si el usuario RU: " + ruUsuario + " puede solicitar préstamo");
+
+       try (Connection conn = ConexionBD.conectar();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+           stmt.setInt(1, ruUsuario);
+           ResultSet rs = stmt.executeQuery();
+
+           if (rs.next()) {
+               int count = rs.getInt(1);
+               boolean puede = count == 0; // Puede solicitar si no tiene préstamos pendientes o aceptados
+               System.out.println("Usuario RU " + ruUsuario + " tiene " + count + " préstamo(s) activo(s). Puede solicitar: " + puede);
+               return puede;
+           }
+
+           System.out.println("No se encontraron resultados para RU: " + ruUsuario);
+           return true; // Si no hay resultados, puede solicitar
+
+       } catch (SQLException ex) {
+           System.err.println("Error en puedesolicitarPrestamo para RU " + ruUsuario + ": " + ex.getMessage());
+           throw ex;
+       }
+   }
+
+   // 2. También puedes agregar este método opcional para obtener información detallada:
+
+   /**
+    * Obtiene información sobre préstamos activos de un usuario.
+    * 
+    * @param ruUsuario RU del usuario
+    * @return Lista de préstamos con estado Pendiente o Aceptado
+    * @throws SQLException si hay error en la consulta
+    */
+   public List<Prestamo> obtenerPrestamosActivos(int ruUsuario) throws SQLException {
+       List<Prestamo> prestamosActivos = new ArrayList<>();
+       String sql = "SELECT * FROM prestamo WHERE ru_usuario = ? AND (estado_prestamo = 'Pendiente' OR estado_prestamo = 'Aceptado')";
+
+       try (Connection conn = ConexionBD.conectar();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+           stmt.setInt(1, ruUsuario);
+           try (ResultSet rs = stmt.executeQuery()) {
+               while (rs.next()) {
+                   prestamosActivos.add(new Prestamo(
+                       rs.getInt("id_prestamo"),
+                       rs.getInt("ru_usuario"),
+                       rs.getObject("ru_administrador") != null ? rs.getInt("ru_administrador") : null,
+                       rs.getObject("id_horario") != null ? rs.getInt("id_horario") : null,
+                       rs.getDate("fecha_prestamo"),
+                       rs.getString("hora_prestamo"),
+                       rs.getString("estado_prestamo"),
+                       rs.getString("observaciones")
+                   ));
+               }
+           }
+       }
+
+       return prestamosActivos;
+   }
 
 
 
